@@ -27,13 +27,27 @@ const DemoPlayer = ({ activeDemo, inModal = false }) => {
     return () => clearInterval(interval);
   }, [isPlaying]);
 
+  const isSFX = activeDemo?.includes('SFX');
+  const isLUTs = activeDemo?.includes('LUTs');
+
+  useEffect(() => {
+    if (isPlaying) {
+      if (isSFX && progress === 0) {
+        const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3');
+        audio.volume = 0.5;
+        audio.play().catch(e => console.log('Audio play failed:', e));
+      } else if (!isSFX && !isLUTs && progress === 40) {
+        const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3');
+        audio.volume = 0.5;
+        audio.play().catch(e => console.log('Audio play failed:', e));
+      }
+    }
+  }, [progress, isPlaying, isSFX, isLUTs]);
+
   const handlePlay = () => {
     if (progress >= 100) setProgress(0);
     setIsPlaying(true);
   };
-
-  const isSFX = activeDemo?.includes('SFX');
-  const isLUTs = activeDemo?.includes('LUTs');
 
   return (
     <section id="demo" className="demo-section">
