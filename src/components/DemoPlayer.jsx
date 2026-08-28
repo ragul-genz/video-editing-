@@ -32,11 +32,7 @@ const DemoPlayer = ({ activeDemo, inModal = false }) => {
 
   useEffect(() => {
     if (isPlaying) {
-      if (isSFX && progress === 0) {
-        const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3');
-        audio.volume = 0.5;
-        audio.play().catch(e => console.log('Audio play failed:', e));
-      } else if (!isSFX && !isLUTs && progress === 40) {
+      if (!isSFX && !isLUTs && progress === 40) {
         const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3');
         audio.volume = 0.5;
         audio.play().catch(e => console.log('Audio play failed:', e));
@@ -47,6 +43,11 @@ const DemoPlayer = ({ activeDemo, inModal = false }) => {
   const handlePlay = () => {
     if (progress >= 100) setProgress(0);
     setIsPlaying(true);
+    if (isSFX) {
+      const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3');
+      audio.volume = 0.5;
+      audio.play().catch(e => console.log('Audio play failed:', e));
+    }
   };
 
   return (
