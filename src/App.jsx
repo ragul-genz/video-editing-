@@ -67,6 +67,9 @@ function App() {
             onClose={() => setSelectedProduct(null)}
             addToCart={addToCart}
           />
+          <footer style={{ textAlign: 'center', padding: '20px', color: 'var(--text-muted)', fontSize: '0.9rem', borderTop: '1px solid var(--glass-border)', marginTop: '40px' }}>
+            Developed by : GenZ Neural X & Win Tech
+          </footer>
         </div>
       </Router>
     </AppContextProvider>
