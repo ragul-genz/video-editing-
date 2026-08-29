@@ -47,7 +47,7 @@ const MyOrders = () => {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                       <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>Your downloads are ready:</p>
                       {order.items.map((item, i) => (
-                        <a key={i} href={item.driveLink || '#'} target="_blank" rel="noopener noreferrer" className="btn-primary" style={{ padding: '8px 16px', fontSize: '0.9rem' }}>
+                        <a key={i} href={item.driveLink || 'https://drive.google.com'} target="_blank" rel="noopener noreferrer" className="btn-primary" style={{ display: 'inline-block', padding: '10px 16px', fontSize: '0.9rem', textAlign: 'center', textDecoration: 'none' }}>
                           Download {item.title}
                         </a>
                       ))}
