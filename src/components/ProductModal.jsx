@@ -8,7 +8,7 @@ const ProductModal = ({ product, isOpen, onClose, addToCart }) => {
   return (
     <>
       <div className={`modal-overlay ${isOpen ? 'open' : ''}`} onClick={onClose}></div>
-      <div className={`modal-content glass-panel floating-element delay-1 ${isOpen ? 'open' : ''}`}>
+      <div className={`modal-content glass-panel ${isOpen ? 'open' : ''}`}>
         <button className="close-modal" onClick={onClose}>
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <line x1="18" y1="6" x2="6" y2="18"></line>
