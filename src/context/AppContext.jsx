@@ -66,6 +66,11 @@ export const AppContextProvider = ({ children }) => {
     return saved ? JSON.parse(saved) : { logoUrl: '/ds3_logo.jpg' };
   });
 
+  const [orders, setOrders] = useState(() => {
+    const saved = localStorage.getItem('ds3_orders');
+    return saved ? JSON.parse(saved) : [];
+  });
+
   useEffect(() => {
     localStorage.setItem('ds3_products', JSON.stringify(products));
   }, [products]);
@@ -74,8 +79,12 @@ export const AppContextProvider = ({ children }) => {
     localStorage.setItem('ds3_settings', JSON.stringify(siteSettings));
   }, [siteSettings]);
 
+  useEffect(() => {
+    localStorage.setItem('ds3_orders', JSON.stringify(orders));
+  }, [orders]);
+
   return (
-    <AppContext.Provider value={{ products, setProducts, siteSettings, setSiteSettings }}>
+    <AppContext.Provider value={{ products, setProducts, siteSettings, setSiteSettings, orders, setOrders }}>
       {children}
     </AppContext.Provider>
   );

@@ -6,6 +6,7 @@ import About from './pages/About';
 import Bundles from './pages/Bundles';
 import Contact from './pages/Contact';
 import Reviews from './pages/Reviews';
+import MyOrders from './pages/MyOrders';
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
 import Cart from './components/Cart';
@@ -48,6 +49,7 @@ function App() {
               <Route path="/bundles" element={<Bundles addToCart={addToCart} onPreview={previewProduct} onProductClick={openProductDetails} activeDemo={activeDemo} />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/reviews" element={<Reviews />} />
+              <Route path="/my-orders" element={<MyOrders />} />
               <Route path="/admin" element={<AdminLogin />} />
               <Route path="/admin/dashboard" element={<AdminDashboard />} />
             </Routes>

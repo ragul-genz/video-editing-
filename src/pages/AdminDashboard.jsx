@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { AppContext } from '../context/AppContext';
 
 const AdminDashboard = () => {
-  const { products, setProducts, siteSettings, setSiteSettings } = useContext(AppContext);
+  const { products, setProducts, siteSettings, setSiteSettings, orders, setOrders } = useContext(AppContext);
   const navigate = useNavigate();
 
   const [newLogoUrl, setNewLogoUrl] = useState(siteSettings.logoUrl);
@@ -50,6 +50,10 @@ const AdminDashboard = () => {
   const handleLogout = () => {
     localStorage.removeItem('ds3_admin_auth');
     navigate('/');
+  };
+
+  const handleApproveOrder = (orderId) => {
+    setOrders(orders.map(o => o.id === orderId ? { ...o, status: 'Approved' } : o));
   };
 
   return (
@@ -100,6 +104,54 @@ const AdminDashboard = () => {
               <button onClick={() => handleDeleteProduct(p.id)} className="btn-secondary" style={{ padding: '6px 12px', fontSize: '0.9rem', color: '#ff0054', borderColor: '#ff0054' }}>Delete</button>
             </div>
           ))}
+        </div>
+      </div>
+
+      <div className="glass-panel" style={{ padding: '30px', marginTop: '40px' }}>
+        <h3>Manage Customer Orders</h3>
+        <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '15px' }}>
+          {(!orders || orders.length === 0) ? (
+            <p style={{ color: 'var(--text-muted)' }}>No orders yet.</p>
+          ) : (
+            orders.map(order => (
+              <div key={order.id} style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'flex-start', gap: '15px', background: 'rgba(255,255,255,0.05)', padding: '20px', borderRadius: '12px' }}>
+                <div>
+                  <h4 style={{ margin: '0 0 10px 0', color: 'var(--primary)' }}>Order #{order.id} <span style={{fontSize: '0.8rem', color: 'var(--text-muted)'}}>({new Date(order.date).toLocaleDateString()})</span></h4>
+                  <p style={{ margin: '5px 0' }}><strong>Customer:</strong> {order.name}</p>
+                  <p style={{ margin: '5px 0' }}><strong>Method:</strong> {order.paymentMethod}</p>
+                  <p style={{ margin: '5px 0' }}><strong>Txn ID:</strong> {order.transactionId}</p>
+                  <p style={{ margin: '5px 0' }}><strong>Total:</strong> {order.total}</p>
+                  <div style={{ margin: '10px 0 0 0' }}>
+                    <strong>Items:</strong>
+                    <ul style={{ paddingLeft: '20px', margin: '5px 0 0 0' }}>
+                      {order.items.map((item, i) => <li key={i}>{item.title}</li>)}
+                    </ul>
+                  </div>
+                </div>
+                
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ 
+                    display: 'inline-block',
+                    padding: '6px 12px', 
+                    borderRadius: '20px', 
+                    background: order.status === 'Approved' ? 'rgba(39, 201, 63, 0.2)' : 'rgba(255, 189, 46, 0.2)',
+                    color: order.status === 'Approved' ? '#27c93f' : '#ffbd2e',
+                    fontSize: '0.9rem',
+                    fontWeight: 'bold',
+                    marginBottom: '15px'
+                  }}>
+                    {order.status}
+                  </div>
+                  
+                  {order.status === 'Pending' && (
+                    <button onClick={() => handleApproveOrder(order.id)} className="btn-primary" style={{ display: 'block', padding: '8px 16px', fontSize: '0.9rem' }}>
+                      Approve Payment
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
     </section>
