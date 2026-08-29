@@ -1,7 +1,9 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import './Hero.css';
 
 const Hero = () => {
+  const navigate = useNavigate();
   return (
     <section className="hero">
       <div className="hero-background">
@@ -20,8 +22,11 @@ const Hero = () => {
             Instantly upgrade your tracks with our high-end master templates, vocal chains, and synth presets. Built for FL Studio, Logic Pro, Ableton Live, Cubase & Studio One.
           </p>
           <div className="hero-actions">
-            <button className="btn-primary">Explore Bundles</button>
-            <button className="btn-secondary">Watch Demo</button>
+            <button className="btn-primary" onClick={() => navigate('/bundles')}>Explore Bundles</button>
+            <button className="btn-secondary" onClick={() => {
+              navigate('/bundles');
+              setTimeout(() => document.getElementById('demo')?.scrollIntoView({ behavior: 'smooth' }), 100);
+            }}>Watch Demo</button>
           </div>
           
           <div className="supported-daws floating-element delay-3">
