@@ -110,11 +110,11 @@ const Cart = ({ isOpen, onClose, cartItems, cartTotal, clearCart }) => {
             
             <div className="download-links">
               {purchasedItems.map((item, index) => (
-                <a key={index} href={`https://drive.google.com/drive/folders/placeholder_${item.id}`} target="_blank" rel="noopener noreferrer" className="gdrive-btn">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M7.71 3.5L1.15 15l3.43 6 6.55-11.5M9.73 15L6.3 21h13.12l3.43-6M13.72 3.5h-6.6l6.56 11.5h6.58z"/>
+                <a key={index} href={item.driveLink || '#'} target="_blank" rel="noopener noreferrer" className="gdrive-btn">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M7.71 3.5L1.15 15l3.43 6 6.55-11.5M9.73 3.5h13.12L16.3 15H3.18M11.75 16.5L15.18 21h8.67l-3.42-6"/>
                   </svg>
-                  Download {item.title}
+                  {item.title} (Google Drive)
                 </a>
               ))}
             </div>

@@ -1,13 +1,16 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { Link } from 'react-router-dom';
+import { AppContext } from '../context/AppContext';
 import './Navbar.css';
 
 const Navbar = ({ cartCount = 0, onCartClick }) => {
+  const { siteSettings } = useContext(AppContext);
+
   return (
     <nav className="navbar glass-panel">
       <div className="nav-container">
         <Link to="/" className="logo">
-          <img src="/ds3_logo.jpg" alt="DS3 Studio Logo" style={{ height: '40px', borderRadius: '4px' }} />
+          <img src={siteSettings.logoUrl} alt="DS3 Studio Logo" style={{ height: '40px', borderRadius: '4px' }} />
         </Link>
         
         <ul className="nav-links">

@@ -1,55 +1,10 @@
-import React from 'react';
+import React, { useContext } from 'react';
+import { AppContext } from '../context/AppContext';
 import './Products.css';
 
-const products = [
-  {
-    id: 1,
-    title: "FL Studio Master Template",
-    description: "Industry-standard mixing & mastering template for FL Studio 21+.",
-    price: "$29.99",
-    icon: "🎹",
-    color: "#ff7b00",
-    features: ["Pre-routed Mixer Tracks", "Vocal Chain Presets", "Stock Plugins Only", "Bonus Sample Pack"]
-  },
-  {
-    id: 2,
-    title: "Logic Pro Vocal Chain",
-    description: "Get pristine vocals instantly with our premium Logic Pro X channel strips.",
-    price: "$34.99",
-    icon: "🎙️",
-    color: "#00a8ff",
-    features: ["Pop & Rap Vocal Presets", "Zero Latency Recording", "Mastering Chain Included", "Easy to install"]
-  },
-  {
-    id: 3,
-    title: "Ableton Live Synth Presets",
-    description: "100+ Serum & Vital presets tailored for Ableton Live 11+.",
-    price: "$24.99",
-    icon: "🎛️",
-    color: "#00ff88",
-    features: ["100+ Premium Presets", "Macros Pre-mapped", "Ableton Racks", "Future Bass & Trap"]
-  },
-  {
-    id: 4,
-    title: "Cubase Orchestral Template",
-    description: "Massive orchestral routing template for Cubase Pro.",
-    price: "$49.99",
-    icon: "🎻",
-    color: "#ff0054",
-    features: ["Kontakt Routing", "Expression Maps", "Color Coded Tracks", "Stem Export Ready"]
-  },
-  {
-    id: 5,
-    title: "Studio One Mixing Preset",
-    description: "Pro mixing console presets designed for Studio One 6.",
-    price: "$29.99",
-    icon: "🎚️",
-    color: "#4facfe",
-    features: ["Fat Drum Bus", "Silky Reverb Sends", "Analog Style Saturation", "Quick Mix Setup"]
-  }
-];
-
 const Products = ({ addToCart, onPreview, onProductClick }) => {
+  const { products } = useContext(AppContext);
+
   return (
     <section id="products" className="products-section">
       <div className="section-header">

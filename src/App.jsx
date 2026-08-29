@@ -4,8 +4,11 @@ import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import About from './pages/About';
 import Contact from './pages/Contact';
+import AdminLogin from './pages/AdminLogin';
+import AdminDashboard from './pages/AdminDashboard';
 import Cart from './components/Cart';
 import ProductModal from './components/ProductModal';
+import { AppContextProvider } from './context/AppContext';
 
 function App() {
   const [cartItems, setCartItems] = useState([]);
@@ -32,31 +35,35 @@ function App() {
   }, 0);
 
   return (
-    <Router>
-      <div className="app">
-        <Navbar cartCount={cartItems.length} onCartClick={() => setIsCartOpen(true)} />
-        <main>
-          <Routes>
-            <Route path="/" element={<Home addToCart={addToCart} onPreview={previewProduct} onProductClick={openProductDetails} activeDemo={activeDemo} />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/contact" element={<Contact />} />
-          </Routes>
-        </main>
-        <Cart 
-          isOpen={isCartOpen} 
-          onClose={() => setIsCartOpen(false)} 
-          cartItems={cartItems}
-          cartTotal={cartTotal}
-          clearCart={() => setCartItems([])}
-        />
-        <ProductModal 
-          product={selectedProduct}
-          isOpen={!!selectedProduct}
-          onClose={() => setSelectedProduct(null)}
-          addToCart={addToCart}
-        />
-      </div>
-    </Router>
+    <AppContextProvider>
+      <Router>
+        <div className="app">
+          <Navbar cartCount={cartItems.length} onCartClick={() => setIsCartOpen(true)} />
+          <main>
+            <Routes>
+              <Route path="/" element={<Home addToCart={addToCart} onPreview={previewProduct} onProductClick={openProductDetails} activeDemo={activeDemo} />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/admin" element={<AdminLogin />} />
+              <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            </Routes>
+          </main>
+          <Cart 
+            isOpen={isCartOpen} 
+            onClose={() => setIsCartOpen(false)} 
+            cartItems={cartItems}
+            cartTotal={cartTotal}
+            clearCart={() => setCartItems([])}
+          />
+          <ProductModal 
+            product={selectedProduct}
+            isOpen={!!selectedProduct}
+            onClose={() => setSelectedProduct(null)}
+            addToCart={addToCart}
+          />
+        </div>
+      </Router>
+    </AppContextProvider>
   );
 }
 
