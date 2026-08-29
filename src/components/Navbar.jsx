@@ -6,13 +6,12 @@ const Navbar = ({ cartCount = 0, onCartClick }) => {
     <nav className="navbar glass-panel">
       <div className="nav-container">
         <a href="#" className="logo">
-          <span className="text-gradient">Logo</span>
+          <img src="/ds3_logo.jpg" alt="DS3 Studio Logo" style={{ height: '40px', borderRadius: '4px' }} />
         </a>
         
         <ul className="nav-links">
           <li><a href="#products">Bundles</a></li>
           <li><a href="#demo">Preview</a></li>
-          <li><a href="#features">Features</a></li>
         </ul>
 
         <div className="nav-actions">
