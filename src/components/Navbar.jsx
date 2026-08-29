@@ -1,28 +1,37 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AppContext } from '../context/AppContext';
 import './Navbar.css';
 
 const Navbar = ({ cartCount = 0, onCartClick }) => {
   const { siteSettings } = useContext(AppContext);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const closeMenu = () => setIsMenuOpen(false);
 
   return (
     <nav className="navbar glass-panel">
       <div className="nav-container">
-        <Link to="/" className="logo">
+        <Link to="/" className="logo" onClick={closeMenu}>
           <img src={siteSettings.logoUrl} alt="DS3 Studio Logo" style={{ height: '40px', borderRadius: '4px' }} />
         </Link>
         
-        <ul className="nav-links">
-          <li><Link to="/">Home</Link></li>
-          <li><Link to="/about">About</Link></li>
-          <li><Link to="/bundles">Bundles</Link></li>
-          <li><Link to="/contact">Contact</Link></li>
-          <li><Link to="/reviews">Reviews</Link></li>
+        <div className={`menu-toggle ${isMenuOpen ? 'open' : ''}`} onClick={() => setIsMenuOpen(!isMenuOpen)}>
+          <span className="bar"></span>
+          <span className="bar"></span>
+          <span className="bar"></span>
+        </div>
+
+        <ul className={`nav-links ${isMenuOpen ? 'active' : ''}`}>
+          <li><Link to="/" onClick={closeMenu}>Home</Link></li>
+          <li><Link to="/about" onClick={closeMenu}>About</Link></li>
+          <li><Link to="/bundles" onClick={closeMenu}>Bundles</Link></li>
+          <li><Link to="/contact" onClick={closeMenu}>Contact</Link></li>
+          <li><Link to="/reviews" onClick={closeMenu}>Reviews</Link></li>
         </ul>
 
         <div className="nav-actions">
-          <button className="cart-btn" aria-label="Cart" onClick={onCartClick}>
+          <button className="cart-btn" aria-label="Cart" onClick={() => { onCartClick(); closeMenu(); }}>
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="9" cy="21" r="1"></circle>
               <circle cx="20" cy="21" r="1"></circle>

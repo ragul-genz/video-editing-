@@ -54,14 +54,14 @@ const AdminDashboard = () => {
 
   return (
     <section style={{ padding: '100px 20px', maxWidth: '1000px', margin: '0 auto', minHeight: '80vh' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px' }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: '20px', marginBottom: '40px' }}>
         <h1 className="section-title" style={{ margin: 0 }}>Admin <span className="text-gradient">Dashboard</span></h1>
         <button onClick={handleLogout} className="btn-secondary" style={{ padding: '8px 16px' }}>Logout</button>
       </div>
 
       <div className="glass-panel" style={{ padding: '30px', marginBottom: '40px' }}>
         <h3>Site Logo Manager</h3>
-        <form onSubmit={handleUpdateLogo} style={{ display: 'flex', gap: '15px', marginTop: '15px' }}>
+        <form onSubmit={handleUpdateLogo} style={{ display: 'flex', flexWrap: 'wrap', gap: '15px', marginTop: '15px' }}>
           <input 
             type="text" 
             value={newLogoUrl}
@@ -75,7 +75,7 @@ const AdminDashboard = () => {
 
       <div className="glass-panel" style={{ padding: '30px', marginBottom: '40px' }}>
         <h3>Add New Bundle (Google Drive Linked)</h3>
-        <form onSubmit={handleAddProduct} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginTop: '20px' }}>
+        <form onSubmit={handleAddProduct} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px', marginTop: '20px' }}>
           <input type="text" placeholder="Product Title" required value={newProduct.title} onChange={e => setNewProduct({...newProduct, title: e.target.value})} style={inputStyle} />
           <input type="text" placeholder="Price (e.g., $19.99)" required value={newProduct.price} onChange={e => setNewProduct({...newProduct, price: e.target.value})} style={inputStyle} />
           <input type="text" placeholder="Description" required value={newProduct.description} onChange={e => setNewProduct({...newProduct, description: e.target.value})} style={{ ...inputStyle, gridColumn: 'span 2' }} />
