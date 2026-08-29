@@ -1,16 +1,44 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './DemoPlayer.css';
 
 const DemoPlayer = ({ activeDemo, inModal = false }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
+  const audioRef = useRef(null);
 
-  // Auto-play when activeDemo changes
+  const isVocal = activeDemo?.includes('Vocal');
+  const isTemplate = activeDemo?.includes('Template');
+
+  // Auto-play audio when activeDemo changes
   useEffect(() => {
-    setIsPlaying(false);
-    setProgress(0);
-  }, [activeDemo]);
+    if (activeDemo) {
+      setIsPlaying(true);
+      setProgress(0);
 
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+      }
+
+      let audioUrl = '';
+      if (isVocal) {
+        audioUrl = 'https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3';
+      } else if (isTemplate) {
+        audioUrl = 'https://assets.mixkit.co/active_storage/sfx/119/119-preview.mp3';
+      } else {
+        audioUrl = 'https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3';
+      }
+
+      if (audioUrl) {
+        audioRef.current = new Audio(audioUrl);
+        audioRef.current.volume = 0.5;
+        // User gesture on Preview button allows this to auto-play
+        audioRef.current.play().catch(e => console.log('Auto-play blocked by browser:', e));
+      }
+    }
+  }, [activeDemo, isVocal, isTemplate]);
+
+  // Handle progress bar animation
   useEffect(() => {
     let interval;
     if (isPlaying) {
@@ -18,36 +46,42 @@ const DemoPlayer = ({ activeDemo, inModal = false }) => {
         setProgress((prev) => {
           if (prev >= 100) {
             setIsPlaying(false);
+            if (audioRef.current) audioRef.current.pause();
             return 100;
           }
-          return prev + 2; // 50 steps = 2.5 seconds approx if 50ms interval
+          return prev + 2; 
         });
       }, 50);
+    } else {
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
     }
     return () => clearInterval(interval);
   }, [isPlaying]);
 
-  const isVocal = activeDemo?.includes('Vocal');
-  const isTemplate = activeDemo?.includes('Template');
-
+  // Cleanup audio on unmount
   useEffect(() => {
-    if (isPlaying) {
-      if (!isVocal && !isTemplate && progress === 40) {
-        const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3');
-        audio.volume = 0.5;
-        audio.play().catch(e => console.log('Audio play failed:', e));
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
       }
-    }
-  }, [progress, isPlaying, isVocal, isTemplate]);
+    };
+  }, []);
 
   const handlePlay = () => {
-    if (progress >= 100) setProgress(0);
-    setIsPlaying(true);
-    if (isVocal) {
-      const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3');
-      audio.volume = 0.5;
-      audio.play().catch(e => console.log('Audio play failed:', e));
+    if (progress >= 100) {
+      setProgress(0);
+      if (audioRef.current) audioRef.current.currentTime = 0;
     }
+    setIsPlaying(true);
+    if (audioRef.current) {
+      audioRef.current.play().catch(e => console.log('Audio play failed:', e));
+    }
+  };
+
+  const handlePause = () => {
+    setIsPlaying(false);
   };
 
   return (
@@ -76,17 +110,17 @@ const DemoPlayer = ({ activeDemo, inModal = false }) => {
           {/* Video / Audio Player Area */}
           <div className="video-player">
             <div className={`video-screen ${isPlaying ? 'playing' : ''}`}>
-              {!isPlaying && progress === 0 ? (
+              {!isPlaying ? (
                 <div className="play-overlay" onClick={handlePlay}>
                   <button className="play-btn">
                     <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
                       <polygon points="5 3 19 12 5 21 5 3"></polygon>
                     </svg>
                   </button>
-                  <span>{isVocal ? 'Click to Listen to Vocal Chain' : (isTemplate ? 'Click to Preview Template' : 'Click to Listen to Synth Presets')}</span>
+                  <span>{progress > 0 && progress < 100 ? 'Resume Audio' : (isVocal ? 'Click to Listen to Vocal Chain' : (isTemplate ? 'Click to Preview Template' : 'Click to Listen to Synth Presets'))}</span>
                 </div>
               ) : (
-                <div className="video-content" onClick={() => setIsPlaying(false)}>
+                <div className="video-content" onClick={handlePause}>
                   {isVocal ? (
                     <div className="audio-visualizer">
                       <div className="waveform-container">
