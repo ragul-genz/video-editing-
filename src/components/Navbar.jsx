@@ -19,6 +19,7 @@ const Navbar = ({ cartCount = 0, onCartClick }) => {
           <li><Link to="/bundles">Bundles</Link></li>
           <li><Link to="/contact">Contact</Link></li>
           <li><Link to="/reviews">Reviews</Link></li>
+          <li><Link to="/admin" style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>Admin</Link></li>
         </ul>
 
         <div className="nav-actions">
