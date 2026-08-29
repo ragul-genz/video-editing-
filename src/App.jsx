@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
-import Hero from './components/Hero';
-import Products from './components/Products';
-import DemoPlayer from './components/DemoPlayer';
+import Home from './pages/Home';
+import About from './pages/About';
+import Contact from './pages/Contact';
 import Cart from './components/Cart';
 import ProductModal from './components/ProductModal';
 
 function App() {
   const [cartItems, setCartItems] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
-  const [activeDemo, setActiveDemo] = useState("Cinematic Transitions Pro");
+  const [activeDemo, setActiveDemo] = useState("FL Studio Master Template");
   const [selectedProduct, setSelectedProduct] = useState(null);
 
   const addToCart = (product) => {
@@ -31,27 +32,31 @@ function App() {
   }, 0);
 
   return (
-    <div className="app">
-      <Navbar cartCount={cartItems.length} onCartClick={() => setIsCartOpen(true)} />
-      <main>
-        <Hero />
-        <Products addToCart={addToCart} onPreview={previewProduct} onProductClick={openProductDetails} />
-        <DemoPlayer activeDemo={activeDemo} />
-      </main>
-      <Cart 
-        isOpen={isCartOpen} 
-        onClose={() => setIsCartOpen(false)} 
-        cartItems={cartItems}
-        cartTotal={cartTotal}
-        clearCart={() => setCartItems([])}
-      />
-      <ProductModal 
-        product={selectedProduct}
-        isOpen={!!selectedProduct}
-        onClose={() => setSelectedProduct(null)}
-        addToCart={addToCart}
-      />
-    </div>
+    <Router>
+      <div className="app">
+        <Navbar cartCount={cartItems.length} onCartClick={() => setIsCartOpen(true)} />
+        <main>
+          <Routes>
+            <Route path="/" element={<Home addToCart={addToCart} onPreview={previewProduct} onProductClick={openProductDetails} activeDemo={activeDemo} />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/contact" element={<Contact />} />
+          </Routes>
+        </main>
+        <Cart 
+          isOpen={isCartOpen} 
+          onClose={() => setIsCartOpen(false)} 
+          cartItems={cartItems}
+          cartTotal={cartTotal}
+          clearCart={() => setCartItems([])}
+        />
+        <ProductModal 
+          product={selectedProduct}
+          isOpen={!!selectedProduct}
+          onClose={() => setSelectedProduct(null)}
+          addToCart={addToCart}
+        />
+      </div>
+    </Router>
   );
 }
 

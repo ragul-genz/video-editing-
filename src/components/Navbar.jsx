@@ -1,17 +1,19 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import './Navbar.css';
 
 const Navbar = ({ cartCount = 0, onCartClick }) => {
   return (
     <nav className="navbar glass-panel">
       <div className="nav-container">
-        <a href="#" className="logo">
+        <Link to="/" className="logo">
           <img src="/ds3_logo.jpg" alt="DS3 Studio Logo" style={{ height: '40px', borderRadius: '4px' }} />
-        </a>
+        </Link>
         
         <ul className="nav-links">
-          <li><a href="#products">Bundles</a></li>
-          <li><a href="#demo">Preview</a></li>
+          <li><Link to="/">Home</Link></li>
+          <li><Link to="/about">About</Link></li>
+          <li><Link to="/contact">Contact</Link></li>
         </ul>
 
         <div className="nav-actions">
