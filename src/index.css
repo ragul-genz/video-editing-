@@ -80,7 +80,7 @@ ul {
 
 .btn-primary:hover {
   transform: translateY(-3px) scale(1.05);
-  box-shadow: 0 10px 30px rgba(255, 0, 84, 0.6);
+  box-shadow: 0 10px 30px rgba(0, 123, 255, 0.6);
 }
 
 /* 3D Animations */

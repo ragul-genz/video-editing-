@@ -13,7 +13,7 @@
 .editor-mockup {
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6), 0 0 40px rgba(157, 78, 221, 0.15);
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6), 0 0 40px rgba(0, 123, 255, 0.15);
   background: rgba(15, 15, 20, 0.8);
   border: 1px solid var(--glass-border);
 }
