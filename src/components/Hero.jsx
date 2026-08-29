@@ -11,13 +11,13 @@ const Hero = () => {
       
       <div className="hero-content">
         <div className="hero-text">
-          <div className="badge floating-element delay-1">✨ New Transitions Pack 2026</div>
+          <div className="badge floating-element delay-1">✨ New Audio Templates 2026</div>
           <h1 className="hero-title">
-            Elevate Your Edits with <br/>
-            <span className="text-gradient">Premium VFX</span> Bundles
+            Elevate Your Sound with <br/>
+            <span className="text-gradient">Premium Audio</span> Bundles
           </h1>
           <p className="hero-subtitle">
-            Instantly upgrade your videos with our high-end transition bundles, SFX packs, and 3D overlays. Built for Premiere Pro & After Effects.
+            Instantly upgrade your tracks with our high-end master templates, vocal chains, and synth presets. Built for FL Studio, Logic Pro, Ableton Live, Cubase & Studio One.
           </p>
           <div className="hero-actions">
             <button className="btn-primary">Explore Bundles</button>
@@ -26,7 +26,7 @@ const Hero = () => {
         </div>
         
         <div className="hero-image-container floating-element delay-2">
-          <img src="/vfx_hero_bundle.jpg" alt="VFX Asset Bundle 3D" className="hero-3d-image glass-panel" />
+          <img src="/music_production_hero.jpg" alt="Music Production Setup" className="hero-3d-image glass-panel" />
         </div>
       </div>
     </section>

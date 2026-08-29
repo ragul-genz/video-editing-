@@ -27,23 +27,23 @@ const DemoPlayer = ({ activeDemo, inModal = false }) => {
     return () => clearInterval(interval);
   }, [isPlaying]);
 
-  const isSFX = activeDemo?.includes('SFX');
-  const isLUTs = activeDemo?.includes('LUTs');
+  const isVocal = activeDemo?.includes('Vocal');
+  const isTemplate = activeDemo?.includes('Template');
 
   useEffect(() => {
     if (isPlaying) {
-      if (!isSFX && !isLUTs && progress === 40) {
+      if (!isVocal && !isTemplate && progress === 40) {
         const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3');
         audio.volume = 0.5;
         audio.play().catch(e => console.log('Audio play failed:', e));
       }
     }
-  }, [progress, isPlaying, isSFX, isLUTs]);
+  }, [progress, isPlaying, isVocal, isTemplate]);
 
   const handlePlay = () => {
     if (progress >= 100) setProgress(0);
     setIsPlaying(true);
-    if (isSFX) {
+    if (isVocal) {
       const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3');
       audio.volume = 0.5;
       audio.play().catch(e => console.log('Audio play failed:', e));
@@ -70,7 +70,7 @@ const DemoPlayer = ({ activeDemo, inModal = false }) => {
               <span className="dot yellow"></span>
               <span className="dot green"></span>
             </div>
-            <div className="editor-title">{isSFX ? 'Audio_Mix_Session.sesx' : (isLUTs ? 'Lumetri_Color_Grade.prproj' : 'VFX_Master_Project.prproj')}</div>
+            <div className="editor-title">{isVocal ? 'Vocal_Chain.logicx' : (isTemplate ? 'Master_Template.flp' : 'Synth_Presets.als')}</div>
           </div>
 
           {/* Video / Audio Player Area */}
@@ -83,11 +83,11 @@ const DemoPlayer = ({ activeDemo, inModal = false }) => {
                       <polygon points="5 3 19 12 5 21 5 3"></polygon>
                     </svg>
                   </button>
-                  <span>{isSFX ? 'Click to Listen to SFX' : (isLUTs ? 'Click to Preview Color Grade' : 'Click to Preview Transition')}</span>
+                  <span>{isVocal ? 'Click to Listen to Vocal Chain' : (isTemplate ? 'Click to Preview Template' : 'Click to Listen to Synth Presets')}</span>
                 </div>
               ) : (
                 <div className="video-content" onClick={() => setIsPlaying(false)}>
-                  {isSFX ? (
+                  {isVocal ? (
                     <div className="audio-visualizer">
                       <div className="waveform-container">
                         {Array.from({ length: 30 }).map((_, i) => (
@@ -101,22 +101,32 @@ const DemoPlayer = ({ activeDemo, inModal = false }) => {
                           ></div>
                         ))}
                       </div>
-                      <div className="sfx-title">Sci-Fi Impact_01.wav</div>
+                      <div className="sfx-title">Lead_Vocal_Processed.wav</div>
                     </div>
-                  ) : isLUTs ? (
-                    <div className="luts-visualizer">
-                       <div className="luts-original">RAW LOG footage</div>
-                       <div className="luts-graded" style={{ clipPath: `inset(0 ${100 - progress}% 0 0)` }}>
-                         LUT Grade applied
-                       </div>
-                       <div className="luts-slider" style={{ left: `${progress}%` }}></div>
+                  ) : isTemplate ? (
+                    <div className="audio-visualizer" style={{ background: '#1a1a2e' }}>
+                       <div className="waveform-container" style={{ opacity: 0.5 }}>
+                        {Array.from({ length: 20 }).map((_, i) => (
+                          <div 
+                            key={i} 
+                            className="bar" 
+                            style={{ 
+                              height: isPlaying ? `${Math.random() * 60 + 10}%` : '5%',
+                              background: '#00a8ff'
+                            }}
+                          ></div>
+                        ))}
+                      </div>
+                      <div className="sfx-title">Mastering_Chain_Active</div>
                     </div>
                   ) : (
-                    <>
-                      <div className="scene scene-1" style={{ opacity: progress > 50 ? 0 : 1 }}></div>
-                      {progress > 40 && progress < 60 && <div className="glitch-transition"></div>}
-                      <div className="scene scene-2" style={{ opacity: progress > 50 ? 1 : 0 }}></div>
-                    </>
+                    <div className="audio-visualizer" style={{ background: '#0f2027' }}>
+                      <div className="waveform-container">
+                        <div className="sfx-title" style={{ fontSize: '2rem', color: '#00ff88', textShadow: '0 0 10px #00ff88' }}>
+                          {isPlaying ? '🎹 Synthesizer Playing...' : '🎹 Ready to Play'}
+                        </div>
+                      </div>
+                    </div>
                   )}
                 </div>
               )}
@@ -126,40 +136,40 @@ const DemoPlayer = ({ activeDemo, inModal = false }) => {
           {/* Timeline Mockup */}
           <div className="timeline-mockup">
             <div className="timeline-tracks">
-              {!isSFX && !isLUTs && (
+              {!isVocal && !isTemplate && (
                 <>
-                  <div className="track v-track">
-                    <span className="track-label">V2</span>
-                    <div className="clip fx-clip" style={{ left: '40%', width: '20%' }}>VFX Transition</div>
+                  <div className="track a-track">
+                    <span className="track-label">MIDI 1</span>
+                    <div className="clip fx-clip" style={{ left: '10%', width: '30%', background: '#00ff88' }}>Serum Lead</div>
+                    <div className="clip fx-clip" style={{ left: '50%', width: '40%', background: '#00ff88' }}>Serum Pluck</div>
                   </div>
-                  <div className="track v-track">
-                    <span className="track-label">V1</span>
-                    <div className="clip video-clip" style={{ left: '5%', width: '45%' }}>Shot_01.mp4</div>
-                    <div className="clip video-clip" style={{ left: '50%', width: '45%' }}>Shot_02.mp4</div>
+                  <div className="track a-track">
+                    <span className="track-label">Audio</span>
+                    <div className="clip video-clip" style={{ left: '5%', width: '90%' }}>Drum_Loop.wav</div>
                   </div>
                 </>
               )}
-              {isSFX && (
+              {isVocal && (
                 <>
                   <div className="track a-track">
-                    <span className="track-label">A1</span>
-                    <div className="clip fx-clip" style={{ left: '30%', width: '40%', background: '#ff0054' }}>Sci-Fi_Impact.wav</div>
+                    <span className="track-label">Vocal</span>
+                    <div className="clip fx-clip" style={{ left: '20%', width: '60%', background: '#00a8ff' }}>Lead_Vocal_Take1.wav</div>
                   </div>
                   <div className="track a-track">
-                    <span className="track-label">A2</span>
-                    <div className="clip audio-clip" style={{ left: '5%', width: '90%' }}>Ambient_Drone.wav</div>
+                    <span className="track-label">Beat</span>
+                    <div className="clip audio-clip" style={{ left: '0%', width: '100%' }}>Instrumental.wav</div>
                   </div>
                 </>
               )}
-              {isLUTs && (
+              {isTemplate && (
                 <>
-                  <div className="track v-track">
-                    <span className="track-label">V2</span>
-                    <div className="clip fx-clip" style={{ left: '0%', width: '100%', background: '#ffbe0b', color: '#000' }}>Lumetri Color FX</div>
+                  <div className="track a-track">
+                    <span className="track-label">Master</span>
+                    <div className="clip fx-clip" style={{ left: '0%', width: '100%', background: '#ff7b00', color: '#fff' }}>Ozone 10 / Limiter</div>
                   </div>
-                  <div className="track v-track">
-                    <span className="track-label">V1</span>
-                    <div className="clip video-clip" style={{ left: '0%', width: '100%' }}>Shot_01.mp4</div>
+                  <div className="track a-track">
+                    <span className="track-label">Mix Bus</span>
+                    <div className="clip video-clip" style={{ left: '0%', width: '100%' }}>Full_Mix_Sum.wav</div>
                   </div>
                 </>
               )}

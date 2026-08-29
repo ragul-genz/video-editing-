@@ -5,14 +5,8 @@ const Navbar = ({ cartCount = 0, onCartClick }) => {
   return (
     <nav className="navbar glass-panel">
       <div className="nav-container">
-        <a href="#" className="logo" style={{ display: 'flex', gap: '8px' }}>
-          <span className="text-gradient">DS3</span>
-          <span style={{
-            background: 'linear-gradient(135deg, #00f2fe, #4facfe)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text'
-          }}>Official</span>
+        <a href="#" className="logo">
+          <span className="text-gradient">Logo</span>
         </a>
         
         <ul className="nav-links">
@@ -30,7 +24,6 @@ const Navbar = ({ cartCount = 0, onCartClick }) => {
             </svg>
             {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
           </button>
-          <button className="btn-primary login-btn">Sign In</button>
         </div>
       </div>
     </nav>
