@@ -23,6 +23,21 @@ const Hero = () => {
             <button className="btn-primary">Explore Bundles</button>
             <button className="btn-secondary">Watch Demo</button>
           </div>
+          
+          <div className="supported-daws floating-element delay-3">
+            <p>SUPPORTED DAWS:</p>
+            <div className="daw-list">
+              <span>FL Studio</span>
+              <span className="dot">•</span>
+              <span>Logic Pro</span>
+              <span className="dot">•</span>
+              <span>Cubase</span>
+              <span className="dot">•</span>
+              <span>Studio One</span>
+              <span className="dot">•</span>
+              <span>Ableton Live</span>
+            </div>
+          </div>
         </div>
         
         <div className="hero-image-container floating-element delay-2">

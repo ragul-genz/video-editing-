@@ -127,6 +127,35 @@
   transform: rotateY(0deg) rotateX(0deg);
 }
 
+.supported-daws {
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.supported-daws p {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  letter-spacing: 2px;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+.daw-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  color: white;
+  font-weight: 500;
+  font-size: 1.1rem;
+}
+
+.daw-list .dot {
+  color: var(--primary);
+  opacity: 0.5;
+}
+
 @media (max-width: 968px) {
   .hero-content {
     flex-direction: column;
