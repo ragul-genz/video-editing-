@@ -16,7 +16,9 @@ const Navbar = ({ cartCount = 0, onCartClick }) => {
         <ul className="nav-links">
           <li><Link to="/">Home</Link></li>
           <li><Link to="/about">About</Link></li>
+          <li><Link to="/bundles">Bundles</Link></li>
           <li><Link to="/contact">Contact</Link></li>
+          <li><Link to="/reviews">Reviews</Link></li>
         </ul>
 
         <div className="nav-actions">
