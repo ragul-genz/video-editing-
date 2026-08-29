@@ -3,10 +3,10 @@
   top: 20px;
   left: 50%;
   transform: translateX(-50%);
-  width: 90%;
-  max-width: 1200px;
+  width: max-content;
+  max-width: 95vw;
   z-index: 1000;
-  padding: 1rem 2rem;
+  padding: 0.8rem 2.5rem;
   border-radius: 50px;
 }
 
@@ -27,9 +27,8 @@
 
 .nav-links {
   display: flex;
-  gap: 2rem;
-  margin-left: auto;
-  margin-right: 3rem;
+  gap: 2.5rem;
+  margin: 0 1.5rem;
 }
 
 .nav-links a {
