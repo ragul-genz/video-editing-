@@ -13,7 +13,7 @@ const Navbar = ({ cartCount = 0, onCartClick }) => {
     <nav className="navbar glass-panel">
       <div className="nav-container">
         <Link to="/" className="logo" onClick={closeMenu} style={{ padding: '5px 0', marginRight: '15px' }}>
-          <img src={siteSettings.logoUrl} alt="DS3 Studio Logo" style={{ height: '40px', borderRadius: '4px', transform: 'scale(1.4)', transformOrigin: 'left center' }} />
+          <img src={siteSettings.logoUrl} alt="DS3 Studio Logo" style={{ height: '40px', borderRadius: '4px', transform: 'scale(1.4)', transformOrigin: 'left center', mixBlendMode: 'screen' }} />
         </Link>
         
         <div className={`menu-toggle ${isMenuOpen ? 'open' : ''}`} onClick={() => setIsMenuOpen(!isMenuOpen)}>
