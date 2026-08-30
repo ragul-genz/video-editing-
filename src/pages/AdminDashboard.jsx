@@ -77,10 +77,11 @@ const AdminDashboard = () => {
   const handleEditProduct = (product) => {
     setNewProduct({
       ...product,
-      price: product.price.replace('₹', ''), // remove symbol for easy editing
-      features: product.features.join(', ') // convert back to string
+      price: typeof product.price === 'string' ? product.price.replace('₹', '') : product.price,
+      features: Array.isArray(product.features) ? product.features.join(', ') : (product.features || '')
     });
     setEditingProductId(product.id);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleCancelEdit = () => {
