@@ -25,7 +25,7 @@ const Cart = ({ isOpen, onClose, cartItems, cartTotal, clearCart }) => {
     const newOrder = {
       id: Date.now().toString().slice(-6),
       date: new Date().toISOString(),
-      total: `$${cartTotal.toFixed(2)}`,
+      total: `₹${cartTotal.toFixed(2)}`,
       items: [...cartItems],
       status: 'Pending',
       name: formData.name,
@@ -37,7 +37,7 @@ const Cart = ({ isOpen, onClose, cartItems, cartTotal, clearCart }) => {
     
     // Generate WhatsApp message
     const itemsList = cartItems.map(i => i.title).join(", ");
-    const message = `Hello! I just made a payment for an order on DS3 Studio.\n\n*Name:* ${formData.name}\n*Payment Method:* ${formData.paymentMethod}\n*Transaction ID:* ${formData.transactionId}\n*Amount:* $${cartTotal.toFixed(2)}\n*Items:* ${itemsList}\n\nPlease approve my order so I can download the files!`;
+    const message = `Hello! I just made a payment for an order on DS3 Studio.\n\n*Name:* ${formData.name}\n*Payment Method:* ${formData.paymentMethod}\n*Transaction ID:* ${formData.transactionId}\n*Amount:* ₹${cartTotal.toFixed(2)}\n*Items:* ${itemsList}\n\nPlease approve my order so I can download the files!`;
     
     const whatsappUrl = `https://wa.me/919611015006?text=${encodeURIComponent(message)}`;
     
@@ -93,7 +93,7 @@ const Cart = ({ isOpen, onClose, cartItems, cartTotal, clearCart }) => {
             <div className="cart-footer">
               <div className="cart-total">
                 <span>Total:</span>
-                <span>${cartTotal.toFixed(2)}</span>
+                <span>₹{cartTotal.toFixed(2)}</span>
               </div>
               <button className="btn-primary checkout-btn" disabled={cartItems.length === 0} onClick={handleProceedToPayment}>
                 Proceed to Checkout

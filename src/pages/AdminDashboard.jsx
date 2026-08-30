@@ -9,7 +9,7 @@ const AdminDashboard = () => {
   const [newLogoUrl, setNewLogoUrl] = useState(siteSettings.logoUrl);
   
   const [newProduct, setNewProduct] = useState({
-    title: '', description: '', price: '', icon: '🎹', color: '#007bff', features: '', driveLink: ''
+    title: '', description: '', price: '', icon: '🎹', color: '#007bff', features: '', driveLink: '', previewUrl: ''
   });
 
   useEffect(() => {
@@ -31,15 +31,16 @@ const AdminDashboard = () => {
       id: Date.now(),
       title: newProduct.title,
       description: newProduct.description,
-      price: newProduct.price.includes('$') ? newProduct.price : `$${newProduct.price}`,
+      price: newProduct.price.includes('₹') ? newProduct.price : `₹${newProduct.price}`,
       icon: newProduct.icon,
       color: newProduct.color,
       features: newProduct.features.split(',').map(f => f.trim()),
-      driveLink: newProduct.driveLink
+      driveLink: newProduct.driveLink,
+      previewUrl: newProduct.previewUrl
     };
     
     setProducts([...products, productToAdd]);
-    setNewProduct({ title: '', description: '', price: '', icon: '🎹', color: '#007bff', features: '', driveLink: '' });
+    setNewProduct({ title: '', description: '', price: '', icon: '🎹', color: '#007bff', features: '', driveLink: '', previewUrl: '' });
     alert("Product added successfully!");
   };
 
@@ -81,11 +82,12 @@ const AdminDashboard = () => {
         <h3>Add New Bundle (Google Drive Linked)</h3>
         <form onSubmit={handleAddProduct} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px', marginTop: '20px' }}>
           <input type="text" placeholder="Product Title" required value={newProduct.title} onChange={e => setNewProduct({...newProduct, title: e.target.value})} style={inputStyle} />
-          <input type="text" placeholder="Price (e.g., $19.99)" required value={newProduct.price} onChange={e => setNewProduct({...newProduct, price: e.target.value})} style={inputStyle} />
+          <input type="text" placeholder="Price (e.g., ₹19.99)" required value={newProduct.price} onChange={e => setNewProduct({...newProduct, price: e.target.value})} style={inputStyle} />
           <input type="text" placeholder="Description" required value={newProduct.description} onChange={e => setNewProduct({...newProduct, description: e.target.value})} style={{ ...inputStyle, gridColumn: 'span 2' }} />
           <input type="text" placeholder="Icon Emoji (e.g., 🎹)" required value={newProduct.icon} onChange={e => setNewProduct({...newProduct, icon: e.target.value})} style={inputStyle} />
           <input type="text" placeholder="Brand Color Hex (e.g., #007bff)" required value={newProduct.color} onChange={e => setNewProduct({...newProduct, color: e.target.value})} style={inputStyle} />
           <input type="text" placeholder="Features (comma separated)" required value={newProduct.features} onChange={e => setNewProduct({...newProduct, features: e.target.value})} style={{ ...inputStyle, gridColumn: 'span 2' }} />
+          <input type="text" placeholder="Preview URL (Manual Link, Drive Link, or File URL)" value={newProduct.previewUrl} onChange={e => setNewProduct({...newProduct, previewUrl: e.target.value})} style={{ ...inputStyle, gridColumn: 'span 2' }} />
           <input type="url" placeholder="Google Drive Link (https://drive.google.com/...)" required value={newProduct.driveLink} onChange={e => setNewProduct({...newProduct, driveLink: e.target.value})} style={{ ...inputStyle, gridColumn: 'span 2', borderColor: 'var(--primary)' }} />
           
           <button type="submit" className="btn-primary" style={{ gridColumn: 'span 2', padding: '15px' }}>Upload Bundle</button>
