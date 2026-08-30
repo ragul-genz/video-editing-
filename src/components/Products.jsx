@@ -26,7 +26,7 @@ const Products = ({ addToCart, onPreview, onProductClick }) => {
             <p className="product-desc">{product.description}</p>
             
             <div className="product-footer">
-              <span className="product-price">{product.price}</span>
+              <span className="product-price">{product.price.replace('$', '₹')}</span>
               <div className="product-actions">
                 <button 
                   className="preview-btn" 

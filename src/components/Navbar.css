@@ -127,9 +127,17 @@
 }
 
 @media (max-width: 968px) {
+  .navbar {
+    width: 90vw;
+    padding: 0.8rem 1.5rem;
+  }
+
+  .nav-actions {
+    gap: 1rem;
+  }
+
   .menu-toggle {
     display: flex;
-    margin-right: 15px;
   }
   
   .nav-container {

@@ -12,15 +12,10 @@ const Navbar = ({ cartCount = 0, onCartClick }) => {
   return (
     <nav className="navbar glass-panel">
       <div className="nav-container">
-        <Link to="/" className="logo" onClick={closeMenu} style={{ padding: '5px 0', marginRight: '15px' }}>
-          <img src={siteSettings.logoUrl} alt="DS3 Studio Logo" style={{ height: '40px', borderRadius: '4px', transform: 'scale(1.4)', transformOrigin: 'left center', mixBlendMode: 'screen' }} />
+        <Link to="/" className="logo" onClick={closeMenu} style={{ padding: '5px 0' }}>
+          <img src={siteSettings.logoUrl} alt="DS3 Studio Logo" style={{ height: '50px', borderRadius: '4px', mixBlendMode: 'screen' }} />
         </Link>
         
-        <div className={`menu-toggle ${isMenuOpen ? 'open' : ''}`} onClick={() => setIsMenuOpen(!isMenuOpen)}>
-          <span className="bar"></span>
-          <span className="bar"></span>
-          <span className="bar"></span>
-        </div>
 
         <ul className={`nav-links ${isMenuOpen ? 'active' : ''}`}>
           <li><Link to="/" onClick={closeMenu}>Home</Link></li>
@@ -32,6 +27,12 @@ const Navbar = ({ cartCount = 0, onCartClick }) => {
         </ul>
 
         <div className="nav-actions">
+          <div className={`menu-toggle ${isMenuOpen ? 'open' : ''}`} onClick={() => setIsMenuOpen(!isMenuOpen)}>
+            <span className="bar"></span>
+            <span className="bar"></span>
+            <span className="bar"></span>
+          </div>
+
           <button className="cart-btn" aria-label="Cart" onClick={() => { onCartClick(); closeMenu(); }}>
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="9" cy="21" r="1"></circle>

@@ -23,7 +23,7 @@ const ProductModal = ({ product, isOpen, onClose, addToCart }) => {
             </div>
             <div>
               <h2 className="modal-title">{product.title}</h2>
-              <p className="modal-price">{product.price}</p>
+              <p className="modal-price">{product.price.replace('$', '₹')}</p>
             </div>
           </div>
           

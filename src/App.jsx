@@ -34,7 +34,7 @@ function App() {
   };
 
   const cartTotal = cartItems.reduce((total, item) => {
-    return total + parseFloat(item.price.replace('₹', ''));
+    return total + parseFloat(item.price.replace('₹', '').replace('$', ''));
   }, 0);
 
   return (
