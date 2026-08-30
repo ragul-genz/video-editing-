@@ -1,54 +1,77 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './DemoPlayer.css';
 
+const getDriveStreamUrl = (url) => {
+  if (!url) return '';
+  // Match standard Google Drive file links
+  const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+  if (match && match[1]) {
+    return `https://drive.google.com/uc?export=download&id=${match[1]}`;
+  }
+  return url; // fallback to original if not a drive link
+};
+
 const DemoPlayer = ({ activeDemo, onClose }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [volume, setVolume] = useState(1);
+  const [error, setError] = useState(false);
   const audioRef = useRef(null);
 
   // Auto-play audio when activeDemo changes
   useEffect(() => {
     if (activeDemo) {
-      setIsPlaying(true);
+      setIsPlaying(false);
       setProgress(0);
+      setError(false);
 
       if (audioRef.current) {
         audioRef.current.pause();
-        audioRef.current.currentTime = 0;
+        audioRef.current.removeAttribute('src');
+        audioRef.current.load();
       }
 
-      // Simple mock audio url based on title (or just a generic one for demo)
-      const audioUrl = 'https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3';
+      // Try previewUrl first, fallback to driveLink, then fallback to mock audio if both are missing
+      let rawUrl = activeDemo.previewUrl || activeDemo.driveLink;
+      let audioUrl = getDriveStreamUrl(rawUrl);
+      
+      // If still no url (e.g. they left both blank on default products), use the mock one
+      if (!audioUrl) {
+        audioUrl = 'https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3';
+      }
 
       if (audioUrl) {
         audioRef.current = new Audio(audioUrl);
-        audioRef.current.volume = 0.5;
-        audioRef.current.play().catch(e => console.log('Auto-play blocked by browser:', e));
+        audioRef.current.volume = volume;
+        
+        // Listeners for progress and end
+        audioRef.current.addEventListener('timeupdate', () => {
+          if (audioRef.current.duration) {
+            setProgress((audioRef.current.currentTime / audioRef.current.duration) * 100);
+          }
+        });
+        
+        audioRef.current.addEventListener('ended', () => {
+          setIsPlaying(false);
+          setProgress(0);
+        });
+
+        audioRef.current.addEventListener('error', () => {
+          console.error("Failed to load audio");
+          setError(true);
+          setIsPlaying(false);
+        });
+
+        // Try to play
+        audioRef.current.play().then(() => {
+          setIsPlaying(true);
+        }).catch(e => {
+          console.log('Auto-play blocked or failed:', e);
+          setIsPlaying(false);
+        });
       }
     }
   }, [activeDemo]);
-
-  // Handle progress bar animation
-  useEffect(() => {
-    let interval;
-    if (isPlaying) {
-      interval = setInterval(() => {
-        setProgress((prev) => {
-          if (prev >= 100) {
-            setIsPlaying(false);
-            if (audioRef.current) audioRef.current.pause();
-            return 0; // Reset
-          }
-          return prev + 1; // slower progress for demo
-        });
-      }, 50);
-    } else {
-      if (audioRef.current) {
-        audioRef.current.pause();
-      }
-    }
-    return () => clearInterval(interval);
-  }, [isPlaying]);
 
   // Cleanup audio on unmount
   useEffect(() => {
@@ -60,6 +83,8 @@ const DemoPlayer = ({ activeDemo, onClose }) => {
   }, []);
 
   const togglePlay = () => {
+    if (error) return; // Don't try playing if there's an error
+    
     if (isPlaying) {
       setIsPlaying(false);
       if (audioRef.current) audioRef.current.pause();
@@ -69,7 +94,12 @@ const DemoPlayer = ({ activeDemo, onClose }) => {
         if (audioRef.current) audioRef.current.currentTime = 0;
       }
       setIsPlaying(true);
-      if (audioRef.current) audioRef.current.play().catch(e => console.log(e));
+      if (audioRef.current) {
+        audioRef.current.play().catch(e => {
+          console.log(e);
+          setIsPlaying(false);
+        });
+      }
     }
   };
 
@@ -78,9 +108,15 @@ const DemoPlayer = ({ activeDemo, onClose }) => {
     if (audioRef.current) {
       audioRef.current.pause();
     }
-    // Ideally we'd clear activeDemo via a prop, but since we can't easily change App.jsx state from here without prop drilling, we'll just hide this component's DOM by forcing a local state if needed.
-    // Actually we can just pause it, or add an onClose prop.
     if (onClose) onClose();
+  };
+
+  const handleVolumeChange = (e) => {
+    const newVol = parseFloat(e.target.value);
+    setVolume(newVol);
+    if (audioRef.current) {
+      audioRef.current.volume = newVol;
+    }
   };
 
   if (!activeDemo) return null;
@@ -88,7 +124,7 @@ const DemoPlayer = ({ activeDemo, onClose }) => {
   return (
     <div className="mini-player-container">
       <div className="mini-player glass-panel">
-        <button className="mini-play-btn" onClick={togglePlay}>
+        <button className="mini-play-btn" onClick={togglePlay} disabled={error}>
           {isPlaying ? (
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
               <rect x="6" y="4" width="4" height="16"></rect>
@@ -102,9 +138,8 @@ const DemoPlayer = ({ activeDemo, onClose }) => {
         </button>
         
         <div className="mini-waveform">
-          <div className="waveform-progress" style={{ width: `${progress}%` }}></div>
+          <div className="waveform-progress" style={{ width: `${progress}%`, position: 'absolute', height: '100%', background: 'rgba(255,255,255,0.1)' }}></div>
           <div className="waveform-bars">
-            {/* Generate random heights for a static-looking waveform */}
             {Array.from({ length: 60 }).map((_, i) => (
               <div 
                 key={i} 
@@ -118,9 +153,25 @@ const DemoPlayer = ({ activeDemo, onClose }) => {
           </div>
         </div>
         
-        
-        <div className="mini-player-title">
-          {activeDemo}
+        <div className="mini-player-title" style={{ color: error ? '#ff5f56' : 'var(--text-muted)' }}>
+          {error ? 'Failed to load Audio' : activeDemo.title}
+        </div>
+
+        <div className="volume-control" style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+          </svg>
+          <input 
+            type="range" 
+            min="0" 
+            max="1" 
+            step="0.01" 
+            value={volume} 
+            onChange={handleVolumeChange}
+            className="volume-slider"
+          />
         </div>
 
         <button onClick={handleClose} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.5)', cursor: 'pointer', padding: '0 5px' }}>

@@ -25,7 +25,7 @@ function App() {
   };
 
   const previewProduct = (product) => {
-    setActiveDemo(product.title);
+    setActiveDemo(product);
     document.getElementById('demo')?.scrollIntoView({ behavior: 'smooth' });
   };
 
@@ -44,7 +44,7 @@ function App() {
           <Navbar cartCount={cartItems.length} onCartClick={() => setIsCartOpen(true)} />
           <main>
             <Routes>
-              <Route path="/" element={<Home />} />
+              <Route path="/" element={<Home addToCart={addToCart} onPreview={previewProduct} onProductClick={openProductDetails} activeDemo={activeDemo} onCloseDemo={() => setActiveDemo(null)} />} />
               <Route path="/about" element={<About />} />
               <Route path="/bundles" element={<Bundles addToCart={addToCart} onPreview={previewProduct} onProductClick={openProductDetails} activeDemo={activeDemo} onCloseDemo={() => setActiveDemo(null)} />} />
               <Route path="/contact" element={<Contact />} />

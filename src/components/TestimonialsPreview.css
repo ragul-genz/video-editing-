@@ -1,0 +1,58 @@
+.testimonials-preview {
+  padding: 80px 20px;
+  background-color: var(--bg-light);
+}
+
+.preview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+  max-width: 1000px;
+  margin: 40px auto;
+}
+
+.preview-card {
+  padding: 30px;
+  border-radius: 15px;
+  position: relative;
+  transition: transform 0.3s ease;
+}
+
+.preview-card:hover {
+  transform: translateY(-5px);
+}
+
+.stars {
+  display: flex;
+  gap: 5px;
+  color: #ffc107;
+  margin-bottom: 15px;
+}
+
+.review-text {
+  font-style: italic;
+  font-size: 1.05rem;
+  line-height: 1.6;
+  margin-bottom: 20px;
+  color: var(--text-light);
+}
+
+.review-author {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 15px;
+}
+
+.review-author h4 {
+  margin: 0 0 5px 0;
+  color: white;
+}
+
+.review-author span {
+  color: var(--primary);
+  font-size: 0.9rem;
+}
+
+.view-more-container {
+  text-align: center;
+  margin-top: 40px;
+}
