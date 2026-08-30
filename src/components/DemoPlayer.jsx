@@ -3,12 +3,18 @@ import './DemoPlayer.css';
 
 const getDriveStreamUrl = (url) => {
   if (!url) return '';
-  // Match standard Google Drive file links
-  const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
-  if (match && match[1]) {
-    return `https://docs.google.com/uc?export=download&id=${match[1]}`;
+  // Google Drive (May be blocked by Google CORS policies)
+  const driveMatch = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+  if (driveMatch && driveMatch[1]) {
+    return `https://docs.google.com/uc?export=download&id=${driveMatch[1]}`;
   }
-  return url; // fallback to original if not a drive link
+
+  // Dropbox support
+  if (url.includes('dropbox.com')) {
+    return url.replace('dl=0', 'raw=1').replace('?dl=0', '?raw=1');
+  }
+
+  return url; // fallback to original
 };
 
 const DemoPlayer = ({ activeDemo, onClose }) => {
