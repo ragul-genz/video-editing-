@@ -7,8 +7,8 @@ const Hero = () => {
   return (
     <section className="hero">
       <div className="hero-background">
-        <div className="glow-orb purple"></div>
-        <div className="glow-orb pink"></div>
+        <div className="glow-orb blue"></div>
+        <div className="glow-orb cyan"></div>
       </div>
       
       <div className="hero-content">
