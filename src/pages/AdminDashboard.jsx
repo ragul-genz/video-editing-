@@ -51,11 +51,11 @@ const AdminDashboard = () => {
   const handleAddProduct = (e) => {
     e.preventDefault();
     const productToAdd = {
-      id: Date.now(),
+      id: editingProductId ? editingProductId : Date.now(),
       title: newProduct.title,
       description: newProduct.description,
       price: newProduct.price.includes('₹') ? newProduct.price : `₹${newProduct.price}`,
-      image: newProduct.image || '/vfx_hero_bundle.jpg', // fallback image
+      image: newProduct.image, // Don't force a fallback image here so it doesn't overwrite
       color: newProduct.color,
       features: typeof newProduct.features === 'string' ? newProduct.features.split(',').map(f => f.trim()) : newProduct.features,
       driveLink: newProduct.driveLink,
