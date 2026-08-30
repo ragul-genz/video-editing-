@@ -6,7 +6,7 @@ const getDriveStreamUrl = (url) => {
   // Match standard Google Drive file links
   const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
   if (match && match[1]) {
-    return `https://drive.google.com/uc?export=download&confirm=t&id=${match[1]}`;
+    return `https://docs.google.com/uc?export=download&id=${match[1]}`;
   }
   return url; // fallback to original if not a drive link
 };
