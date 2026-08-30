@@ -1,19 +1,35 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import { AppContext } from '../context/AppContext';
 import './Products.css';
 
 const Products = ({ addToCart, onPreview, onProductClick }) => {
   const { products } = useContext(AppContext);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const filteredProducts = products.filter(product => 
+    product.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    product.description.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <section id="products" className="products-section">
       <div className="section-header">
         <h2 className="section-title">Featured <span className="text-gradient">Bundles</span></h2>
         <p className="section-subtitle">Premium assets to level up your editing game.</p>
+        
+        <div className="search-container">
+          <input 
+            type="text" 
+            className="search-input glass-panel" 
+            placeholder="Search bundles..." 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
       </div>
 
       <div className="products-grid">
-        {products.map((product) => (
+        {filteredProducts.map((product) => (
           <div 
             key={product.id} 
             className="product-card glass-panel floating-element delay-3 interactive-card"
