@@ -35,8 +35,14 @@ const Products = ({ addToCart, onPreview, onProductClick }) => {
             className="product-card glass-panel floating-element delay-3 interactive-card"
             onClick={() => onProductClick(product)}
           >
-            <div className="product-icon" style={{ textShadow: `0 0 20px ${product.color}` }}>
-              {product.icon}
+            <div className="product-image-container" style={{ boxShadow: `0 0 20px ${product.color}40` }}>
+              {product.image ? (
+                <img src={product.image} alt={product.title} className="product-image" />
+              ) : (
+                <div className="product-icon" style={{ textShadow: `0 0 20px ${product.color}` }}>
+                  {product.icon}
+                </div>
+              )}
             </div>
             <h3 className="product-title">{product.title}</h3>
             <p className="product-desc">{product.description}</p>

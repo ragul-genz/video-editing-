@@ -16,7 +16,7 @@ import { AppContextProvider } from './context/AppContext';
 function App() {
   const [cartItems, setCartItems] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
-  const [activeDemo, setActiveDemo] = useState("FL Studio Master Template");
+  const [activeDemo, setActiveDemo] = useState(null);
   const [selectedProduct, setSelectedProduct] = useState(null);
 
   const addToCart = (product) => {
@@ -46,7 +46,7 @@ function App() {
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/about" element={<About />} />
-              <Route path="/bundles" element={<Bundles addToCart={addToCart} onPreview={previewProduct} onProductClick={openProductDetails} activeDemo={activeDemo} />} />
+              <Route path="/bundles" element={<Bundles addToCart={addToCart} onPreview={previewProduct} onProductClick={openProductDetails} activeDemo={activeDemo} onCloseDemo={() => setActiveDemo(null)} />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/reviews" element={<Reviews />} />
               <Route path="/my-orders" element={<MyOrders />} />

@@ -1,13 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './DemoPlayer.css';
 
-const DemoPlayer = ({ activeDemo, inModal = false }) => {
+const DemoPlayer = ({ activeDemo, onClose }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const audioRef = useRef(null);
-
-  const isVocal = activeDemo?.includes('Vocal');
-  const isTemplate = activeDemo?.includes('Template');
 
   // Auto-play audio when activeDemo changes
   useEffect(() => {
@@ -20,23 +17,16 @@ const DemoPlayer = ({ activeDemo, inModal = false }) => {
         audioRef.current.currentTime = 0;
       }
 
-      let audioUrl = '';
-      if (isVocal) {
-        audioUrl = 'https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3';
-      } else if (isTemplate) {
-        audioUrl = 'https://assets.mixkit.co/active_storage/sfx/119/119-preview.mp3';
-      } else {
-        audioUrl = 'https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3';
-      }
+      // Simple mock audio url based on title (or just a generic one for demo)
+      const audioUrl = 'https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3';
 
       if (audioUrl) {
         audioRef.current = new Audio(audioUrl);
         audioRef.current.volume = 0.5;
-        // User gesture on Preview button allows this to auto-play
         audioRef.current.play().catch(e => console.log('Auto-play blocked by browser:', e));
       }
     }
-  }, [activeDemo, isVocal, isTemplate]);
+  }, [activeDemo]);
 
   // Handle progress bar animation
   useEffect(() => {
@@ -47,9 +37,9 @@ const DemoPlayer = ({ activeDemo, inModal = false }) => {
           if (prev >= 100) {
             setIsPlaying(false);
             if (audioRef.current) audioRef.current.pause();
-            return 100;
+            return 0; // Reset
           }
-          return prev + 2; 
+          return prev + 1; // slower progress for demo
         });
       }, 50);
     } else {
@@ -69,150 +59,75 @@ const DemoPlayer = ({ activeDemo, inModal = false }) => {
     };
   }, []);
 
-  const handlePlay = () => {
-    if (progress >= 100) {
-      setProgress(0);
-      if (audioRef.current) audioRef.current.currentTime = 0;
-    }
-    setIsPlaying(true);
-    if (audioRef.current) {
-      audioRef.current.play().catch(e => console.log('Audio play failed:', e));
+  const togglePlay = () => {
+    if (isPlaying) {
+      setIsPlaying(false);
+      if (audioRef.current) audioRef.current.pause();
+    } else {
+      if (progress >= 100) {
+        setProgress(0);
+        if (audioRef.current) audioRef.current.currentTime = 0;
+      }
+      setIsPlaying(true);
+      if (audioRef.current) audioRef.current.play().catch(e => console.log(e));
     }
   };
 
-  const handlePause = () => {
+  const handleClose = () => {
     setIsPlaying(false);
+    if (audioRef.current) {
+      audioRef.current.pause();
+    }
+    // Ideally we'd clear activeDemo via a prop, but since we can't easily change App.jsx state from here without prop drilling, we'll just hide this component's DOM by forcing a local state if needed.
+    // Actually we can just pause it, or add an onClose prop.
+    if (onClose) onClose();
   };
+
+  if (!activeDemo) return null;
 
   return (
-    <section id="demo" className="demo-section">
-      {!inModal && (
-        <div className="section-header">
-          <h2 className="section-title">Experience the <span className="text-gradient">Magic</span></h2>
-          <p className="section-subtitle">
-            {activeDemo ? `Previewing: ${activeDemo}` : 'Select a bundle above to preview.'}
-          </p>
-        </div>
-      )}
-
-      <div className="demo-container floating-element">
-        <div className="editor-mockup glass-panel">
-          {/* Editor Header */}
-          <div className="editor-header">
-            <div className="window-controls">
-              <span className="dot red"></span>
-              <span className="dot yellow"></span>
-              <span className="dot green"></span>
-            </div>
-            <div className="editor-title">{isVocal ? 'Vocal_Chain.logicx' : (isTemplate ? 'Master_Template.flp' : 'Synth_Presets.als')}</div>
-          </div>
-
-          {/* Video / Audio Player Area */}
-          <div className="video-player">
-            <div className={`video-screen ${isPlaying ? 'playing' : ''}`}>
-              {!isPlaying ? (
-                <div className="play-overlay" onClick={handlePlay}>
-                  <button className="play-btn">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
-                      <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                    </svg>
-                  </button>
-                  <span>{progress > 0 && progress < 100 ? 'Resume Audio' : (isVocal ? 'Click to Listen to Vocal Chain' : (isTemplate ? 'Click to Preview Template' : 'Click to Listen to Synth Presets'))}</span>
-                </div>
-              ) : (
-                <div className="video-content" onClick={handlePause}>
-                  {isVocal ? (
-                    <div className="audio-visualizer">
-                      <div className="waveform-container">
-                        {Array.from({ length: 30 }).map((_, i) => (
-                          <div 
-                            key={i} 
-                            className="bar" 
-                            style={{ 
-                              height: isPlaying ? `${Math.random() * 80 + 20}%` : '10%',
-                              animationDelay: `${i * 0.05}s`
-                            }}
-                          ></div>
-                        ))}
-                      </div>
-                      <div className="sfx-title">Lead_Vocal_Processed.wav</div>
-                    </div>
-                  ) : isTemplate ? (
-                    <div className="audio-visualizer" style={{ background: '#1a1a2e' }}>
-                       <div className="waveform-container" style={{ opacity: 0.5 }}>
-                        {Array.from({ length: 20 }).map((_, i) => (
-                          <div 
-                            key={i} 
-                            className="bar" 
-                            style={{ 
-                              height: isPlaying ? `${Math.random() * 60 + 10}%` : '5%',
-                              background: '#00a8ff'
-                            }}
-                          ></div>
-                        ))}
-                      </div>
-                      <div className="sfx-title">Mastering_Chain_Active</div>
-                    </div>
-                  ) : (
-                    <div className="audio-visualizer" style={{ background: '#0f2027' }}>
-                      <div className="waveform-container">
-                        <div className="sfx-title" style={{ fontSize: '2rem', color: '#00ff88', textShadow: '0 0 10px #00ff88' }}>
-                          {isPlaying ? '🎹 Synthesizer Playing...' : '🎹 Ready to Play'}
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Timeline Mockup */}
-          <div className="timeline-mockup">
-            <div className="timeline-tracks">
-              {!isVocal && !isTemplate && (
-                <>
-                  <div className="track a-track">
-                    <span className="track-label">MIDI 1</span>
-                    <div className="clip fx-clip" style={{ left: '10%', width: '30%', background: '#00ff88' }}>Serum Lead</div>
-                    <div className="clip fx-clip" style={{ left: '50%', width: '40%', background: '#00ff88' }}>Serum Pluck</div>
-                  </div>
-                  <div className="track a-track">
-                    <span className="track-label">Audio</span>
-                    <div className="clip video-clip" style={{ left: '5%', width: '90%' }}>Drum_Loop.wav</div>
-                  </div>
-                </>
-              )}
-              {isVocal && (
-                <>
-                  <div className="track a-track">
-                    <span className="track-label">Vocal</span>
-                    <div className="clip fx-clip" style={{ left: '20%', width: '60%', background: '#00a8ff' }}>Lead_Vocal_Take1.wav</div>
-                  </div>
-                  <div className="track a-track">
-                    <span className="track-label">Beat</span>
-                    <div className="clip audio-clip" style={{ left: '0%', width: '100%' }}>Instrumental.wav</div>
-                  </div>
-                </>
-              )}
-              {isTemplate && (
-                <>
-                  <div className="track a-track">
-                    <span className="track-label">Master</span>
-                    <div className="clip fx-clip" style={{ left: '0%', width: '100%', background: '#ff7b00', color: '#fff' }}>Ozone 10 / Limiter</div>
-                  </div>
-                  <div className="track a-track">
-                    <span className="track-label">Mix Bus</span>
-                    <div className="clip video-clip" style={{ left: '0%', width: '100%' }}>Full_Mix_Sum.wav</div>
-                  </div>
-                </>
-              )}
-            </div>
-            <div className="playhead" style={{ left: `${progress}%` }}></div>
+    <div className="mini-player-container">
+      <div className="mini-player glass-panel">
+        <button className="mini-play-btn" onClick={togglePlay}>
+          {isPlaying ? (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+              <rect x="6" y="4" width="4" height="16"></rect>
+              <rect x="14" y="4" width="4" height="16"></rect>
+            </svg>
+          ) : (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+              <polygon points="5 3 19 12 5 21 5 3"></polygon>
+            </svg>
+          )}
+        </button>
+        
+        <div className="mini-waveform">
+          <div className="waveform-progress" style={{ width: `${progress}%` }}></div>
+          <div className="waveform-bars">
+            {/* Generate random heights for a static-looking waveform */}
+            {Array.from({ length: 60 }).map((_, i) => (
+              <div 
+                key={i} 
+                className="mini-bar" 
+                style={{ 
+                  height: `${Math.random() * 80 + 20}%`,
+                  opacity: i < (progress / 100) * 60 ? 1 : 0.4
+                }}
+              ></div>
+            ))}
           </div>
         </div>
+        
+        
+        <div className="mini-player-title">
+          {activeDemo}
+        </div>
+
+        <button onClick={handleClose} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.5)', cursor: 'pointer', padding: '0 5px' }}>
+          ✕
+        </button>
       </div>
-    </section>
+    </div>
   );
 };
 

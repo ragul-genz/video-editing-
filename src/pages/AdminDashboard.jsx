@@ -9,8 +9,31 @@ const AdminDashboard = () => {
   const [newLogoUrl, setNewLogoUrl] = useState(siteSettings.logoUrl);
   
   const [newProduct, setNewProduct] = useState({
-    title: '', description: '', price: '', icon: '🎹', color: '#007bff', features: '', driveLink: '', previewUrl: ''
+    title: '', description: '', price: '', image: '', color: '#007bff', features: '', driveLink: '', previewUrl: ''
   });
+  const [editingProductId, setEditingProductId] = useState(null);
+
+  const handleLogoUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setNewLogoUrl(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setNewProduct({ ...newProduct, image: reader.result });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   useEffect(() => {
     const isAuth = localStorage.getItem('ds3_admin_auth');
@@ -32,16 +55,37 @@ const AdminDashboard = () => {
       title: newProduct.title,
       description: newProduct.description,
       price: newProduct.price.includes('₹') ? newProduct.price : `₹${newProduct.price}`,
-      icon: newProduct.icon,
+      image: newProduct.image || '/vfx_hero_bundle.jpg', // fallback image
       color: newProduct.color,
-      features: newProduct.features.split(',').map(f => f.trim()),
+      features: typeof newProduct.features === 'string' ? newProduct.features.split(',').map(f => f.trim()) : newProduct.features,
       driveLink: newProduct.driveLink,
       previewUrl: newProduct.previewUrl
     };
     
-    setProducts([...products, productToAdd]);
-    setNewProduct({ title: '', description: '', price: '', icon: '🎹', color: '#007bff', features: '', driveLink: '', previewUrl: '' });
-    alert("Product added successfully!");
+    if (editingProductId) {
+      setProducts(products.map(p => p.id === editingProductId ? { ...productToAdd, id: editingProductId } : p));
+      alert("Product updated successfully!");
+      setEditingProductId(null);
+    } else {
+      setProducts([...products, productToAdd]);
+      alert("Product added successfully!");
+    }
+    
+    setNewProduct({ title: '', description: '', price: '', image: '', color: '#007bff', features: '', driveLink: '', previewUrl: '' });
+  };
+
+  const handleEditProduct = (product) => {
+    setNewProduct({
+      ...product,
+      price: product.price.replace('₹', ''), // remove symbol for easy editing
+      features: product.features.join(', ') // convert back to string
+    });
+    setEditingProductId(product.id);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingProductId(null);
+    setNewProduct({ title: '', description: '', price: '', image: '', color: '#007bff', features: '', driveLink: '', previewUrl: '' });
   };
 
   const handleDeleteProduct = (id) => {
@@ -67,30 +111,62 @@ const AdminDashboard = () => {
       <div className="glass-panel" style={{ padding: '30px', marginBottom: '40px' }}>
         <h3>Site Logo Manager</h3>
         <form onSubmit={handleUpdateLogo} style={{ display: 'flex', flexWrap: 'wrap', gap: '15px', marginTop: '15px' }}>
-          <input 
-            type="text" 
-            value={newLogoUrl}
-            onChange={(e) => setNewLogoUrl(e.target.value)}
-            placeholder="Image URL (e.g., /ds3_logo.jpg or https://...)"
-            style={{ flex: 1, padding: '10px', borderRadius: '8px', border: '1px solid var(--glass-border)', background: 'rgba(0,0,0,0.5)', color: 'white' }}
-          />
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            {newLogoUrl && newLogoUrl.startsWith('data:image') ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px', background: 'rgba(0,0,0,0.5)', borderRadius: '8px', border: '1px solid var(--glass-border)' }}>
+                 <img src={newLogoUrl} alt="logo preview" style={{ height: '40px', objectFit: 'contain' }} />
+                 <button type="button" onClick={() => setNewLogoUrl('')} className="btn-secondary" style={{ padding: '5px 10px', fontSize: '0.8rem' }}>Clear</button>
+              </div>
+            ) : (
+              <input 
+                type="text" 
+                value={newLogoUrl}
+                onChange={(e) => setNewLogoUrl(e.target.value)}
+                placeholder="Image URL (e.g., /ds3_logo.jpg or https://...)"
+                style={{ padding: '10px', borderRadius: '8px', border: '1px solid var(--glass-border)', background: 'rgba(0,0,0,0.5)', color: 'white' }}
+              />
+            )}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Or upload from device:</span>
+              <input type="file" accept="image/*" onChange={handleLogoUpload} style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }} />
+            </div>
+          </div>
           <button type="submit" className="btn-primary" style={{ padding: '10px 20px' }}>Update Logo</button>
         </form>
       </div>
 
       <div className="glass-panel" style={{ padding: '30px', marginBottom: '40px' }}>
-        <h3>Add New Bundle (Google Drive Linked)</h3>
+        <h3>{editingProductId ? 'Edit Bundle' : 'Add New Bundle (Google Drive Linked)'}</h3>
         <form onSubmit={handleAddProduct} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px', marginTop: '20px' }}>
           <input type="text" placeholder="Product Title" required value={newProduct.title} onChange={e => setNewProduct({...newProduct, title: e.target.value})} style={inputStyle} />
           <input type="text" placeholder="Price (e.g., ₹19.99)" required value={newProduct.price} onChange={e => setNewProduct({...newProduct, price: e.target.value})} style={inputStyle} />
           <input type="text" placeholder="Description" required value={newProduct.description} onChange={e => setNewProduct({...newProduct, description: e.target.value})} style={{ ...inputStyle, gridColumn: 'span 2' }} />
-          <input type="text" placeholder="Icon Emoji (e.g., 🎹)" required value={newProduct.icon} onChange={e => setNewProduct({...newProduct, icon: e.target.value})} style={inputStyle} />
+          <div style={{ ...inputStyle, gridColumn: 'span 2', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <label style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '-5px' }}>Thumbnail Image (URL or Upload)</label>
+            {newProduct.image && newProduct.image.startsWith('data:image') ? (
+               <div style={{ display: 'flex', alignItems: 'center', gap: '15px', background: 'rgba(255,255,255,0.05)', padding: '10px', borderRadius: '6px' }}>
+                 <img src={newProduct.image} alt="preview" style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: '4px' }} />
+                 <button type="button" onClick={() => setNewProduct({...newProduct, image: ''})} className="btn-secondary" style={{ padding: '5px 10px', fontSize: '0.8rem' }}>Remove Image</button>
+               </div>
+            ) : (
+               <input type="text" placeholder="Thumbnail Image URL (e.g. /image.jpg)" value={newProduct.image || ''} onChange={e => setNewProduct({...newProduct, image: e.target.value})} style={{ background: 'transparent', border: 'none', color: 'white', width: '100%', outline: 'none', padding: '5px 0' }} />
+            )}
+            <div style={{ borderTop: '1px solid var(--glass-border)', paddingTop: '10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Upload File:</span>
+              <input type="file" accept="image/*" onChange={handleImageUpload} style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }} />
+            </div>
+          </div>
           <input type="text" placeholder="Brand Color Hex (e.g., #007bff)" required value={newProduct.color} onChange={e => setNewProduct({...newProduct, color: e.target.value})} style={inputStyle} />
           <input type="text" placeholder="Features (comma separated)" required value={newProduct.features} onChange={e => setNewProduct({...newProduct, features: e.target.value})} style={{ ...inputStyle, gridColumn: 'span 2' }} />
-          <input type="text" placeholder="Preview URL (Manual Link, Drive Link, or File URL)" value={newProduct.previewUrl} onChange={e => setNewProduct({...newProduct, previewUrl: e.target.value})} style={{ ...inputStyle, gridColumn: 'span 2' }} />
+          <input type="text" placeholder="Preview URL (Manual Link, Drive Link, or File URL)" value={newProduct.previewUrl || ''} onChange={e => setNewProduct({...newProduct, previewUrl: e.target.value})} style={{ ...inputStyle, gridColumn: 'span 2' }} />
           <input type="url" placeholder="Google Drive Link (https://drive.google.com/...)" required value={newProduct.driveLink} onChange={e => setNewProduct({...newProduct, driveLink: e.target.value})} style={{ ...inputStyle, gridColumn: 'span 2', borderColor: 'var(--primary)' }} />
           
-          <button type="submit" className="btn-primary" style={{ gridColumn: 'span 2', padding: '15px' }}>Upload Bundle</button>
+          <div style={{ gridColumn: 'span 2', display: 'flex', gap: '10px' }}>
+            <button type="submit" className="btn-primary" style={{ flex: 1, padding: '15px' }}>{editingProductId ? 'Update Bundle' : 'Upload Bundle'}</button>
+            {editingProductId && (
+              <button type="button" onClick={handleCancelEdit} className="btn-secondary" style={{ padding: '15px' }}>Cancel</button>
+            )}
+          </div>
         </form>
       </div>
 
@@ -99,11 +175,21 @@ const AdminDashboard = () => {
         <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '15px' }}>
           {products.map(p => (
             <div key={p.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.05)', padding: '15px', borderRadius: '8px' }}>
-              <div>
-                <h4 style={{ margin: '0 0 5px 0' }}>{p.icon} {p.title}</h4>
-                <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-muted)' }}>{p.price} | {p.driveLink}</p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                {p.image ? (
+                  <img src={p.image} alt={p.title} style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: '6px' }} />
+                ) : (
+                  <div style={{ fontSize: '2rem' }}>{p.icon}</div>
+                )}
+                <div>
+                  <h4 style={{ margin: '0 0 5px 0' }}>{p.title}</h4>
+                  <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-muted)' }}>{p.price} | {p.driveLink}</p>
+                </div>
               </div>
-              <button onClick={() => handleDeleteProduct(p.id)} className="btn-secondary" style={{ padding: '6px 12px', fontSize: '0.9rem', color: '#ff0054', borderColor: '#ff0054' }}>Delete</button>
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <button onClick={() => handleEditProduct(p)} className="btn-secondary" style={{ padding: '6px 12px', fontSize: '0.9rem', color: '#00d2ff', borderColor: '#00d2ff' }}>Edit</button>
+                <button onClick={() => handleDeleteProduct(p.id)} className="btn-secondary" style={{ padding: '6px 12px', fontSize: '0.9rem', color: '#ff0054', borderColor: '#ff0054' }}>Delete</button>
+              </div>
             </div>
           ))}
         </div>
