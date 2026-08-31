@@ -35,6 +35,17 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleMusicUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setNewProduct({ ...newProduct, previewUrl: reader.result });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   useEffect(() => {
     const isAuth = localStorage.getItem('ds3_admin_auth');
     if (!isAuth) {
@@ -159,7 +170,21 @@ const AdminDashboard = () => {
           </div>
           <input type="text" placeholder="Brand Color Hex (e.g., #007bff)" required value={newProduct.color} onChange={e => setNewProduct({...newProduct, color: e.target.value})} style={inputStyle} />
           <input type="text" placeholder="Features (comma separated)" required value={newProduct.features} onChange={e => setNewProduct({...newProduct, features: e.target.value})} style={{ ...inputStyle, gridColumn: 'span 2' }} />
-          <input type="text" placeholder="Preview URL (Manual Link, Drive Link, or File URL)" value={newProduct.previewUrl || ''} onChange={e => setNewProduct({...newProduct, previewUrl: e.target.value})} style={{ ...inputStyle, gridColumn: 'span 2' }} />
+          <div style={{ ...inputStyle, gridColumn: 'span 2', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <label style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '-5px' }}>Preview Audio (URL or Upload Music)</label>
+            {newProduct.previewUrl && newProduct.previewUrl.startsWith('data:audio') ? (
+               <div style={{ display: 'flex', alignItems: 'center', gap: '15px', background: 'rgba(255,255,255,0.05)', padding: '10px', borderRadius: '6px' }}>
+                 <audio controls src={newProduct.previewUrl} style={{ width: '100%', height: '30px' }} />
+                 <button type="button" onClick={() => setNewProduct({...newProduct, previewUrl: ''})} className="btn-secondary" style={{ padding: '5px 10px', fontSize: '0.8rem', whiteSpace: 'nowrap' }}>Remove</button>
+               </div>
+            ) : (
+               <input type="text" placeholder="Preview URL (Manual Link or File URL)" value={newProduct.previewUrl || ''} onChange={e => setNewProduct({...newProduct, previewUrl: e.target.value})} style={{ background: 'transparent', border: 'none', color: 'white', width: '100%', outline: 'none', padding: '5px 0' }} />
+            )}
+            <div style={{ borderTop: '1px solid var(--glass-border)', paddingTop: '10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Upload Music File:</span>
+              <input type="file" accept="audio/*" onChange={handleMusicUpload} style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }} />
+            </div>
+          </div>
           <input type="url" placeholder="Google Drive Link (https://drive.google.com/...)" required value={newProduct.driveLink} onChange={e => setNewProduct({...newProduct, driveLink: e.target.value})} style={{ ...inputStyle, gridColumn: 'span 2', borderColor: 'var(--primary)' }} />
           
           <div style={{ gridColumn: 'span 2', display: 'flex', gap: '10px' }}>
