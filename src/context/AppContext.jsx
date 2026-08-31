@@ -71,6 +71,16 @@ export const AppContextProvider = ({ children }) => {
     return saved ? JSON.parse(saved) : [];
   });
 
+  const [users, setUsers] = useState(() => {
+    const saved = localStorage.getItem('ds3_users');
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  const [currentUser, setCurrentUser] = useState(() => {
+    const saved = localStorage.getItem('ds3_currentUser');
+    return saved ? JSON.parse(saved) : null;
+  });
+
   useEffect(() => {
     localStorage.setItem('ds3_products', JSON.stringify(products));
   }, [products]);
@@ -83,8 +93,22 @@ export const AppContextProvider = ({ children }) => {
     localStorage.setItem('ds3_orders', JSON.stringify(orders));
   }, [orders]);
 
+  useEffect(() => {
+    localStorage.setItem('ds3_users', JSON.stringify(users));
+  }, [users]);
+
+  useEffect(() => {
+    localStorage.setItem('ds3_currentUser', JSON.stringify(currentUser));
+  }, [currentUser]);
+
   return (
-    <AppContext.Provider value={{ products, setProducts, siteSettings, setSiteSettings, orders, setOrders }}>
+    <AppContext.Provider value={{ 
+      products, setProducts, 
+      siteSettings, setSiteSettings, 
+      orders, setOrders,
+      users, setUsers,
+      currentUser, setCurrentUser
+    }}>
       {children}
     </AppContext.Provider>
   );

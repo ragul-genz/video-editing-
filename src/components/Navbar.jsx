@@ -4,10 +4,15 @@ import { AppContext } from '../context/AppContext';
 import './Navbar.css';
 
 const Navbar = ({ cartCount = 0, onCartClick }) => {
-  const { siteSettings } = useContext(AppContext);
+  const { siteSettings, currentUser, setCurrentUser } = useContext(AppContext);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const closeMenu = () => setIsMenuOpen(false);
+
+  const handleLogout = () => {
+    setCurrentUser(null);
+    closeMenu();
+  };
 
   return (
     <nav className="navbar glass-panel">
@@ -41,6 +46,12 @@ const Navbar = ({ cartCount = 0, onCartClick }) => {
             </svg>
             {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
           </button>
+
+          {currentUser && (
+            <button onClick={handleLogout} className="btn-secondary" style={{ padding: '6px 12px', fontSize: '0.85rem', marginLeft: '10px', height: 'fit-content', alignSelf: 'center' }}>
+              Logout
+            </button>
+          )}
         </div>
       </div>
     </nav>

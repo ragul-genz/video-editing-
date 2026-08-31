@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { useContext } from 'react';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import About from './pages/About';
@@ -9,9 +10,18 @@ import Reviews from './pages/Reviews';
 import MyOrders from './pages/MyOrders';
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
+import Auth from './pages/Auth';
 import Cart from './components/Cart';
 import ProductModal from './components/ProductModal';
-import { AppContextProvider } from './context/AppContext';
+import { AppContextProvider, AppContext } from './context/AppContext';
+
+const ProtectedRoute = ({ children }) => {
+  const { currentUser } = useContext(AppContext);
+  if (!currentUser) {
+    return <Navigate to="/login" replace />;
+  }
+  return children;
+};
 
 function App() {
   const [cartItems, setCartItems] = useState([]);
@@ -44,12 +54,13 @@ function App() {
           <Navbar cartCount={cartItems.length} onCartClick={() => setIsCartOpen(true)} />
           <main>
             <Routes>
-              <Route path="/" element={<Home addToCart={addToCart} onPreview={previewProduct} onProductClick={openProductDetails} activeDemo={activeDemo} onCloseDemo={() => setActiveDemo(null)} />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/bundles" element={<Bundles addToCart={addToCart} onPreview={previewProduct} onProductClick={openProductDetails} activeDemo={activeDemo} onCloseDemo={() => setActiveDemo(null)} />} />
-              <Route path="/contact" element={<Contact />} />
-              <Route path="/reviews" element={<Reviews />} />
-              <Route path="/my-orders" element={<MyOrders />} />
+              <Route path="/login" element={<Auth />} />
+              <Route path="/" element={<ProtectedRoute><Home addToCart={addToCart} onPreview={previewProduct} onProductClick={openProductDetails} activeDemo={activeDemo} onCloseDemo={() => setActiveDemo(null)} /></ProtectedRoute>} />
+              <Route path="/about" element={<ProtectedRoute><About /></ProtectedRoute>} />
+              <Route path="/bundles" element={<ProtectedRoute><Bundles addToCart={addToCart} onPreview={previewProduct} onProductClick={openProductDetails} activeDemo={activeDemo} onCloseDemo={() => setActiveDemo(null)} /></ProtectedRoute>} />
+              <Route path="/contact" element={<ProtectedRoute><Contact /></ProtectedRoute>} />
+              <Route path="/reviews" element={<ProtectedRoute><Reviews /></ProtectedRoute>} />
+              <Route path="/my-orders" element={<ProtectedRoute><MyOrders /></ProtectedRoute>} />
               <Route path="/admin" element={<AdminLogin />} />
               <Route path="/admin/dashboard" element={<AdminDashboard />} />
             </Routes>
