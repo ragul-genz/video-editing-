@@ -10,7 +10,7 @@ const AdminDashboard = () => {
   const [newLogoUrl, setNewLogoUrl] = useState(siteSettings.logoUrl);
   
   const [newProduct, setNewProduct] = useState({
-    title: '', description: '', price: '', image: '', color: '#007bff', features: '', driveLink: '', previewUrl: ''
+    title: '', description: '', price: '', image: '', color: '#007bff', features: '', driveLink: '', previewUrl: '', previewVideoUrl: ''
   });
   const [editingProductId, setEditingProductId] = useState(null);
 
@@ -116,7 +116,8 @@ const AdminDashboard = () => {
       color: newProduct.color,
       features: typeof newProduct.features === 'string' ? newProduct.features.split(',').map(f => f.trim()) : newProduct.features,
       driveLink: newProduct.driveLink,
-      previewUrl: newProduct.previewUrl
+      previewUrl: newProduct.previewUrl,
+      previewVideoUrl: newProduct.previewVideoUrl
     };
     
     if (editingProductId) {
@@ -128,7 +129,7 @@ const AdminDashboard = () => {
       addToast("Product added successfully!", "success");
     }
     
-    setNewProduct({ title: '', description: '', price: '', image: '', color: '#007bff', features: '', driveLink: '', previewUrl: '' });
+    setNewProduct({ title: '', description: '', price: '', image: '', color: '#007bff', features: '', driveLink: '', previewUrl: '', previewVideoUrl: '' });
   };
 
   const handleEditProduct = (product) => {
@@ -143,7 +144,7 @@ const AdminDashboard = () => {
 
   const handleCancelEdit = () => {
     setEditingProductId(null);
-    setNewProduct({ title: '', description: '', price: '', image: '', color: '#007bff', features: '', driveLink: '', previewUrl: '' });
+    setNewProduct({ title: '', description: '', price: '', image: '', color: '#007bff', features: '', driveLink: '', previewUrl: '', previewVideoUrl: '' });
   };
 
   const handleDeleteProduct = (id) => {
@@ -258,6 +259,13 @@ const AdminDashboard = () => {
               <input type="file" accept="audio/*" onChange={handleMusicUpload} style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }} />
             </div>
           </div>
+          
+          <div style={{ ...inputStyle, gridColumn: 'span 2', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <label style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '-5px' }}>Preview Video (YouTube, Vimeo, or MP4 URL)</label>
+            <input type="url" placeholder="Video Preview URL (e.g., https://youtube.com/embed/...)" value={newProduct.previewVideoUrl || ''} onChange={e => setNewProduct({...newProduct, previewVideoUrl: e.target.value})} style={{ background: 'transparent', border: 'none', color: 'white', width: '100%', outline: 'none', padding: '5px 0' }} />
+            <span style={{ fontSize: '0.8rem', color: 'var(--primary)' }}>* Direct upload not supported to save storage. Please paste a link.</span>
+          </div>
+
           <input type="url" placeholder="Google Drive Link (https://drive.google.com/...)" required value={newProduct.driveLink} onChange={e => setNewProduct({...newProduct, driveLink: e.target.value})} style={{ ...inputStyle, gridColumn: 'span 2', borderColor: 'var(--primary)' }} />
           
           <div style={{ gridColumn: 'span 2', display: 'flex', gap: '10px' }}>

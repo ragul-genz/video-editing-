@@ -53,11 +53,23 @@ const ProductModal = ({ product, isOpen, onClose, addToCart, onProductClick }) =
             </ul>
           </div>
 
-          <div className="modal-demo-wrapper">
-            <h3>Interactive Preview</h3>
-            {/* We reuse the DemoPlayer but pass the activeDemo for this specific product */}
-            <DemoPlayer activeDemo={product.title} inModal={true} />
-          </div>
+          {product.previewVideoUrl ? (
+            <div className="modal-video-wrapper">
+              <h3 style={{ marginBottom: '15px' }}>Video Preview</h3>
+              {product.previewVideoUrl.includes('youtube.com') || product.previewVideoUrl.includes('youtu.be') || product.previewVideoUrl.includes('vimeo.com') ? (
+                <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0, overflow: 'hidden', borderRadius: '10px', marginBottom: '20px' }}>
+                  <iframe src={product.previewVideoUrl} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: '0' }} allowFullScreen></iframe>
+                </div>
+              ) : (
+                <video controls style={{ width: '100%', borderRadius: '10px', marginBottom: '20px', background: 'black' }} src={product.previewVideoUrl}></video>
+              )}
+            </div>
+          ) : (
+            <div className="modal-demo-wrapper">
+              <h3>Interactive Audio Preview</h3>
+              <DemoPlayer activeDemo={product.title} inModal={true} />
+            </div>
+          )}
 
           <div className="modal-actions">
             <button 
