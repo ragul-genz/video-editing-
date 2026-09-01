@@ -3,7 +3,7 @@ import axios from 'axios';
 
 export const AppContext = createContext();
 
-const API_URL = 'http://localhost:5000/api';
+const API_URL = 'https://video-editing-h7vr.onrender.com/api';
 
 const initialProducts = [
   {
