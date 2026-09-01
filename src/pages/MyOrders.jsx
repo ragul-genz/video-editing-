@@ -1,10 +1,44 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import { AppContext } from '../context/AppContext';
 
+
 const MyOrders = () => {
-  const { orders, currentUser } = useContext(AppContext);
-  
+  const { orders, currentUser, addReview, addToast } = useContext(AppContext);
+  const [reviewModalOpen, setReviewModalOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [rating, setRating] = useState(5);
+  const [reviewText, setReviewText] = useState('');
+
   const userOrders = orders.filter(order => order.userEmail === currentUser?.email);
+
+  const openReviewModal = (item) => {
+    setSelectedProduct(item);
+    setRating(5);
+    setReviewText('');
+    setReviewModalOpen(true);
+  };
+
+  const submitReview = (e) => {
+    e.preventDefault();
+    if (reviewText.trim().length < 5) {
+      addToast("Please write a slightly longer review.", "error");
+      return;
+    }
+
+    const newReview = {
+      id: Date.now(),
+      name: currentUser?.email.split('@')[0] || "Verified Buyer",
+      role: "Verified Buyer",
+      rating,
+      text: reviewText,
+      productId: selectedProduct.id,
+      productName: selectedProduct.title
+    };
+
+    addReview(newReview);
+    addToast("Thank you! Your review has been published.", "success");
+    setReviewModalOpen(false);
+  };
 
   return (
     <section style={{ padding: '120px 20px', maxWidth: '1000px', margin: '0 auto', minHeight: '80vh' }}>
@@ -47,12 +81,20 @@ const MyOrders = () => {
                   </div>
                   
                   {order.status === 'Approved' ? (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                       <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>Your downloads are ready:</p>
                       {order.items.map((item, i) => (
-                        <a key={i} href={item.driveLink || 'https://drive.google.com'} target="_blank" rel="noopener noreferrer" className="btn-primary" style={{ display: 'inline-block', padding: '10px 16px', fontSize: '0.9rem', textAlign: 'center', textDecoration: 'none' }}>
-                          Download {item.title}
-                        </a>
+                        <div key={i} style={{ display: 'flex', gap: '10px', flexDirection: 'column' }}>
+                          <a href={item.driveLink || 'https://drive.google.com'} target="_blank" rel="noopener noreferrer" className="btn-primary" style={{ display: 'inline-block', padding: '10px 16px', fontSize: '0.9rem', textAlign: 'center', textDecoration: 'none' }}>
+                            Download {item.title}
+                          </a>
+                          <button 
+                            onClick={() => openReviewModal(item)}
+                            style={{ background: 'transparent', border: '1px solid var(--primary)', color: 'var(--primary)', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', transition: '0.3s' }}
+                          >
+                            ⭐ Write a Review
+                          </button>
+                        </div>
                       ))}
                     </div>
                   ) : (
@@ -65,6 +107,49 @@ const MyOrders = () => {
             </div>
           ))}
         </div>
+      )}
+
+      {reviewModalOpen && selectedProduct && (
+        <>
+          <div className="modal-overlay open" onClick={() => setReviewModalOpen(false)}></div>
+          <div className="modal-content glass-panel open" style={{ maxWidth: '500px', padding: '30px' }}>
+            <h3 style={{ marginBottom: '20px' }}>Review: {selectedProduct.title}</h3>
+            <form onSubmit={submitReview}>
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{ display: 'block', color: 'var(--text-muted)', marginBottom: '10px' }}>Rating</label>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  {[1, 2, 3, 4, 5].map(star => (
+                    <svg 
+                      key={star}
+                      onClick={() => setRating(star)}
+                      xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" 
+                      fill={star <= rating ? "#ffc107" : "none"} 
+                      stroke={star <= rating ? "#ffc107" : "var(--text-muted)"}
+                      style={{ cursor: 'pointer' }}
+                    >
+                      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                    </svg>
+                  ))}
+                </div>
+              </div>
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{ display: 'block', color: 'var(--text-muted)', marginBottom: '10px' }}>Your Feedback</label>
+                <textarea 
+                  value={reviewText}
+                  onChange={(e) => setReviewText(e.target.value)}
+                  placeholder="How was the product? Did it help you?"
+                  required
+                  rows="4"
+                  style={{ width: '100%', padding: '15px', borderRadius: '10px', background: 'rgba(0,0,0,0.2)', border: '1px solid var(--glass-border)', color: 'white', resize: 'none' }}
+                />
+              </div>
+              <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+                <button type="button" onClick={() => setReviewModalOpen(false)} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', padding: '10px 20px', cursor: 'pointer' }}>Cancel</button>
+                <button type="submit" className="btn-primary">Submit Review</button>
+              </div>
+            </form>
+          </div>
+        </>
       )}
     </section>
   );

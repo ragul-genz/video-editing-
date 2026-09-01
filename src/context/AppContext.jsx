@@ -55,6 +55,13 @@ const initialProducts = [
   }
 ];
 
+const initialReviews = [
+  { id: 1, name: "Alex Mercer", role: "Music Producer", rating: 5, text: "The Logic Pro vocal chain is absolutely insane. Cut my mixing time in half and the vocals sit perfectly in the mix." },
+  { id: 2, name: "Sarah J.", role: "Beatmaker", rating: 5, text: "FL Studio Master Template is a game changer. The routing is incredibly clean and intuitive." },
+  { id: 3, name: "DJ Kael", role: "Electronic Artist", rating: 5, text: "Those Ableton Live synth presets are huge. Immediate inspiration right out of the box." },
+  { id: 4, name: "Michael R.", role: "Composer", rating: 5, text: "The Cubase orchestral template handles 100+ tracks flawlessly. Expression mapping is on point." },
+];
+
 export const AppContextProvider = ({ children }) => {
   const [toasts, setToasts] = useState([]);
 
@@ -84,12 +91,17 @@ export const AppContextProvider = ({ children }) => {
 
   const [users, setUsers] = useState(() => {
     const saved = localStorage.getItem('ds3_users');
-    return saved ? JSON.parse(saved) : [];
+    return saved ? JSON.parse(saved) : [{ email: 'genzdevoff@gmail.com', password: 'password123' }];
   });
 
   const [currentUser, setCurrentUser] = useState(() => {
     const saved = localStorage.getItem('ds3_currentUser');
     return saved ? JSON.parse(saved) : null;
+  });
+
+  const [reviews, setReviews] = useState(() => {
+    const saved = localStorage.getItem('ds3_reviews');
+    return saved ? JSON.parse(saved) : initialReviews;
   });
 
   useEffect(() => {
@@ -113,11 +125,17 @@ export const AppContextProvider = ({ children }) => {
   }, [currentUser]);
 
   useEffect(() => {
+    localStorage.setItem('ds3_reviews', JSON.stringify(reviews));
+  }, [reviews]);
+
+  useEffect(() => {
     const handleStorageChange = (e) => {
-      if (e.key === 'ds3_products' && e.newValue) setProducts(JSON.parse(e.newValue));
-      if (e.key === 'ds3_settings' && e.newValue) setSiteSettings(JSON.parse(e.newValue));
-      if (e.key === 'ds3_orders' && e.newValue) setOrders(JSON.parse(e.newValue));
-      if (e.key === 'ds3_users' && e.newValue) setUsers(JSON.parse(e.newValue));
+      if (e.key === 'ds3_products') setProducts(JSON.parse(e.newValue || '[]'));
+      if (e.key === 'ds3_settings') setSiteSettings(JSON.parse(e.newValue || '{}'));
+      if (e.key === 'ds3_orders') setOrders(JSON.parse(e.newValue || '[]'));
+      if (e.key === 'ds3_users') setUsers(JSON.parse(e.newValue || '[]'));
+      if (e.key === 'ds3_currentUser') setCurrentUser(JSON.parse(e.newValue || 'null'));
+      if (e.key === 'ds3_reviews') setReviews(JSON.parse(e.newValue || '[]'));
     };
     window.addEventListener('storage', handleStorageChange);
     return () => window.removeEventListener('storage', handleStorageChange);
@@ -133,6 +151,14 @@ export const AppContextProvider = ({ children }) => {
     }
   };
 
+  const addReview = (review) => {
+    setReviews([review, ...reviews]);
+  };
+
+  const deleteReview = (id) => {
+    setReviews(reviews.filter(r => r.id !== id));
+  };
+
   return (
     <AppContext.Provider value={{ 
       products, setProducts, 
@@ -140,6 +166,7 @@ export const AppContextProvider = ({ children }) => {
       orders, setOrders,
       users, setUsers,
       currentUser, setCurrentUser,
+      reviews, addReview, deleteReview,
       toasts, addToast, removeToast,
       updateUserPassword
     }}>

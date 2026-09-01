@@ -3,9 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { AppContext } from '../context/AppContext';
 
 const AdminDashboard = () => {
-  const { products, setProducts, siteSettings, setSiteSettings, orders, setOrders, addToast } = useContext(AppContext);
+  const { products, setProducts, siteSettings, setSiteSettings, orders, setOrders, reviews, deleteReview, addToast } = useContext(AppContext);
   const navigate = useNavigate();
 
+  const [activeTab, setActiveTab] = useState('products');
   const [newLogoUrl, setNewLogoUrl] = useState(siteSettings.logoUrl);
   
   const [newProduct, setNewProduct] = useState({
@@ -160,11 +161,35 @@ const AdminDashboard = () => {
 
   return (
     <section style={{ padding: '100px 20px', maxWidth: '1000px', margin: '0 auto', minHeight: '80vh' }}>
-      <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: '20px', marginBottom: '40px' }}>
+      <div className="section-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
         <h1 className="section-title" style={{ margin: 0 }}>Admin <span className="text-gradient">Dashboard</span></h1>
         <button onClick={handleLogout} className="btn-secondary" style={{ padding: '8px 16px' }}>Logout</button>
       </div>
 
+      <div style={{ display: 'flex', gap: '15px', marginBottom: '30px', borderBottom: '1px solid var(--glass-border)', paddingBottom: '15px', overflowX: 'auto' }}>
+        {['products', 'orders', 'reviews', 'settings'].map(tab => (
+          <button 
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            style={{
+              background: activeTab === tab ? 'var(--primary)' : 'transparent',
+              color: activeTab === tab ? 'black' : 'white',
+              border: '1px solid var(--primary)',
+              padding: '8px 20px',
+              borderRadius: '20px',
+              cursor: 'pointer',
+              textTransform: 'capitalize',
+              fontWeight: 'bold',
+              transition: '0.3s',
+              whiteSpace: 'nowrap'
+            }}
+          >
+            {tab}
+          </button>
+        ))}
+      </div>
+
+      {activeTab === 'settings' && (
       <div className="glass-panel" style={{ padding: '30px', marginBottom: '40px' }}>
         <h3>Site Logo Manager</h3>
         <form onSubmit={handleUpdateLogo} style={{ display: 'flex', flexWrap: 'wrap', gap: '15px', marginTop: '15px' }}>
@@ -191,7 +216,10 @@ const AdminDashboard = () => {
           <button type="submit" className="btn-primary" style={{ padding: '10px 20px' }}>Update Logo</button>
         </form>
       </div>
+      )}
 
+      {activeTab === 'products' && (
+      <>
       <div className="glass-panel" style={{ padding: '30px', marginBottom: '40px' }}>
         <h3>{editingProductId ? 'Edit Bundle' : 'Add New Bundle (Google Drive Linked)'}</h3>
         <form onSubmit={handleAddProduct} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px', marginTop: '20px' }}>
@@ -240,8 +268,8 @@ const AdminDashboard = () => {
           </div>
         </form>
       </div>
-
-      <div className="glass-panel" style={{ padding: '30px' }}>
+      
+      <div className="glass-panel" style={{ padding: '30px', marginBottom: '40px' }}>
         <h3>Manage Bundles</h3>
         <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '15px' }}>
           {products.map(p => (
@@ -265,7 +293,10 @@ const AdminDashboard = () => {
           ))}
         </div>
       </div>
+      </>
+      )}
 
+      {activeTab === 'orders' && (
       <div className="glass-panel" style={{ padding: '30px', marginTop: '40px' }}>
         <h3>Manage Customer Orders</h3>
         <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '15px' }}>
@@ -313,6 +344,38 @@ const AdminDashboard = () => {
           )}
         </div>
       </div>
+      )}
+
+      {activeTab === 'reviews' && (
+        <div className="glass-panel" style={{ padding: '30px', marginTop: '40px' }}>
+          <h3>Manage Customer Reviews</h3>
+          <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '15px' }}>
+            {(!reviews || reviews.length === 0) ? (
+              <p style={{ color: 'var(--text-muted)' }}>No reviews yet.</p>
+            ) : (
+              reviews.map(review => (
+                <div key={review.id} style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: '15px', background: 'rgba(255,255,255,0.05)', padding: '20px', borderRadius: '12px' }}>
+                  <div>
+                    <h4 style={{ margin: '0 0 5px 0', color: 'white' }}>{review.name} <span style={{ fontSize: '0.8rem', color: 'var(--primary)' }}>({review.role})</span></h4>
+                    <p style={{ margin: '0 0 10px 0', color: '#ffc107', fontSize: '1.2rem' }}>{'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}</p>
+                    <p style={{ margin: '0 0 5px 0', fontStyle: 'italic', color: 'var(--text-muted)' }}>"{review.text}"</p>
+                    {review.productName && <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--primary)' }}>Purchased: {review.productName}</p>}
+                  </div>
+                  
+                  <div style={{ textAlign: 'right' }}>
+                    <button onClick={() => {
+                      deleteReview(review.id);
+                      addToast("Review deleted.", "success");
+                    }} className="btn-secondary" style={{ padding: '8px 16px', fontSize: '0.9rem', color: '#ff0054', borderColor: '#ff0054' }}>
+                      Delete Review
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      )}
     </section>
   );
 };
