@@ -123,6 +123,16 @@ export const AppContextProvider = ({ children }) => {
     return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
+  const updateUserPassword = (email, newPassword) => {
+    const updatedUsers = users.map(u => u.email === email ? { ...u, password: newPassword } : u);
+    setUsers(updatedUsers);
+    
+    // If the currently logged-in user is updated, update currentUser state as well
+    if (currentUser?.email === email) {
+      setCurrentUser({ ...currentUser, password: newPassword });
+    }
+  };
+
   return (
     <AppContext.Provider value={{ 
       products, setProducts, 
@@ -130,7 +140,8 @@ export const AppContextProvider = ({ children }) => {
       orders, setOrders,
       users, setUsers,
       currentUser, setCurrentUser,
-      toasts, addToast, removeToast
+      toasts, addToast, removeToast,
+      updateUserPassword
     }}>
       {children}
     </AppContext.Provider>

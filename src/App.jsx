@@ -8,6 +8,7 @@ import Bundles from './pages/Bundles';
 import Contact from './pages/Contact';
 import Reviews from './pages/Reviews';
 import MyOrders from './pages/MyOrders';
+import Profile from './pages/Profile';
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
 import Auth from './pages/Auth';
@@ -68,6 +69,7 @@ const AppContent = () => {
           <Route path="/contact" element={<ProtectedRoute><Contact /></ProtectedRoute>} />
           <Route path="/reviews" element={<ProtectedRoute><Reviews /></ProtectedRoute>} />
           <Route path="/my-orders" element={<ProtectedRoute><MyOrders /></ProtectedRoute>} />
+          <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
           <Route path="/admin" element={<AdminLogin />} />
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
         </Routes>
@@ -86,6 +88,7 @@ const AppContent = () => {
             isOpen={!!selectedProduct}
             onClose={() => setSelectedProduct(null)}
             addToCart={addToCart}
+            onProductClick={openProductDetails}
           />
           <footer style={{ textAlign: 'center', padding: '20px', color: 'var(--text-muted)', fontSize: '0.9rem', borderTop: '1px solid var(--glass-border)', marginTop: '40px' }}>
             Developed by : GenZ Neural X & Win Tech

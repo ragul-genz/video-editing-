@@ -1,9 +1,17 @@
-import React, { useState } from 'react';
+import React, { useContext } from 'react';
 import './ProductModal.css';
 import DemoPlayer from './DemoPlayer';
+import { AppContext } from '../context/AppContext';
 
-const ProductModal = ({ product, isOpen, onClose, addToCart }) => {
+const ProductModal = ({ product, isOpen, onClose, addToCart, onProductClick }) => {
+  const { products } = useContext(AppContext);
+  
   if (!isOpen || !product) return null;
+
+  const relatedProducts = products
+    .filter(p => p.id !== product.id)
+    .sort(() => 0.5 - Math.random())
+    .slice(0, 3);
 
   return (
     <>
@@ -63,6 +71,31 @@ const ProductModal = ({ product, isOpen, onClose, addToCart }) => {
               Add Bundle to Cart
             </button>
           </div>
+
+          {relatedProducts.length > 0 && (
+            <div className="related-products-section">
+              <h3 style={{ marginTop: '30px', marginBottom: '15px', fontSize: '1.1rem' }}>You might also like...</h3>
+              <div className="related-grid">
+                {relatedProducts.map(related => (
+                  <div 
+                    key={related.id} 
+                    className="related-card glass-panel"
+                    onClick={() => onProductClick && onProductClick(related)}
+                  >
+                    {related.image ? (
+                      <img src={related.image} alt={related.title} />
+                    ) : (
+                      <div className="related-icon">{related.icon}</div>
+                    )}
+                    <div className="related-info">
+                      <h4>{related.title}</h4>
+                      <p>{related.price}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </>
