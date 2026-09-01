@@ -4,10 +4,12 @@ const productSchema = new mongoose.Schema({
   title: { type: String, required: true },
   description: { type: String, required: true },
   price: { type: String, required: true },
-  image: { type: String, required: true },
+  image: { type: String, default: '' },
   color: { type: String, required: true },
   features: { type: [String], required: true },
   driveLink: { type: String, required: true },
+  previewUrl: { type: String, default: '' },
+  previewVideoUrl: { type: String, default: '' }
 }, { timestamps: true });
 
 // Convert _id to id when sending to frontend

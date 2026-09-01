@@ -105,14 +105,14 @@ const AdminDashboard = () => {
     addToast("Logo updated successfully!", "success");
   };
 
-  const handleAddProduct = (e) => {
+  const handleAddProduct = async (e) => {
     e.preventDefault();
     const productToAdd = {
       id: editingProductId ? editingProductId : Date.now(),
       title: newProduct.title,
       description: newProduct.description,
       price: newProduct.price.includes('₹') ? newProduct.price : `₹${newProduct.price}`,
-      image: newProduct.image, // Don't force a fallback image here so it doesn't overwrite
+      image: newProduct.image,
       color: newProduct.color,
       features: typeof newProduct.features === 'string' ? newProduct.features.split(',').map(f => f.trim()) : newProduct.features,
       driveLink: newProduct.driveLink,
@@ -120,16 +120,19 @@ const AdminDashboard = () => {
       previewVideoUrl: newProduct.previewVideoUrl
     };
     
-    if (editingProductId) {
-      updateProduct(editingProductId, productToAdd);
-      addToast("Product updated successfully!", "success");
-      setEditingProductId(null);
-    } else {
-      addProduct(productToAdd);
-      addToast("Product added successfully!", "success");
+    try {
+      if (editingProductId) {
+        await updateProduct(editingProductId, productToAdd);
+        addToast("Product updated successfully!", "success");
+        setEditingProductId(null);
+      } else {
+        await addProduct(productToAdd);
+        addToast("Product added successfully!", "success");
+      }
+      setNewProduct({ title: '', description: '', price: '', image: '', color: '#007bff', features: '', driveLink: '', previewUrl: '', previewVideoUrl: '' });
+    } catch (error) {
+      addToast("Failed to save product. Check required fields.", "error");
     }
-    
-    setNewProduct({ title: '', description: '', price: '', image: '', color: '#007bff', features: '', driveLink: '', previewUrl: '', previewVideoUrl: '' });
   };
 
   const handleEditProduct = (product) => {

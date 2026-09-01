@@ -147,14 +147,22 @@ export const AppContextProvider = ({ children }) => {
     try {
       const res = await axios.post(`${API_URL}/products`, product);
       setProductsState([...products, res.data]);
-    } catch (err) { console.error(err); }
+      return res.data;
+    } catch (err) { 
+      console.error(err); 
+      throw err;
+    }
   };
 
   const updateProduct = async (id, updatedProduct) => {
     try {
       const res = await axios.put(`${API_URL}/products/${id}`, updatedProduct);
       setProductsState(products.map(p => p.id === id ? res.data : p));
-    } catch (err) { console.error(err); }
+      return res.data;
+    } catch (err) { 
+      console.error(err); 
+      throw err;
+    }
   };
 
   const deleteProduct = async (id) => {
