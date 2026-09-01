@@ -1,11 +1,13 @@
 import React, { useState, useContext } from 'react';
 import { AppContext } from '../context/AppContext';
 import { useNavigate } from 'react-router-dom';
+import Loader from './Loader';
 import './Cart.css';
 
 const Cart = ({ isOpen, onClose, cartItems, cartTotal, clearCart }) => {
   const [checkoutStep, setCheckoutStep] = useState(0);
-  const { orders, setOrders } = useContext(AppContext);
+  const [isLoading, setIsLoading] = useState(false);
+  const { orders, setOrders, currentUser, addToast } = useContext(AppContext);
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -20,36 +22,42 @@ const Cart = ({ isOpen, onClose, cartItems, cartTotal, clearCart }) => {
 
   const handlePaymentSubmit = (e) => {
     e.preventDefault();
-    
-    // Save order to context
-    const newOrder = {
-      id: Date.now().toString().slice(-6),
-      date: new Date().toISOString(),
-      total: `₹${cartTotal.toFixed(2)}`,
-      items: [...cartItems],
-      status: 'Pending',
-      name: formData.name,
-      paymentMethod: formData.paymentMethod,
-      transactionId: formData.transactionId
-    };
-    
-    setOrders([newOrder, ...orders]);
-    
-    // Generate WhatsApp message
-    const itemsList = cartItems.map(i => i.title).join(", ");
-    const message = `Hello! I just made a payment for an order on DS3 Studio.\n\n*Name:* ${formData.name}\n*Payment Method:* ${formData.paymentMethod}\n*Transaction ID:* ${formData.transactionId}\n*Amount:* ₹${cartTotal.toFixed(2)}\n*Items:* ${itemsList}\n\nPlease approve my order so I can download the files!`;
-    
-    const whatsappUrl = `https://wa.me/919611015006?text=${encodeURIComponent(message)}`;
-    
-    // Open WhatsApp in new tab
-    window.open(whatsappUrl, '_blank');
-    
-    // Reset and route
-    clearCart();
-    setCheckoutStep(0);
-    setFormData({ name: '', paymentMethod: 'UPI / GPay', transactionId: '' });
-    onClose();
-    navigate('/my-orders');
+    setIsLoading(true);
+
+    setTimeout(() => {
+      // Save order to context
+      const newOrder = {
+        id: Date.now().toString().slice(-6),
+        date: new Date().toISOString(),
+        total: `₹${cartTotal.toFixed(2)}`,
+        items: [...cartItems],
+        status: 'Pending',
+        name: formData.name,
+        paymentMethod: formData.paymentMethod,
+        transactionId: formData.transactionId,
+        userEmail: currentUser?.email
+      };
+      
+      setOrders([newOrder, ...orders]);
+      addToast("Order placed successfully! Waiting for approval.", "success");
+      
+      // Generate WhatsApp message
+      const itemsList = cartItems.map(i => i.title).join(", ");
+      const message = `Hello! I just made a payment for an order on DS3 Studio.\n\n*Name:* ${formData.name}\n*Email:* ${currentUser?.email}\n*Payment Method:* ${formData.paymentMethod}\n*Transaction ID:* ${formData.transactionId}\n*Amount:* ₹${cartTotal.toFixed(2)}\n*Items:* ${itemsList}\n\nPlease approve my order so I can download the files!`;
+      
+      const whatsappUrl = `https://wa.me/919611015006?text=${encodeURIComponent(message)}`;
+      
+      // Open WhatsApp in new tab
+      window.open(whatsappUrl, '_blank');
+      
+      // Reset and route
+      setIsLoading(false);
+      clearCart();
+      setCheckoutStep(0);
+      setFormData({ name: '', paymentMethod: 'UPI / GPay', transactionId: '' });
+      onClose();
+      navigate('/my-orders');
+    }, 2000);
   };
 
   const resetCart = () => {
@@ -62,6 +70,12 @@ const Cart = ({ isOpen, onClose, cartItems, cartTotal, clearCart }) => {
       <div className={`cart-overlay ${isOpen ? 'open' : ''}`} onClick={resetCart}></div>
       <div className={`cart-panel glass-panel ${isOpen ? 'open' : ''}`}>
         
+        {isLoading && (
+          <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(5,5,5,0.8)', zIndex: 10 }}>
+            <Loader text="Processing Order..." />
+          </div>
+        )}
+
         {checkoutStep === 0 && (
           <>
             <div className="cart-header">
@@ -80,7 +94,13 @@ const Cart = ({ isOpen, onClose, cartItems, cartTotal, clearCart }) => {
               ) : (
                 cartItems.map((item, index) => (
                   <div key={index} className="cart-item">
-                    <div className="cart-item-icon">{item.icon}</div>
+                    <div className="cart-item-icon">
+                      {item.image ? (
+                        <img src={item.image} alt={item.title} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '6px' }} />
+                      ) : (
+                        item.icon
+                      )}
+                    </div>
                     <div className="cart-item-details">
                       <h4>{item.title}</h4>
                       <p>{item.price}</p>

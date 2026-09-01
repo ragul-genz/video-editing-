@@ -7,6 +7,16 @@ const Hero = () => {
   return (
     <section className="hero">
       <div className="hero-background">
+        <video 
+          autoPlay 
+          loop 
+          muted 
+          playsInline
+          className="hero-video-bg"
+        >
+          <source src="https://assets.mixkit.co/videos/preview/mixkit-recording-studio-with-dj-equipment-4148-large.mp4" type="video/mp4" />
+        </video>
+        <div className="video-overlay"></div>
         <div className="glow-orb blue"></div>
         <div className="glow-orb cyan"></div>
       </div>

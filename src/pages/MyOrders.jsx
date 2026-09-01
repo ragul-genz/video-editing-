@@ -2,19 +2,22 @@ import React, { useContext } from 'react';
 import { AppContext } from '../context/AppContext';
 
 const MyOrders = () => {
-  const { orders } = useContext(AppContext);
+  const { orders, currentUser } = useContext(AppContext);
+  
+  const userOrders = orders.filter(order => order.userEmail === currentUser?.email);
 
   return (
     <section style={{ padding: '120px 20px', maxWidth: '1000px', margin: '0 auto', minHeight: '80vh' }}>
-      <h1 className="section-title">My <span className="text-gradient">Orders</span></h1>
+      <h1 className="section-title">My <span className="text-gradient">Account</span></h1>
+      <p style={{ color: 'var(--text-muted)', marginBottom: '30px' }}>Welcome back, {currentUser?.email}</p>
       
-      {orders.length === 0 ? (
+      {userOrders.length === 0 ? (
         <div className="glass-panel" style={{ padding: '40px', textAlign: 'center' }}>
           <h3 style={{ color: 'var(--text-muted)' }}>You have no orders yet.</h3>
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          {orders.map((order, index) => (
+          {userOrders.map((order, index) => (
             <div key={index} className="glass-panel" style={{ padding: '20px', borderRadius: '15px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '15px' }}>
                 <div>

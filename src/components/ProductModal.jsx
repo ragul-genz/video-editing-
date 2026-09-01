@@ -19,7 +19,11 @@ const ProductModal = ({ product, isOpen, onClose, addToCart }) => {
         <div className="modal-body">
           <div className="modal-header-info">
             <div className="modal-icon" style={{ textShadow: `0 0 30px ${product.color}` }}>
-              {product.icon}
+              {product.image ? (
+                <img src={product.image} alt={product.title} style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '8px' }} />
+              ) : (
+                product.icon
+              )}
             </div>
             <div>
               <h2 className="modal-title">{product.title}</h2>

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { AppContext } from '../context/AppContext';
 
 const AdminDashboard = () => {
-  const { products, setProducts, siteSettings, setSiteSettings, orders, setOrders } = useContext(AppContext);
+  const { products, setProducts, siteSettings, setSiteSettings, orders, setOrders, addToast } = useContext(AppContext);
   const navigate = useNavigate();
 
   const [newLogoUrl, setNewLogoUrl] = useState(siteSettings.logoUrl);
@@ -56,7 +56,7 @@ const AdminDashboard = () => {
   const handleUpdateLogo = (e) => {
     e.preventDefault();
     setSiteSettings({ ...siteSettings, logoUrl: newLogoUrl });
-    alert("Logo updated successfully!");
+    addToast("Logo updated successfully!", "success");
   };
 
   const handleAddProduct = (e) => {
@@ -75,11 +75,11 @@ const AdminDashboard = () => {
     
     if (editingProductId) {
       setProducts(products.map(p => p.id === editingProductId ? { ...productToAdd, id: editingProductId } : p));
-      alert("Product updated successfully!");
+      addToast("Product updated successfully!", "success");
       setEditingProductId(null);
     } else {
       setProducts([...products, productToAdd]);
-      alert("Product added successfully!");
+      addToast("Product added successfully!", "success");
     }
     
     setNewProduct({ title: '', description: '', price: '', image: '', color: '#007bff', features: '', driveLink: '', previewUrl: '' });

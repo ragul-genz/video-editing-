@@ -1,9 +1,11 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AppContext } from '../context/AppContext';
+import Loader from '../components/Loader';
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -21,26 +23,35 @@ const Auth = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     setError('');
+    setIsLoading(true);
 
-    if (isLogin) {
-      const user = users.find(u => u.email === email && u.password === password);
-      if (user) {
-        setCurrentUser(user);
-        navigate('/');
+    setTimeout(() => {
+      if (isLogin) {
+        const user = users.find(u => u.email === email && u.password === password);
+        if (user) {
+          setCurrentUser(user);
+          navigate('/');
+        } else {
+          setError('Invalid email or password.');
+          setIsLoading(false);
+        }
       } else {
-        setError('Invalid email or password.');
+        if (users.find(u => u.email === email)) {
+          setError('Email is already registered.');
+          setIsLoading(false);
+        } else {
+          const newUser = { email, password };
+          setUsers([...users, newUser]);
+          setCurrentUser(newUser);
+          navigate('/');
+        }
       }
-    } else {
-      if (users.find(u => u.email === email)) {
-        setError('Email is already registered.');
-      } else {
-        const newUser = { email, password };
-        setUsers([...users, newUser]);
-        setCurrentUser(newUser);
-        navigate('/');
-      }
-    }
+    }, 1500); // Simulate a brief loading state
   };
+
+  if (isLoading) {
+    return <Loader fullScreen={true} text="Authenticating..." />;
+  }
 
   return (
     <section style={{ padding: '100px 20px', minHeight: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

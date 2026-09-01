@@ -56,6 +56,17 @@ const initialProducts = [
 ];
 
 export const AppContextProvider = ({ children }) => {
+  const [toasts, setToasts] = useState([]);
+
+  const addToast = (message, type = 'success') => {
+    const id = Date.now();
+    setToasts((prev) => [...prev, { id, message, type }]);
+  };
+
+  const removeToast = (id) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+  };
+
   const [products, setProducts] = useState(() => {
     const saved = localStorage.getItem('ds3_products');
     return saved ? JSON.parse(saved) : initialProducts;
@@ -101,13 +112,25 @@ export const AppContextProvider = ({ children }) => {
     localStorage.setItem('ds3_currentUser', JSON.stringify(currentUser));
   }, [currentUser]);
 
+  useEffect(() => {
+    const handleStorageChange = (e) => {
+      if (e.key === 'ds3_products' && e.newValue) setProducts(JSON.parse(e.newValue));
+      if (e.key === 'ds3_settings' && e.newValue) setSiteSettings(JSON.parse(e.newValue));
+      if (e.key === 'ds3_orders' && e.newValue) setOrders(JSON.parse(e.newValue));
+      if (e.key === 'ds3_users' && e.newValue) setUsers(JSON.parse(e.newValue));
+    };
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
   return (
     <AppContext.Provider value={{ 
       products, setProducts, 
       siteSettings, setSiteSettings, 
       orders, setOrders,
       users, setUsers,
-      currentUser, setCurrentUser
+      currentUser, setCurrentUser,
+      toasts, addToast, removeToast
     }}>
       {children}
     </AppContext.Provider>

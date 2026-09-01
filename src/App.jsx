@@ -13,6 +13,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import Auth from './pages/Auth';
 import Cart from './components/Cart';
 import ProductModal from './components/ProductModal';
+import { ToastContainer } from './components/Toast';
 import { AppContextProvider, AppContext } from './context/AppContext';
 
 const ProtectedRoute = ({ children }) => {
@@ -21,6 +22,11 @@ const ProtectedRoute = ({ children }) => {
     return <Navigate to="/login" replace />;
   }
   return children;
+};
+
+const ToastWrapper = () => {
+  const { toasts, removeToast } = useContext(AppContext);
+  return <ToastContainer toasts={toasts} removeToast={removeToast} />;
 };
 
 function App() {
@@ -78,6 +84,7 @@ function App() {
             onClose={() => setSelectedProduct(null)}
             addToCart={addToCart}
           />
+          <ToastWrapper />
           <footer style={{ textAlign: 'center', padding: '20px', color: 'var(--text-muted)', fontSize: '0.9rem', borderTop: '1px solid var(--glass-border)', marginTop: '40px' }}>
             Developed by : GenZ Neural X & Win Tech
           </footer>
