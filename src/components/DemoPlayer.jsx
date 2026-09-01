@@ -37,8 +37,8 @@ const DemoPlayer = ({ activeDemo, onClose }) => {
         audioRef.current.load();
       }
 
-      // Try previewUrl first, fallback to driveLink, then fallback to mock audio if both are missing
-      let rawUrl = activeDemo.previewUrl || activeDemo.driveLink;
+      // Try previewUrl first, then fallback to mock audio if missing
+      let rawUrl = activeDemo.previewUrl;
       let audioUrl = getDriveStreamUrl(rawUrl);
       
       // If still no url (e.g. they left both blank on default products), use the mock one
