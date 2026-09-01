@@ -39,25 +39,25 @@ const Cart = ({ isOpen, onClose, cartItems, cartTotal, clearCart }) => {
       };
       
       setOrders([newOrder, ...orders]);
-      addToast("Order placed successfully! Waiting for approval.", "success");
-      
-      // Generate WhatsApp message
-      const itemsList = cartItems.map(i => i.title).join(", ");
-      const message = `Hello! I just made a payment for an order on DS3 Studio.\n\n*Name:* ${formData.name}\n*Email:* ${currentUser?.email}\n*Payment Method:* ${formData.paymentMethod}\n*Transaction ID:* ${formData.transactionId}\n*Amount:* ₹${cartTotal.toFixed(2)}\n*Items:* ${itemsList}\n\nPlease approve my order so I can download the files!`;
-      
-      const whatsappUrl = `https://wa.me/919611015006?text=${encodeURIComponent(message)}`;
-      
-      // Open WhatsApp in new tab
-      window.open(whatsappUrl, '_blank');
-      
-      // Reset and route
       setIsLoading(false);
-      clearCart();
-      setCheckoutStep(0);
-      setFormData({ name: '', paymentMethod: 'UPI / GPay', transactionId: '' });
-      onClose();
-      navigate('/my-orders');
-    }, 2000);
+      setCheckoutStep(2);
+
+      setTimeout(() => {
+        // Generate WhatsApp message
+        const itemsList = cartItems.map(i => i.title).join(", ");
+        const message = `Hello! I just made a payment for an order on DS3 Studio.\n\n*Name:* ${formData.name}\n*Email:* ${currentUser?.email}\n*Payment Method:* ${formData.paymentMethod}\n*Transaction ID:* ${formData.transactionId}\n*Amount:* ₹${cartTotal.toFixed(2)}\n*Items:* ${itemsList}\n\nPlease approve my order so I can download the files!`;
+        
+        const whatsappUrl = `https://wa.me/919611015006?text=${encodeURIComponent(message)}`;
+        window.open(whatsappUrl, '_blank');
+        
+        clearCart();
+        setCheckoutStep(0);
+        setFormData({ name: '', paymentMethod: 'UPI / GPay', transactionId: '' });
+        onClose();
+        navigate('/my-orders');
+      }, 3000);
+      
+    }, 1500);
   };
 
   const resetCart = () => {
@@ -181,6 +181,63 @@ const Cart = ({ isOpen, onClose, cartItems, cartTotal, clearCart }) => {
                 Submit & WhatsApp Owner
               </button>
             </form>
+          </div>
+        )}
+
+        {checkoutStep === 2 && (
+          <div style={{
+            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', padding: '20px', textAlign: 'center'
+          }}>
+            <svg className="success-checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+              <circle className="success-checkmark__circle" cx="26" cy="26" r="25" fill="none"/>
+              <path className="success-checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+            </svg>
+            <h2 style={{ marginTop: '20px', color: 'var(--primary)', animation: 'fadeInUp 0.5s ease-out forwards', opacity: 0 }}>Payment Successful!</h2>
+            <p style={{ marginTop: '10px', color: 'var(--text-muted)', animation: 'fadeInUp 0.5s ease-out 0.2s forwards', opacity: 0 }}>
+              Redirecting to WhatsApp and your Orders...
+            </p>
+            <style>{`
+              .success-checkmark {
+                width: 80px;
+                height: 80px;
+                border-radius: 50%;
+                display: block;
+                stroke-width: 4;
+                stroke: #27c93f;
+                stroke-miterlimit: 10;
+                box-shadow: inset 0px 0px 0px #27c93f;
+                animation: fill .4s ease-in-out .4s forwards, scale .3s ease-in-out .9s both;
+              }
+              .success-checkmark__circle {
+                stroke-dasharray: 166;
+                stroke-dashoffset: 166;
+                stroke-width: 4;
+                stroke-miterlimit: 10;
+                stroke: #27c93f;
+                fill: none;
+                animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+              }
+              .success-checkmark__check {
+                transform-origin: 50% 50%;
+                stroke-dasharray: 48;
+                stroke-dashoffset: 48;
+                animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.6s forwards;
+              }
+              @keyframes stroke {
+                100% { stroke-dashoffset: 0; }
+              }
+              @keyframes scale {
+                0%, 100% { transform: none; }
+                50% { transform: scale3d(1.1, 1.1, 1); }
+              }
+              @keyframes fill {
+                100% { box-shadow: inset 0px 0px 0px 30px rgba(39, 201, 63, 0.1); }
+              }
+              @keyframes fadeInUp {
+                from { opacity: 0; transform: translateY(20px); }
+                to { opacity: 1; transform: translateY(0); }
+              }
+            `}</style>
           </div>
         )}
 

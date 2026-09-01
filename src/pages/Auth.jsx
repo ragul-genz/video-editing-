@@ -9,8 +9,9 @@ const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [isAnimating, setIsAnimating] = useState(false);
   
-  const { users, setUsers, currentUser, setCurrentUser } = useContext(AppContext);
+  const { users, setUsers, currentUser, setCurrentUser, addToast } = useContext(AppContext);
   const navigate = useNavigate();
 
   // If already logged in, redirect to home
@@ -23,19 +24,27 @@ const Auth = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     setError('');
-    setIsLoading(true);
-
-    setTimeout(() => {
-      if (isLogin) {
+    
+    if (isLogin) {
+      if(email === 'admin@ds3studio.in') {
+        addToast('Please use Admin Login page.', 'error');
+        return;
+      }
+      setIsAnimating(true);
+      setTimeout(() => {
         const user = users.find(u => u.email === email && u.password === password);
         if (user) {
           setCurrentUser(user);
+          addToast('Logged in successfully!', 'success');
           navigate('/');
         } else {
+          setIsAnimating(false);
           setError('Invalid email or password.');
-          setIsLoading(false);
         }
-      } else {
+      }, 2000);
+    } else {
+      setIsLoading(true);
+      setTimeout(() => {
         if (users.find(u => u.email === email)) {
           setError('Email is already registered.');
           setIsLoading(false);
@@ -45,8 +54,8 @@ const Auth = () => {
           setCurrentUser(newUser);
           navigate('/');
         }
-      }
-    }, 1500); // Simulate a brief loading state
+      }, 1500);
+    }
   };
 
   if (isLoading) {
@@ -109,6 +118,46 @@ const Auth = () => {
           </span>
         </div>
       </div>
+
+      {isAnimating && (
+        <div style={{
+          position: 'fixed',
+          top: 0, left: 0, right: 0, bottom: 0,
+          background: 'var(--bg-dark)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 9999,
+          animation: 'fadeIn 0.3s ease-out'
+        }}>
+          <h1 className="text-gradient" style={{ 
+            fontSize: '3rem', 
+            animation: 'slideUpFade 1s ease-out forwards',
+            opacity: 0,
+            transform: 'translateY(20px)'
+          }}>
+            Welcome Back!
+          </h1>
+          <div style={{
+            marginTop: '20px',
+            width: '50px',
+            height: '50px',
+            border: '3px solid rgba(255,255,255,0.1)',
+            borderTopColor: 'var(--primary)',
+            borderRadius: '50%',
+            animation: 'spin 1s linear infinite'
+          }}></div>
+          <style>{`
+            @keyframes slideUpFade {
+              to { opacity: 1; transform: translateY(0); }
+            }
+            @keyframes spin {
+              to { transform: rotate(360deg); }
+            }
+          `}</style>
+        </div>
+      )}
     </section>
   );
 };
