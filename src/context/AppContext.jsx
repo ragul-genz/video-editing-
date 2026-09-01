@@ -1,10 +1,12 @@
 import React, { createContext, useState, useEffect } from 'react';
+import axios from 'axios';
 
 export const AppContext = createContext();
 
+const API_URL = 'http://localhost:5000/api';
+
 const initialProducts = [
   {
-    id: 1,
     title: "FL Studio Master Template",
     description: "Industry-standard mixing & mastering template for FL Studio 21+.",
     price: "₹29.99",
@@ -14,7 +16,6 @@ const initialProducts = [
     driveLink: "https://drive.google.com/drive/folders/placeholder_1"
   },
   {
-    id: 2,
     title: "Logic Pro Vocal Chain",
     description: "Get pristine vocals instantly with our premium Logic Pro X channel strips.",
     price: "₹34.99",
@@ -24,7 +25,6 @@ const initialProducts = [
     driveLink: "https://drive.google.com/drive/folders/placeholder_2"
   },
   {
-    id: 3,
     title: "Ableton Live Synth Presets",
     description: "100+ Serum & Vital presets tailored for Ableton Live 11+.",
     price: "₹24.99",
@@ -34,7 +34,6 @@ const initialProducts = [
     driveLink: "https://drive.google.com/drive/folders/placeholder_3"
   },
   {
-    id: 4,
     title: "Cubase Orchestral Template",
     description: "Massive orchestral routing template for Cubase Pro.",
     price: "₹49.99",
@@ -44,7 +43,6 @@ const initialProducts = [
     driveLink: "https://drive.google.com/drive/folders/placeholder_4"
   },
   {
-    id: 5,
     title: "Studio One Mixing Preset",
     description: "Pro mixing console presets designed for Studio One 6.",
     price: "₹29.99",
@@ -56,14 +54,84 @@ const initialProducts = [
 ];
 
 const initialReviews = [
-  { id: 1, name: "Alex Mercer", role: "Music Producer", rating: 5, text: "The Logic Pro vocal chain is absolutely insane. Cut my mixing time in half and the vocals sit perfectly in the mix." },
-  { id: 2, name: "Sarah J.", role: "Beatmaker", rating: 5, text: "FL Studio Master Template is a game changer. The routing is incredibly clean and intuitive." },
-  { id: 3, name: "DJ Kael", role: "Electronic Artist", rating: 5, text: "Those Ableton Live synth presets are huge. Immediate inspiration right out of the box." },
-  { id: 4, name: "Michael R.", role: "Composer", rating: 5, text: "The Cubase orchestral template handles 100+ tracks flawlessly. Expression mapping is on point." },
+  { name: "Alex Mercer", role: "Music Producer", rating: 5, text: "The Logic Pro vocal chain is absolutely insane. Cut my mixing time in half and the vocals sit perfectly in the mix." },
+  { name: "Sarah J.", role: "Beatmaker", rating: 5, text: "FL Studio Master Template is a game changer. The routing is incredibly clean and intuitive." },
+  { name: "DJ Kael", role: "Electronic Artist", rating: 5, text: "Those Ableton Live synth presets are huge. Immediate inspiration right out of the box." },
+  { name: "Michael R.", role: "Composer", rating: 5, text: "The Cubase orchestral template handles 100+ tracks flawlessly. Expression mapping is on point." },
 ];
 
 export const AppContextProvider = ({ children }) => {
   const [toasts, setToasts] = useState([]);
+  
+  const [products, setProductsState] = useState([]);
+  const [siteSettings, setSiteSettingsState] = useState({ logoUrl: '/ds3_logo.jpg' });
+  const [orders, setOrdersState] = useState([]);
+  const [users, setUsersState] = useState([]);
+  const [currentUser, setCurrentUser] = useState(() => {
+    const saved = localStorage.getItem('ds3_currentUser');
+    return saved ? JSON.parse(saved) : null;
+  });
+  const [reviews, setReviewsState] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Helper to fetch data
+  const fetchData = async () => {
+    try {
+      const [prodRes, revRes, userRes, ordRes, setRes] = await Promise.all([
+        axios.get(`${API_URL}/products`),
+        axios.get(`${API_URL}/reviews`),
+        axios.get(`${API_URL}/users`),
+        axios.get(`${API_URL}/orders`),
+        axios.get(`${API_URL}/settings`)
+      ]);
+
+      // Seed initial data if DB is empty
+      if (prodRes.data.length === 0) {
+        for (const p of initialProducts) {
+          await axios.post(`${API_URL}/products`, p);
+        }
+        const newProds = await axios.get(`${API_URL}/products`);
+        setProductsState(newProds.data);
+      } else {
+        setProductsState(prodRes.data);
+      }
+
+      if (revRes.data.length === 0) {
+        for (const r of initialReviews) {
+          await axios.post(`${API_URL}/reviews`, r);
+        }
+        const newRevs = await axios.get(`${API_URL}/reviews`);
+        setReviewsState(newRevs.data);
+      } else {
+        setReviewsState(revRes.data);
+      }
+
+      if (userRes.data.length === 0) {
+        const defaultUser = { email: 'genzdevoff@gmail.com', password: 'password123' };
+        await axios.post(`${API_URL}/users`, defaultUser);
+        setUsersState([defaultUser]);
+      } else {
+        setUsersState(userRes.data);
+      }
+
+      setOrdersState(ordRes.data);
+      setSiteSettingsState(setRes.data || { logoUrl: '/ds3_logo.jpg' });
+      
+    } catch (err) {
+      console.error("Failed to fetch data from backend:", err);
+      addToast("Failed to connect to database.", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('ds3_currentUser', JSON.stringify(currentUser));
+  }, [currentUser]);
 
   const addToast = (message, type = 'success') => {
     const id = Date.now();
@@ -74,101 +142,89 @@ export const AppContextProvider = ({ children }) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   };
 
-  const [products, setProducts] = useState(() => {
-    const saved = localStorage.getItem('ds3_products');
-    return saved ? JSON.parse(saved) : initialProducts;
-  });
+  // Wrapper functions for updating state AND backend
+  const addProduct = async (product) => {
+    try {
+      const res = await axios.post(`${API_URL}/products`, product);
+      setProductsState([...products, res.data]);
+    } catch (err) { console.error(err); }
+  };
 
-  const [siteSettings, setSiteSettings] = useState(() => {
-    const saved = localStorage.getItem('ds3_settings');
-    return saved ? JSON.parse(saved) : { logoUrl: '/ds3_logo.jpg' };
-  });
+  const updateProduct = async (id, updatedProduct) => {
+    try {
+      const res = await axios.put(`${API_URL}/products/${id}`, updatedProduct);
+      setProductsState(products.map(p => p.id === id ? res.data : p));
+    } catch (err) { console.error(err); }
+  };
 
-  const [orders, setOrders] = useState(() => {
-    const saved = localStorage.getItem('ds3_orders');
-    return saved ? JSON.parse(saved) : [];
-  });
+  const deleteProduct = async (id) => {
+    try {
+      await axios.delete(`${API_URL}/products/${id}`);
+      setProductsState(products.filter(p => p.id !== id));
+    } catch (err) { console.error(err); }
+  };
 
-  const [users, setUsers] = useState(() => {
-    const saved = localStorage.getItem('ds3_users');
-    return saved ? JSON.parse(saved) : [{ email: 'genzdevoff@gmail.com', password: 'password123' }];
-  });
-
-  const [currentUser, setCurrentUser] = useState(() => {
-    const saved = localStorage.getItem('ds3_currentUser');
-    return saved ? JSON.parse(saved) : null;
-  });
-
-  const [reviews, setReviews] = useState(() => {
-    const saved = localStorage.getItem('ds3_reviews');
-    return saved ? JSON.parse(saved) : initialReviews;
-  });
-
-  useEffect(() => {
-    localStorage.setItem('ds3_products', JSON.stringify(products));
-  }, [products]);
-
-  useEffect(() => {
-    localStorage.setItem('ds3_settings', JSON.stringify(siteSettings));
-  }, [siteSettings]);
-
-  useEffect(() => {
-    localStorage.setItem('ds3_orders', JSON.stringify(orders));
-  }, [orders]);
-
-  useEffect(() => {
-    localStorage.setItem('ds3_users', JSON.stringify(users));
-  }, [users]);
-
-  useEffect(() => {
-    localStorage.setItem('ds3_currentUser', JSON.stringify(currentUser));
-  }, [currentUser]);
-
-  useEffect(() => {
-    localStorage.setItem('ds3_reviews', JSON.stringify(reviews));
-  }, [reviews]);
-
-  useEffect(() => {
-    const handleStorageChange = (e) => {
-      if (e.key === 'ds3_products') setProducts(JSON.parse(e.newValue || '[]'));
-      if (e.key === 'ds3_settings') setSiteSettings(JSON.parse(e.newValue || '{}'));
-      if (e.key === 'ds3_orders') setOrders(JSON.parse(e.newValue || '[]'));
-      if (e.key === 'ds3_users') setUsers(JSON.parse(e.newValue || '[]'));
-      if (e.key === 'ds3_currentUser') setCurrentUser(JSON.parse(e.newValue || 'null'));
-      if (e.key === 'ds3_reviews') setReviews(JSON.parse(e.newValue || '[]'));
-    };
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
-  }, []);
-
-  const updateUserPassword = (email, newPassword) => {
-    const updatedUsers = users.map(u => u.email === email ? { ...u, password: newPassword } : u);
-    setUsers(updatedUsers);
-    
-    // If the currently logged-in user is updated, update currentUser state as well
-    if (currentUser?.email === email) {
-      setCurrentUser({ ...currentUser, password: newPassword });
+  const setSiteSettings = async (newSettings) => {
+    try {
+      const res = await axios.put(`${API_URL}/settings`, newSettings);
+      setSiteSettingsState(res.data);
+    } catch (err) {
+      console.error(err);
     }
   };
 
-  const addReview = (review) => {
-    setReviews([review, ...reviews]);
+  const setOrders = async (newOrders) => {
+    setOrdersState(newOrders);
   };
 
-  const deleteReview = (id) => {
-    setReviews(reviews.filter(r => r.id !== id));
+  const setUsers = (newUsers) => {
+    setUsersState(newUsers);
   };
 
+  const updateUserPassword = async (email, newPassword) => {
+    try {
+      await axios.put(`${API_URL}/users/${email}`, { password: newPassword });
+      setUsersState(users.map(u => u.email === email ? { ...u, password: newPassword } : u));
+      if (currentUser?.email === email) {
+        setCurrentUser({ ...currentUser, password: newPassword });
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const addReview = async (review) => {
+    try {
+      const res = await axios.post(`${API_URL}/reviews`, review);
+      setReviewsState([res.data, ...reviews]);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const deleteReview = async (id) => {
+    try {
+      await axios.delete(`${API_URL}/reviews/${id}`);
+      setReviewsState(reviews.filter(r => r.id !== id));
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // Since components might be calling setProducts with a new array for edits, 
+  // we expose API helper functions for components to use if needed, or we just rely on useEffect in components.
+  // We will expose the raw states and wrappers.
   return (
     <AppContext.Provider value={{ 
-      products, setProducts, 
+      products, addProduct, updateProduct, deleteProduct, setProductsState,
       siteSettings, setSiteSettings, 
       orders, setOrders,
       users, setUsers,
       currentUser, setCurrentUser,
       reviews, addReview, deleteReview,
       toasts, addToast, removeToast,
-      updateUserPassword
+      updateUserPassword,
+      loading, API_URL
     }}>
       {children}
     </AppContext.Provider>

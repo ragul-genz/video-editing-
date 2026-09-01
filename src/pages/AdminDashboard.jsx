@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { AppContext } from '../context/AppContext';
 
 const AdminDashboard = () => {
-  const { products, setProducts, siteSettings, setSiteSettings, orders, setOrders, reviews, deleteReview, addToast } = useContext(AppContext);
+  const { products, addProduct, updateProduct, deleteProduct, siteSettings, setSiteSettings, orders, setOrders, reviews, deleteReview, addToast } = useContext(AppContext);
   const navigate = useNavigate();
 
   const [activeTab, setActiveTab] = useState('products');
@@ -121,11 +121,11 @@ const AdminDashboard = () => {
     };
     
     if (editingProductId) {
-      setProducts(products.map(p => p.id === editingProductId ? { ...productToAdd, id: editingProductId } : p));
+      updateProduct(editingProductId, productToAdd);
       addToast("Product updated successfully!", "success");
       setEditingProductId(null);
     } else {
-      setProducts([...products, productToAdd]);
+      addProduct(productToAdd);
       addToast("Product added successfully!", "success");
     }
     
@@ -148,7 +148,7 @@ const AdminDashboard = () => {
   };
 
   const handleDeleteProduct = (id) => {
-    setProducts(products.filter(p => p.id !== id));
+    deleteProduct(id);
   };
 
   const handleLogout = () => {
