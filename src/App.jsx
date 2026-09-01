@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useContext } from 'react';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
@@ -29,11 +29,14 @@ const ToastWrapper = () => {
   return <ToastContainer toasts={toasts} removeToast={removeToast} />;
 };
 
-function App() {
+const AppContent = () => {
   const [cartItems, setCartItems] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [activeDemo, setActiveDemo] = useState(null);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const location = useLocation();
+
+  const isAdminRoute = location.pathname.startsWith('/admin');
 
   const addToCart = (product) => {
     setCartItems([...cartItems, product]);
@@ -54,23 +57,23 @@ function App() {
   }, 0);
 
   return (
-    <AppContextProvider>
-      <Router>
-        <div className="app">
-          <Navbar cartCount={cartItems.length} onCartClick={() => setIsCartOpen(true)} />
-          <main>
-            <Routes>
-              <Route path="/login" element={<Auth />} />
-              <Route path="/" element={<ProtectedRoute><Home addToCart={addToCart} onPreview={previewProduct} onProductClick={openProductDetails} activeDemo={activeDemo} onCloseDemo={() => setActiveDemo(null)} /></ProtectedRoute>} />
-              <Route path="/about" element={<ProtectedRoute><About /></ProtectedRoute>} />
-              <Route path="/bundles" element={<ProtectedRoute><Bundles addToCart={addToCart} onPreview={previewProduct} onProductClick={openProductDetails} activeDemo={activeDemo} onCloseDemo={() => setActiveDemo(null)} /></ProtectedRoute>} />
-              <Route path="/contact" element={<ProtectedRoute><Contact /></ProtectedRoute>} />
-              <Route path="/reviews" element={<ProtectedRoute><Reviews /></ProtectedRoute>} />
-              <Route path="/my-orders" element={<ProtectedRoute><MyOrders /></ProtectedRoute>} />
-              <Route path="/admin" element={<AdminLogin />} />
-              <Route path="/admin/dashboard" element={<AdminDashboard />} />
-            </Routes>
-          </main>
+    <div className="app">
+      {!isAdminRoute && <Navbar cartCount={cartItems.length} onCartClick={() => setIsCartOpen(true)} />}
+      <main>
+        <Routes>
+          <Route path="/login" element={<Auth />} />
+          <Route path="/" element={<ProtectedRoute><Home addToCart={addToCart} onPreview={previewProduct} onProductClick={openProductDetails} activeDemo={activeDemo} onCloseDemo={() => setActiveDemo(null)} /></ProtectedRoute>} />
+          <Route path="/about" element={<ProtectedRoute><About /></ProtectedRoute>} />
+          <Route path="/bundles" element={<ProtectedRoute><Bundles addToCart={addToCart} onPreview={previewProduct} onProductClick={openProductDetails} activeDemo={activeDemo} onCloseDemo={() => setActiveDemo(null)} /></ProtectedRoute>} />
+          <Route path="/contact" element={<ProtectedRoute><Contact /></ProtectedRoute>} />
+          <Route path="/reviews" element={<ProtectedRoute><Reviews /></ProtectedRoute>} />
+          <Route path="/my-orders" element={<ProtectedRoute><MyOrders /></ProtectedRoute>} />
+          <Route path="/admin" element={<AdminLogin />} />
+          <Route path="/admin/dashboard" element={<AdminDashboard />} />
+        </Routes>
+      </main>
+      {!isAdminRoute && (
+        <>
           <Cart 
             isOpen={isCartOpen} 
             onClose={() => setIsCartOpen(false)} 
@@ -84,11 +87,21 @@ function App() {
             onClose={() => setSelectedProduct(null)}
             addToCart={addToCart}
           />
-          <ToastWrapper />
           <footer style={{ textAlign: 'center', padding: '20px', color: 'var(--text-muted)', fontSize: '0.9rem', borderTop: '1px solid var(--glass-border)', marginTop: '40px' }}>
             Developed by : GenZ Neural X & Win Tech
           </footer>
-        </div>
+        </>
+      )}
+      <ToastWrapper />
+    </div>
+  );
+};
+
+function App() {
+  return (
+    <AppContextProvider>
+      <Router>
+        <AppContent />
       </Router>
     </AppContextProvider>
   );
