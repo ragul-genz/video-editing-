@@ -1,7 +1,11 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const dns = require('dns');
 require('dotenv').config();
+
+// Override default DNS to avoid 'querySrv ECONNREFUSED' issues
+dns.setServers(['8.8.8.8', '1.1.1.1']);
 
 // Models
 const Product = require('./models/Product');
