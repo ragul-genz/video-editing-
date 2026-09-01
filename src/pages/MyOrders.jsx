@@ -3,7 +3,7 @@ import { AppContext } from '../context/AppContext';
 
 
 const MyOrders = () => {
-  const { orders, currentUser, addReview, addToast } = useContext(AppContext);
+  const { orders, currentUser, addReview, addToast, reviews } = useContext(AppContext);
   const [reviewModalOpen, setReviewModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [rating, setRating] = useState(5);
@@ -32,7 +32,7 @@ const MyOrders = () => {
       rating,
       text: reviewText,
       productId: selectedProduct.id,
-      productName: selectedProduct.title
+      userEmail: currentUser?.email
     };
 
     addReview(newReview);
@@ -83,19 +83,25 @@ const MyOrders = () => {
                   {order.status === 'Approved' ? (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                       <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>Your downloads are ready:</p>
-                      {order.items.map((item, i) => (
-                        <div key={i} style={{ display: 'flex', gap: '10px', flexDirection: 'column' }}>
-                          <a href={item.driveLink || 'https://drive.google.com'} target="_blank" rel="noopener noreferrer" className="btn-primary" style={{ display: 'inline-block', padding: '10px 16px', fontSize: '0.9rem', textAlign: 'center', textDecoration: 'none' }}>
-                            Download {item.title}
-                          </a>
-                          <button 
-                            onClick={() => openReviewModal(item)}
-                            style={{ background: 'transparent', border: '1px solid var(--primary)', color: 'var(--primary)', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', transition: '0.3s' }}
-                          >
-                            ⭐ Write a Review
-                          </button>
-                        </div>
-                      ))}
+                      {order.items.map((item, i) => {
+                        const hasReviewed = reviews.some(r => r.productId === item.id && r.userEmail === currentUser?.email);
+                        return (
+                          <div key={i} style={{ display: 'flex', gap: '10px', flexDirection: 'column' }}>
+                            {hasReviewed ? (
+                              <a href={item.driveLink || 'https://drive.google.com'} target="_blank" rel="noopener noreferrer" className="btn-primary" style={{ display: 'inline-block', padding: '10px 16px', fontSize: '0.9rem', textAlign: 'center', textDecoration: 'none' }}>
+                                Download {item.title}
+                              </a>
+                            ) : (
+                              <button 
+                                onClick={() => openReviewModal(item)}
+                                style={{ background: 'transparent', border: '1px solid var(--primary)', color: 'var(--primary)', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', transition: '0.3s' }}
+                              >
+                                ⭐ Write a Review to Unlock Download
+                              </button>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
                   ) : (
                     <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', maxWidth: '200px' }}>
