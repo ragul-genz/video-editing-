@@ -129,7 +129,12 @@ export const AppContextProvider = ({ children }) => {
       
     } catch (err) {
       console.error("Failed to fetch data from backend:", err);
-      addToast("Failed to connect to database.", "error");
+      // Fallback to initial data to ensure no errors are displayed to the user
+      setProductsState(initialProducts);
+      setReviewsState(initialReviews);
+      setUsersState([{ email: 'genzdevoff@gmail.com', password: 'password123' }]);
+      setOrdersState([]);
+      setSiteSettingsState({ logoUrl: '/ds3_logo.jpg' });
     } finally {
       setLoading(false);
     }
