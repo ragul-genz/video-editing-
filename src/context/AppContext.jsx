@@ -196,7 +196,7 @@ export const AppContextProvider = ({ children }) => {
   const addProduct = async (product) => {
     try {
       const res = await axios.post(`${API_URL}/products`, product);
-      setProductsState([...products, res.data]);
+      setProductsState(prev => [...prev, res.data]);
       return res.data;
     } catch (err) { 
       console.error(err); 
@@ -206,8 +206,12 @@ export const AppContextProvider = ({ children }) => {
 
   const updateProduct = async (id, updatedProduct) => {
     try {
+      if (String(id).startsWith('fallback-')) {
+        setProductsState(prev => prev.map(p => p.id === id ? { ...updatedProduct, id } : p));
+        return { ...updatedProduct, id };
+      }
       const res = await axios.put(`${API_URL}/products/${id}`, updatedProduct);
-      setProductsState(products.map(p => p.id === id ? res.data : p));
+      setProductsState(prev => prev.map(p => p.id === id ? res.data : p));
       return res.data;
     } catch (err) { 
       console.error(err); 
@@ -245,7 +249,7 @@ export const AppContextProvider = ({ children }) => {
   const addOrder = async (order) => {
     try {
       const res = await axios.post(`${API_URL}/orders`, order);
-      setOrdersState([res.data, ...orders]);
+      setOrdersState(prev => [res.data, ...prev]);
       return res.data;
     } catch (err) {
       console.error(err);
@@ -256,7 +260,7 @@ export const AppContextProvider = ({ children }) => {
   const updateOrder = async (id, updatedFields) => {
     try {
       const res = await axios.put(`${API_URL}/orders/${id}`, updatedFields);
-      setOrdersState(orders.map(o => o.id === id ? res.data : o));
+      setOrdersState(prev => prev.map(o => o.id === id ? res.data : o));
       return res.data;
     } catch (err) {
       console.error(err);
@@ -271,7 +275,7 @@ export const AppContextProvider = ({ children }) => {
   const updateUserPassword = async (email, newPassword) => {
     try {
       await axios.put(`${API_URL}/users/${email}`, { password: newPassword });
-      setUsersState(users.map(u => u.email === email ? { ...u, password: newPassword } : u));
+      setUsersState(prev => prev.map(u => u.email === email ? { ...u, password: newPassword } : u));
       if (currentUser?.email === email) {
         setCurrentUser({ ...currentUser, password: newPassword });
       }
@@ -283,7 +287,7 @@ export const AppContextProvider = ({ children }) => {
   const addReview = async (review) => {
     try {
       const res = await axios.post(`${API_URL}/reviews`, review);
-      setReviewsState([res.data, ...reviews]);
+      setReviewsState(prev => [res.data, ...prev]);
     } catch (err) {
       console.error(err);
     }
@@ -291,10 +295,14 @@ export const AppContextProvider = ({ children }) => {
 
   const deleteReview = async (id) => {
     try {
-      await axios.delete(`${API_URL}/reviews/${id}`);
-      setReviewsState(reviews.filter(r => r.id !== id));
+      if (!String(id).startsWith('fallback-')) {
+        await axios.delete(`${API_URL}/reviews/${id}`);
+      }
+      setReviewsState(prev => prev.filter(r => r.id !== id));
+      addToast("Review deleted successfully", "success");
     } catch (err) {
       console.error(err);
+      addToast("Failed to delete review", "error");
     }
   };
 
