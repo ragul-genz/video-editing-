@@ -179,6 +179,7 @@
 
 .payment-form {
   padding: 20px;
+  padding-bottom: 60px; /* Extra padding to avoid mobile nav bar */
   display: flex;
   flex-direction: column;
   gap: 15px;
