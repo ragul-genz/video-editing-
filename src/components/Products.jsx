@@ -1,5 +1,6 @@
 import React, { useContext, useState } from 'react';
 import { AppContext } from '../context/AppContext';
+import { Heart } from 'lucide-react';
 import './Products.css';
 
 const Products = ({ addToCart, onPreview, onProductClick }) => {
@@ -67,7 +68,7 @@ const Products = ({ addToCart, onPreview, onProductClick }) => {
                   transition: 'all 0.3s ease'
                 }}
               >
-                {wishlist.find(w => w.id === product.id) ? '❤️' : '🤍'}
+                {wishlist.find(w => w.id === product.id) ? <Heart size={20} fill="currentColor" /> : <Heart size={20} />}
               </button>
             </div>
             <h3 className="product-title">{product.title}</h3>

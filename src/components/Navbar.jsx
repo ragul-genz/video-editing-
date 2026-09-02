@@ -1,6 +1,7 @@
 import React, { useContext, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AppContext } from '../context/AppContext';
+import { Sun, Moon, Heart } from 'lucide-react';
 import './Navbar.css';
 
 const Navbar = ({ cartCount = 0, onCartClick }) => {
@@ -43,14 +44,14 @@ const Navbar = ({ cartCount = 0, onCartClick }) => {
 
               <button 
                 onClick={toggleTheme} 
-                style={{ background: 'transparent', border: 'none', color: 'var(--text)', fontSize: '1.2rem', cursor: 'pointer', padding: '5px' }}
+                style={{ background: 'transparent', border: 'none', color: 'var(--text)', fontSize: '1.2rem', cursor: 'pointer', padding: '5px', display: 'flex', alignItems: 'center' }}
                 title="Toggle Theme"
               >
-                {theme === 'dark' ? '☀️' : '🌙'}
+                {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
               </button>
 
               <Link to="/wishlist" onClick={closeMenu} style={{ position: 'relative', display: 'flex', alignItems: 'center', textDecoration: 'none', padding: '5px', color: 'var(--text)' }}>
-                <span style={{ fontSize: '1.2rem' }}>❤️</span>
+                <Heart size={20} fill="currentColor" style={{ color: '#ff4757' }} />
                 {wishlist.length > 0 && <span className="cart-badge">{wishlist.length}</span>}
               </Link>
 

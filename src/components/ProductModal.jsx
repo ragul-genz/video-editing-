@@ -2,6 +2,7 @@ import React, { useContext, useState } from 'react';
 import './ProductModal.css';
 import DemoPlayer from './DemoPlayer';
 import { AppContext } from '../context/AppContext';
+import { Heart } from 'lucide-react';
 
 const ProductModal = ({ product, isOpen, onClose, addToCart, onProductClick }) => {
   const { products, wishlist, addToWishlist, removeFromWishlist } = useContext(AppContext);
@@ -145,7 +146,7 @@ const ProductModal = ({ product, isOpen, onClose, addToCart, onProductClick }) =
                 inWishlist ? removeFromWishlist(product.id) : addToWishlist(product);
               }}
             >
-              {wishlist.find(w => w.id === product.id) ? '❤️ Saved' : '🤍 Save'}
+              {wishlist.find(w => w.id === product.id) ? <><Heart size={16} fill="currentColor" /> Saved</> : <><Heart size={16} /> Save</>}
             </button>
           </div>
 
