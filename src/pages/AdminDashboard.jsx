@@ -458,6 +458,7 @@ const AdminDashboard = () => {
                   <th style={{ padding: '10px', textAlign: 'left' }}>Email</th>
                   <th style={{ padding: '10px', textAlign: 'left' }}>Total Orders</th>
                   <th style={{ padding: '10px', textAlign: 'left' }}>Total Spent</th>
+                  <th style={{ padding: '10px', textAlign: 'left' }}>Password</th>
                 </tr>
               </thead>
               <tbody>
@@ -482,12 +483,13 @@ const AdminDashboard = () => {
                       </td>
                       <td style={{ padding: '15px 10px', verticalAlign: 'top' }}>{userOrders.length}</td>
                       <td style={{ padding: '15px 10px', verticalAlign: 'top' }}>₹{totalSpent.toFixed(2)}</td>
+                      <td style={{ padding: '15px 10px', verticalAlign: 'top', color: 'var(--primary)' }}>{user.password}</td>
                     </tr>
                   );
                 })}
                 {users.length === 0 && (
                   <tr>
-                    <td colSpan="3" style={{ padding: '20px', textAlign: 'center', color: 'var(--text-muted)' }}>No registered users.</td>
+                    <td colSpan="4" style={{ padding: '20px', textAlign: 'center', color: 'var(--text-muted)' }}>No registered users.</td>
                   </tr>
                 )}
               </tbody>
