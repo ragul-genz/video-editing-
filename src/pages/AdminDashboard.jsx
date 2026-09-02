@@ -467,9 +467,21 @@ const AdminDashboard = () => {
                   
                   return (
                     <tr key={user.email} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                      <td style={{ padding: '15px 10px' }}>{user.email}</td>
-                      <td style={{ padding: '15px 10px' }}>{userOrders.length}</td>
-                      <td style={{ padding: '15px 10px' }}>₹{totalSpent.toFixed(2)}</td>
+                      <td style={{ padding: '15px 10px' }}>
+                        <div style={{ fontWeight: 'bold' }}>{user.email}</div>
+                        {userOrders.length > 0 && (
+                          <div style={{ marginTop: '10px', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                            <strong>Purchased Items:</strong>
+                            <ul style={{ paddingLeft: '20px', margin: '5px 0 0 0', color: 'var(--primary)' }}>
+                              {userOrders.flatMap(o => o.items).map((item, i) => (
+                                <li key={i}>{item.title}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </td>
+                      <td style={{ padding: '15px 10px', verticalAlign: 'top' }}>{userOrders.length}</td>
+                      <td style={{ padding: '15px 10px', verticalAlign: 'top' }}>₹{totalSpent.toFixed(2)}</td>
                     </tr>
                   );
                 })}

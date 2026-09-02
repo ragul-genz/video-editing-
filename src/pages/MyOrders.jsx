@@ -42,7 +42,7 @@ const MyOrders = () => {
 
   return (
     <section style={{ padding: '120px 20px', maxWidth: '1000px', margin: '0 auto', minHeight: '80vh' }}>
-      <h1 className="section-title">My <span className="text-gradient">Account</span></h1>
+      <h1 className="section-title">Purchase <span className="text-gradient">History</span></h1>
       <p style={{ color: 'var(--text-muted)', marginBottom: '30px' }}>Welcome back, {currentUser?.email}</p>
       
       {userOrders.length === 0 ? (
@@ -77,7 +77,7 @@ const MyOrders = () => {
                     fontWeight: 'bold',
                     marginBottom: '15px'
                   }}>
-                    {order.status}
+                    {order.status === 'Delivered' ? 'Approved' : order.status}
                   </div>
                   
                   {['Approved', 'Delivered'].includes(order.status) ? (
