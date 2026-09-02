@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { AppContext } from '../context/AppContext';
 import { useNavigate } from 'react-router-dom';
 import Loader from './Loader';
@@ -7,6 +7,7 @@ import './Cart.css';
 const Cart = ({ isOpen, onClose, cartItems, cartTotal, clearCart }) => {
   const [checkoutStep, setCheckoutStep] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  const [isWaitingForReturn, setIsWaitingForReturn] = useState(false);
   const { addOrder, currentUser, addToast } = useContext(AppContext);
   const navigate = useNavigate();
 
@@ -15,6 +16,37 @@ const Cart = ({ isOpen, onClose, cartItems, cartTotal, clearCart }) => {
     paymentMethod: 'UPI / GPay',
     transactionId: ''
   });
+
+  useEffect(() => {
+    const handleFocus = () => {
+      if (isWaitingForReturn) {
+        setIsWaitingForReturn(false);
+        setCheckoutStep(2);
+        
+        // Wait for animation then navigate
+        setTimeout(() => {
+          clearCart();
+          setCheckoutStep(0);
+          setFormData({ name: '', paymentMethod: 'UPI / GPay', transactionId: '' });
+          onClose();
+          navigate('/my-orders');
+        }, 3000);
+      }
+    };
+
+    window.addEventListener('focus', handleFocus);
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        handleFocus();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [isWaitingForReturn]);
 
   const handleProceedToPayment = () => {
     setCheckoutStep(1);
@@ -47,23 +79,20 @@ const Cart = ({ isOpen, onClose, cartItems, cartTotal, clearCart }) => {
       }
       
       setIsLoading(false);
-      setCheckoutStep(2);
-
-      setTimeout(() => {
-        // Generate WhatsApp message
-        const itemsList = cartItems.map(i => i.title).join(", ");
-        const message = `Hello! I just made a payment for an order on DS3 Studio.\n\n*Name:* ${formData.name}\n*Email:* ${currentUser?.email}\n*Payment Method:* ${formData.paymentMethod}\n*Transaction ID:* ${formData.transactionId}\n*Amount:* ₹${cartTotal.toFixed(2)}\n*Items:* ${itemsList}\n\nPlease approve my order so I can download the files!`;
-        
-        const whatsappUrl = `https://wa.me/919611015006?text=${encodeURIComponent(message)}`;
-        window.open(whatsappUrl, '_blank');
-        
-        clearCart();
-        setCheckoutStep(0);
-        setFormData({ name: '', paymentMethod: 'UPI / GPay', transactionId: '' });
-        onClose();
-        navigate('/my-orders');
-      }, 3000);
       
+      // Generate WhatsApp message
+      const itemsList = cartItems.map(i => i.title).join(", ");
+      const message = `Hello! I just made a payment for an order on DS3 Studio.\n\n*Name:* ${formData.name}\n*Email:* ${currentUser?.email}\n*Payment Method:* ${formData.paymentMethod}\n*Transaction ID:* ${formData.transactionId}\n*Amount:* ₹${cartTotal.toFixed(2)}\n*Items:* ${itemsList}\n\nPlease approve my order so I can download the files!`;
+      
+      const whatsappUrl = `https://wa.me/919611015006?text=${encodeURIComponent(message)}`;
+      
+      // Open WhatsApp instantly
+      window.open(whatsappUrl, '_blank');
+      
+      // Move to waiting step
+      setCheckoutStep(3);
+      setIsWaitingForReturn(true);
+
     }, 1500);
   };
 
@@ -201,7 +230,7 @@ const Cart = ({ isOpen, onClose, cartItems, cartTotal, clearCart }) => {
             </svg>
             <h2 style={{ marginTop: '20px', color: 'var(--primary)', animation: 'fadeInUp 0.5s ease-out forwards', opacity: 0 }}>Payment Successful!</h2>
             <p style={{ marginTop: '10px', color: 'var(--text-muted)', animation: 'fadeInUp 0.5s ease-out 0.2s forwards', opacity: 0 }}>
-              Redirecting to WhatsApp and your Orders...
+              Redirecting to your Orders...
             </p>
             <style>{`
               .success-checkmark {
@@ -243,6 +272,30 @@ const Cart = ({ isOpen, onClose, cartItems, cartTotal, clearCart }) => {
               @keyframes fadeInUp {
                 from { opacity: 0; transform: translateY(20px); }
                 to { opacity: 1; transform: translateY(0); }
+              }
+            `}</style>
+          </div>
+        )}
+
+        {checkoutStep === 3 && (
+          <div style={{
+            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', padding: '20px', textAlign: 'center'
+          }}>
+            <div style={{
+              width: '60px',
+              height: '60px',
+              border: '4px solid rgba(39, 201, 63, 0.2)',
+              borderTopColor: '#27c93f',
+              borderRadius: '50%',
+              animation: 'spin 1s linear infinite'
+            }}></div>
+            <h2 style={{ marginTop: '20px', color: 'var(--primary)' }}>WhatsApp Opened!</h2>
+            <p style={{ marginTop: '10px', color: 'var(--text-muted)' }}>
+              Please send the message to the owner in the new tab, then <strong>return to this tab</strong> to complete your order.
+            </p>
+            <style>{`
+              @keyframes spin {
+                to { transform: rotate(360deg); }
               }
             `}</style>
           </div>
