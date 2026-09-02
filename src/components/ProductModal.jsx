@@ -1,10 +1,11 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import './ProductModal.css';
 import DemoPlayer from './DemoPlayer';
 import { AppContext } from '../context/AppContext';
 
 const ProductModal = ({ product, isOpen, onClose, addToCart, onProductClick }) => {
   const { products, wishlist, addToWishlist, removeFromWishlist } = useContext(AppContext);
+  const [activePreviewTab, setActivePreviewTab] = useState('video');
   
   if (!isOpen || !product) return null;
 
@@ -74,7 +75,40 @@ const ProductModal = ({ product, isOpen, onClose, addToCart, onProductClick }) =
             </ul>
           </div>
 
-          {product.previewVideoUrl ? (
+          {product.previewVideoUrl && product.previewUrl ? (
+            <div className="modal-preview-section">
+              <div style={{ display: 'flex', gap: '15px', marginBottom: '15px' }}>
+                <button 
+                  onClick={() => setActivePreviewTab('video')}
+                  style={{ background: activePreviewTab === 'video' ? 'var(--primary)' : 'rgba(255,255,255,0.1)', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer' }}
+                >
+                  Video Preview
+                </button>
+                <button 
+                  onClick={() => setActivePreviewTab('audio')}
+                  style={{ background: activePreviewTab === 'audio' ? 'var(--primary)' : 'rgba(255,255,255,0.1)', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer' }}
+                >
+                  Audio Preview
+                </button>
+              </div>
+              
+              {activePreviewTab === 'video' ? (
+                <div className="modal-video-wrapper">
+                  {product.previewVideoUrl.includes('youtube.com') || product.previewVideoUrl.includes('youtu.be') || product.previewVideoUrl.includes('vimeo.com') ? (
+                    <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0, overflow: 'hidden', borderRadius: '10px', marginBottom: '20px' }}>
+                      <iframe src={getEmbedUrl(product.previewVideoUrl)} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: '0' }} allowFullScreen></iframe>
+                    </div>
+                  ) : (
+                    <video controls style={{ width: '100%', borderRadius: '10px', marginBottom: '20px', background: 'black' }} src={product.previewVideoUrl}></video>
+                  )}
+                </div>
+              ) : (
+                <div className="modal-demo-wrapper">
+                  <DemoPlayer activeDemo={product} inModal={true} />
+                </div>
+              )}
+            </div>
+          ) : product.previewVideoUrl ? (
             <div className="modal-video-wrapper">
               <h3 style={{ marginBottom: '15px' }}>Video Preview</h3>
               {product.previewVideoUrl.includes('youtube.com') || product.previewVideoUrl.includes('youtu.be') || product.previewVideoUrl.includes('vimeo.com') ? (
@@ -85,12 +119,12 @@ const ProductModal = ({ product, isOpen, onClose, addToCart, onProductClick }) =
                 <video controls style={{ width: '100%', borderRadius: '10px', marginBottom: '20px', background: 'black' }} src={product.previewVideoUrl}></video>
               )}
             </div>
-          ) : (
+          ) : product.previewUrl ? (
             <div className="modal-demo-wrapper">
               <h3>Interactive Audio Preview</h3>
-              <DemoPlayer activeDemo={product.title} inModal={true} />
+              <DemoPlayer activeDemo={product} inModal={true} />
             </div>
-          )}
+          ) : null}
 
           <div className="modal-actions">
             <button 
