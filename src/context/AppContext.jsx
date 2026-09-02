@@ -54,10 +54,10 @@ const initialProducts = [
 ];
 
 const initialReviews = [
-  { name: "Alex Mercer", role: "Music Producer", rating: 5, text: "The Logic Pro vocal chain is absolutely insane. Cut my mixing time in half and the vocals sit perfectly in the mix." },
-  { name: "Sarah J.", role: "Beatmaker", rating: 5, text: "FL Studio Master Template is a game changer. The routing is incredibly clean and intuitive." },
-  { name: "DJ Kael", role: "Electronic Artist", rating: 5, text: "Those Ableton Live synth presets are huge. Immediate inspiration right out of the box." },
-  { name: "Michael R.", role: "Composer", rating: 5, text: "The Cubase orchestral template handles 100+ tracks flawlessly. Expression mapping is on point." },
+  { name: "Alex Mercer", role: "Music Producer", rating: 5, text: "The Logic Pro vocal chain is absolutely insane. Cut my mixing time in half and the vocals sit perfectly in the mix.", userEmail: "alex@example.com", productId: "1" },
+  { name: "Sarah J.", role: "Beatmaker", rating: 5, text: "FL Studio Master Template is a game changer. The routing is incredibly clean and intuitive.", userEmail: "sarah@example.com", productId: "2" },
+  { name: "DJ Kael", role: "Electronic Artist", rating: 5, text: "Those Ableton Live synth presets are huge. Immediate inspiration right out of the box.", userEmail: "kael@example.com", productId: "3" },
+  { name: "Michael R.", role: "Composer", rating: 5, text: "The Cubase orchestral template handles 100+ tracks flawlessly. Expression mapping is on point.", userEmail: "michael@example.com", productId: "4" },
 ];
 
 export const AppContextProvider = ({ children }) => {
