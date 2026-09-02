@@ -129,9 +129,9 @@ export const AppContextProvider = ({ children }) => {
       
     } catch (err) {
       console.error("Failed to fetch data from backend:", err);
-      // Fallback to initial data to ensure no errors are displayed to the user
-      setProductsState(initialProducts);
-      setReviewsState(initialReviews);
+      // Fallback to initial data to ensure no errors are displayed to the user, with temporary IDs
+      setProductsState(initialProducts.map((p, i) => ({ ...p, id: `fallback-${i}` })));
+      setReviewsState(initialReviews.map((r, i) => ({ ...r, id: `fallback-${i}` })));
       setUsersState([{ email: 'genzdevoff@gmail.com', password: 'password123' }]);
       setOrdersState([]);
       setSiteSettingsState({ logoUrl: '/ds3_logo.jpg' });
@@ -217,9 +217,16 @@ export const AppContextProvider = ({ children }) => {
 
   const deleteProduct = async (id) => {
     try {
-      await axios.delete(`${API_URL}/products/${id}`);
-      setProductsState(products.filter(p => p.id !== id));
-    } catch (err) { console.error(err); }
+      // Don't call API for fallback items, just remove from local state
+      if (!String(id).startsWith('fallback-')) {
+        await axios.delete(`${API_URL}/products/${id}`);
+      }
+      setProductsState(prev => prev.filter(p => p.id !== id));
+      addToast("Product deleted successfully", "success");
+    } catch (err) { 
+      console.error(err); 
+      addToast("Failed to delete product", "error");
+    }
   };
 
   const setSiteSettings = async (newSettings) => {
