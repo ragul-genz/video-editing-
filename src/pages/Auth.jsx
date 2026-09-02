@@ -12,7 +12,7 @@ const Auth = () => {
   const [isAnimating, setIsAnimating] = useState(false);
   
   const [showPassword, setShowPassword] = useState(false);
-  const { loginUser, currentUser, setCurrentUser, addToast, API_URL } = useContext(AppContext);
+  const { loginUser, currentUser, setCurrentUser, addToast, API_URL, users, setUsers } = useContext(AppContext);
   const navigate = useNavigate();
 
   // If already logged in, redirect to home
@@ -52,6 +52,9 @@ const Auth = () => {
         if (!res.ok) throw new Error('Registration failed. Email might exist.');
         const newUser = await res.json();
         setCurrentUser(newUser);
+        if (users && setUsers) {
+          setUsers([newUser, ...users]);
+        }
         addToast('Registered and logged in successfully!', 'success');
         navigate('/');
       } catch (err) {
