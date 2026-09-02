@@ -1,7 +1,7 @@
 import React, { useContext, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AppContext } from '../context/AppContext';
-import { Sun, Moon, Heart } from 'lucide-react';
+import { Sun, Moon, Bookmark } from 'lucide-react';
 import './Navbar.css';
 
 const Navbar = ({ cartCount = 0, onCartClick }) => {
@@ -51,7 +51,7 @@ const Navbar = ({ cartCount = 0, onCartClick }) => {
               </button>
 
               <Link to="/wishlist" onClick={closeMenu} style={{ position: 'relative', display: 'flex', alignItems: 'center', textDecoration: 'none', padding: '5px', color: 'var(--text)' }}>
-                <Heart size={20} fill="currentColor" style={{ color: '#ff4757' }} />
+                <Bookmark size={20} fill="currentColor" style={{ color: '#ff4757' }} />
                 {wishlist.length > 0 && <span className="cart-badge">{wishlist.length}</span>}
               </Link>
 
