@@ -4,7 +4,7 @@ import DemoPlayer from './DemoPlayer';
 import { AppContext } from '../context/AppContext';
 
 const ProductModal = ({ product, isOpen, onClose, addToCart, onProductClick }) => {
-  const { products } = useContext(AppContext);
+  const { products, wishlist, addToWishlist, removeFromWishlist } = useContext(AppContext);
   
   if (!isOpen || !product) return null;
 
@@ -81,6 +81,16 @@ const ProductModal = ({ product, isOpen, onClose, addToCart, onProductClick }) =
               }}
             >
               Add Bundle to Cart
+            </button>
+            <button 
+              className="btn-secondary" 
+              style={{ padding: '0.8rem 2rem', marginLeft: '10px', display: 'flex', alignItems: 'center', gap: '8px' }}
+              onClick={() => {
+                const inWishlist = wishlist.find(w => w.id === product.id);
+                inWishlist ? removeFromWishlist(product.id) : addToWishlist(product);
+              }}
+            >
+              {wishlist.find(w => w.id === product.id) ? '❤️ Saved' : '🤍 Save'}
             </button>
           </div>
 

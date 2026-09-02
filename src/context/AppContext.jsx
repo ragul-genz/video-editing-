@@ -73,6 +73,16 @@ export const AppContextProvider = ({ children }) => {
   });
   const [reviews, setReviewsState] = useState([]);
   const [loading, setLoading] = useState(true);
+  
+  // New States
+  const [wishlist, setWishlist] = useState(() => {
+    const saved = localStorage.getItem('ds3_wishlist');
+    return saved ? JSON.parse(saved) : [];
+  });
+  
+  const [theme, setTheme] = useState(() => {
+    return localStorage.getItem('ds3_theme') || 'dark';
+  });
 
   // Helper to fetch data
   const fetchData = async () => {
@@ -133,6 +143,15 @@ export const AppContextProvider = ({ children }) => {
     localStorage.setItem('ds3_currentUser', JSON.stringify(currentUser));
   }, [currentUser]);
 
+  useEffect(() => {
+    localStorage.setItem('ds3_wishlist', JSON.stringify(wishlist));
+  }, [wishlist]);
+
+  useEffect(() => {
+    localStorage.setItem('ds3_theme', theme);
+    document.documentElement.setAttribute('data-theme', theme);
+  }, [theme]);
+
   const addToast = (message, type = 'success') => {
     const id = Date.now();
     setToasts((prev) => [...prev, { id, message, type }]);
@@ -140,6 +159,32 @@ export const AppContextProvider = ({ children }) => {
 
   const removeToast = (id) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
+  };
+
+  const toggleTheme = () => {
+    setTheme(prev => prev === 'dark' ? 'light' : 'dark');
+  };
+
+  const addToWishlist = (product) => {
+    if (!wishlist.find(item => item.id === product.id)) {
+      setWishlist([...wishlist, product]);
+      addToast('Added to wishlist', 'success');
+    }
+  };
+
+  const removeFromWishlist = (productId) => {
+    setWishlist(wishlist.filter(item => item.id !== productId));
+    addToast('Removed from wishlist', 'success');
+  };
+
+  const loginUser = async (email, password) => {
+    try {
+      const res = await axios.post(`${API_URL}/users/login`, { email, password });
+      setCurrentUser(res.data);
+      return res.data;
+    } catch (err) {
+      throw err;
+    }
   };
 
   // Wrapper functions for updating state AND backend
@@ -250,10 +295,12 @@ export const AppContextProvider = ({ children }) => {
       siteSettings, setSiteSettings, 
       orders, setOrders, addOrder, updateOrder,
       users, setUsers,
-      currentUser, setCurrentUser,
+      currentUser, setCurrentUser, loginUser,
       reviews, addReview, deleteReview,
       toasts, addToast, removeToast,
       updateUserPassword,
+      wishlist, addToWishlist, removeFromWishlist,
+      theme, toggleTheme,
       loading, API_URL
     }}>
       {children}

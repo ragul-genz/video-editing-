@@ -9,6 +9,7 @@ const orderSchema = new mongoose.Schema({
   paymentMethod: { type: String, required: true },
   transactionId: { type: String, required: true },
   userEmail: { type: String, required: true },
+  deliveryLink: { type: String }, // For custom video edits delivered by Admin
   items: [{
     id: { type: String },
     title: { type: String },

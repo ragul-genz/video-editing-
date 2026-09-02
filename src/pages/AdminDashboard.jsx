@@ -3,10 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { AppContext } from '../context/AppContext';
 
 const AdminDashboard = () => {
-  const { products, addProduct, updateProduct, deleteProduct, siteSettings, setSiteSettings, orders, updateOrder, reviews, deleteReview, addToast } = useContext(AppContext);
+  const { products, addProduct, updateProduct, deleteProduct, siteSettings, setSiteSettings, orders, updateOrder, reviews, deleteReview, users, addToast } = useContext(AppContext);
   const navigate = useNavigate();
 
-  const [activeTab, setActiveTab] = useState('products');
+  const [activeTab, setActiveTab] = useState('overview');
   const [newLogoUrl, setNewLogoUrl] = useState(siteSettings.logoUrl);
   
   const [newProduct, setNewProduct] = useState({
@@ -176,7 +176,7 @@ const AdminDashboard = () => {
       </div>
 
       <div style={{ display: 'flex', gap: '15px', marginBottom: '30px', borderBottom: '1px solid var(--glass-border)', paddingBottom: '15px', overflowX: 'auto' }}>
-        {['products', 'orders', 'reviews', 'settings'].map(tab => (
+        {['overview', 'products', 'orders', 'customers', 'reviews', 'settings'].map(tab => (
           <button 
             key={tab}
             onClick={() => setActiveTab(tab)}
@@ -197,6 +197,32 @@ const AdminDashboard = () => {
           </button>
         ))}
       </div>
+
+      {activeTab === 'overview' && (
+        <div className="glass-panel" style={{ padding: '30px', marginBottom: '40px' }}>
+          <h3>Dashboard Overview</h3>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px', marginTop: '20px' }}>
+            <div style={{ background: 'rgba(255,255,255,0.05)', padding: '20px', borderRadius: '10px', textAlign: 'center' }}>
+              <h2 style={{ fontSize: '2.5rem', color: 'var(--primary)', margin: '0 0 10px 0' }}>{orders.length}</h2>
+              <p style={{ color: 'var(--text-muted)', margin: 0 }}>Total Orders</p>
+            </div>
+            <div style={{ background: 'rgba(255,255,255,0.05)', padding: '20px', borderRadius: '10px', textAlign: 'center' }}>
+              <h2 style={{ fontSize: '2.5rem', color: '#27c93f', margin: '0 0 10px 0' }}>
+                ₹{orders.reduce((acc, o) => acc + parseFloat(o.total.replace('₹', '') || 0), 0).toFixed(2)}
+              </h2>
+              <p style={{ color: 'var(--text-muted)', margin: 0 }}>Total Revenue</p>
+            </div>
+            <div style={{ background: 'rgba(255,255,255,0.05)', padding: '20px', borderRadius: '10px', textAlign: 'center' }}>
+              <h2 style={{ fontSize: '2.5rem', color: '#ffc107', margin: '0 0 10px 0' }}>{users.length}</h2>
+              <p style={{ color: 'var(--text-muted)', margin: 0 }}>Registered Customers</p>
+            </div>
+            <div style={{ background: 'rgba(255,255,255,0.05)', padding: '20px', borderRadius: '10px', textAlign: 'center' }}>
+              <h2 style={{ fontSize: '2.5rem', color: '#ff0054', margin: '0 0 10px 0' }}>{products.length}</h2>
+              <p style={{ color: 'var(--text-muted)', margin: 0 }}>Active Bundles</p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {activeTab === 'settings' && (
       <div className="glass-panel" style={{ padding: '30px', marginBottom: '40px' }}>
@@ -340,8 +366,8 @@ const AdminDashboard = () => {
                     display: 'inline-block',
                     padding: '6px 12px', 
                     borderRadius: '20px', 
-                    background: order.status === 'Approved' ? 'rgba(39, 201, 63, 0.2)' : 'rgba(255, 189, 46, 0.2)',
-                    color: order.status === 'Approved' ? '#27c93f' : '#ffbd2e',
+                    background: ['Approved', 'Delivered'].includes(order.status) ? 'rgba(39, 201, 63, 0.2)' : 'rgba(255, 189, 46, 0.2)',
+                    color: ['Approved', 'Delivered'].includes(order.status) ? '#27c93f' : '#ffbd2e',
                     fontSize: '0.9rem',
                     fontWeight: 'bold',
                     marginBottom: '15px'
@@ -350,9 +376,39 @@ const AdminDashboard = () => {
                   </div>
                   
                   {order.status === 'Pending' && (
-                    <button onClick={() => handleApproveOrder(order.id)} className="btn-primary" style={{ display: 'block', padding: '8px 16px', fontSize: '0.9rem' }}>
+                    <button onClick={() => handleApproveOrder(order.id)} className="btn-primary" style={{ display: 'block', padding: '8px 16px', fontSize: '0.9rem', width: '100%' }}>
                       Approve Payment
                     </button>
+                  )}
+
+                  {order.status === 'Approved' && (
+                    <div style={{ marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                      <input 
+                        type="url" 
+                        placeholder="Google Drive Link for Custom Edit" 
+                        id={`delivery-link-${order.id}`}
+                        style={{ padding: '8px', borderRadius: '6px', border: '1px solid var(--glass-border)', background: 'rgba(0,0,0,0.5)', color: 'white', width: '100%', fontSize: '0.85rem' }} 
+                      />
+                      <button 
+                        onClick={async () => {
+                          const link = document.getElementById(`delivery-link-${order.id}`).value;
+                          if (link) {
+                            try {
+                              await updateOrder(order.id, { status: 'Delivered', deliveryLink: link });
+                              addToast("Order marked as delivered with link!", "success");
+                            } catch (err) {
+                              addToast("Failed to update order", "error");
+                            }
+                          } else {
+                            addToast("Please provide a delivery link", "error");
+                          }
+                        }}
+                        className="btn-primary" 
+                        style={{ padding: '8px 16px', fontSize: '0.9rem', width: '100%', background: 'linear-gradient(45deg, #27c93f, #149c28)' }}
+                      >
+                        Mark Delivered
+                      </button>
+                    </div>
                   )}
                 </div>
               </div>
@@ -389,6 +445,41 @@ const AdminDashboard = () => {
                 </div>
               ))
             )}
+          </div>
+        </div>
+      )}
+      {activeTab === 'customers' && (
+        <div className="glass-panel" style={{ padding: '30px', marginTop: '40px' }}>
+          <h3>Manage Customers</h3>
+          <div style={{ marginTop: '20px', overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr style={{ borderBottom: '1px solid var(--glass-border)', color: 'var(--primary)' }}>
+                  <th style={{ padding: '10px', textAlign: 'left' }}>Email</th>
+                  <th style={{ padding: '10px', textAlign: 'left' }}>Total Orders</th>
+                  <th style={{ padding: '10px', textAlign: 'left' }}>Total Spent</th>
+                </tr>
+              </thead>
+              <tbody>
+                {users.map(user => {
+                  const userOrders = orders.filter(o => o.userEmail === user.email);
+                  const totalSpent = userOrders.reduce((acc, o) => acc + parseFloat(o.total.replace('₹', '') || 0), 0);
+                  
+                  return (
+                    <tr key={user.email} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                      <td style={{ padding: '15px 10px' }}>{user.email}</td>
+                      <td style={{ padding: '15px 10px' }}>{userOrders.length}</td>
+                      <td style={{ padding: '15px 10px' }}>₹{totalSpent.toFixed(2)}</td>
+                    </tr>
+                  );
+                })}
+                {users.length === 0 && (
+                  <tr>
+                    <td colSpan="3" style={{ padding: '20px', textAlign: 'center', color: 'var(--text-muted)' }}>No registered users.</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
           </div>
         </div>
       )}

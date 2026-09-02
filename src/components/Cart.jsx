@@ -202,8 +202,28 @@ const Cart = ({ isOpen, onClose, cartItems, cartTotal, clearCart }) => {
                 >
                   <option value="UPI / GPay">UPI / GPay / PhonePe</option>
                   <option value="Bank Transfer">Bank Transfer (NEFT/IMPS)</option>
+                  <option value="Credit / Debit Card">Credit / Debit Card (Mock)</option>
                 </select>
               </div>
+
+              {formData.paymentMethod === 'Credit / Debit Card' && (
+                <div style={{ background: 'rgba(255,255,255,0.05)', padding: '15px', borderRadius: '10px', marginBottom: '15px' }}>
+                  <div className="form-group" style={{ marginBottom: '10px' }}>
+                    <label>Card Number</label>
+                    <input type="text" placeholder="XXXX XXXX XXXX XXXX" style={{ fontFamily: 'monospace' }} />
+                  </div>
+                  <div style={{ display: 'flex', gap: '10px' }}>
+                    <div className="form-group" style={{ flex: 1 }}>
+                      <label>Expiry</label>
+                      <input type="text" placeholder="MM/YY" />
+                    </div>
+                    <div className="form-group" style={{ flex: 1 }}>
+                      <label>CVV</label>
+                      <input type="password" placeholder="***" maxLength="3" />
+                    </div>
+                  </div>
+                </div>
+              )}
               
               <div className="form-group">
                 <label>Transaction ID / UTR No.</label>

@@ -3,7 +3,7 @@ import { AppContext } from '../context/AppContext';
 import './Products.css';
 
 const Products = ({ addToCart, onPreview, onProductClick }) => {
-  const { products } = useContext(AppContext);
+  const { products, wishlist, addToWishlist, removeFromWishlist } = useContext(AppContext);
   const [searchQuery, setSearchQuery] = useState('');
 
   const filteredProducts = products.filter(product => 
@@ -43,6 +43,32 @@ const Products = ({ addToCart, onPreview, onProductClick }) => {
                   {product.icon}
                 </div>
               )}
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const inWishlist = wishlist.find(w => w.id === product.id);
+                  inWishlist ? removeFromWishlist(product.id) : addToWishlist(product);
+                }}
+                style={{
+                  position: 'absolute',
+                  top: '10px',
+                  right: '10px',
+                  background: 'rgba(0,0,0,0.5)',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: '35px',
+                  height: '35px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '1.2rem',
+                  color: wishlist.find(w => w.id === product.id) ? '#ff4757' : 'white',
+                  transition: 'all 0.3s ease'
+                }}
+              >
+                {wishlist.find(w => w.id === product.id) ? '❤️' : '🤍'}
+              </button>
             </div>
             <h3 className="product-title">{product.title}</h3>
             <p className="product-desc">{product.description}</p>

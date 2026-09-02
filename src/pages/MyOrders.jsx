@@ -72,17 +72,26 @@ const MyOrders = () => {
                     display: 'inline-block',
                     padding: '8px 16px', 
                     borderRadius: '20px', 
-                    background: order.status === 'Approved' ? 'rgba(39, 201, 63, 0.2)' : 'rgba(255, 189, 46, 0.2)',
-                    color: order.status === 'Approved' ? '#27c93f' : '#ffbd2e',
+                    background: ['Approved', 'Delivered'].includes(order.status) ? 'rgba(39, 201, 63, 0.2)' : 'rgba(255, 189, 46, 0.2)',
+                    color: ['Approved', 'Delivered'].includes(order.status) ? '#27c93f' : '#ffbd2e',
                     fontWeight: 'bold',
                     marginBottom: '15px'
                   }}>
                     {order.status}
                   </div>
                   
-                  {order.status === 'Approved' ? (
+                  {['Approved', 'Delivered'].includes(order.status) ? (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                       <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>Your downloads are ready:</p>
+                      
+                      {order.deliveryLink && (
+                        <div style={{ marginBottom: '10px' }}>
+                          <a href={order.deliveryLink} target="_blank" rel="noopener noreferrer" className="btn-primary" style={{ display: 'inline-block', padding: '10px 16px', fontSize: '0.9rem', textAlign: 'center', textDecoration: 'none', background: 'linear-gradient(45deg, #27c93f, #149c28)' }}>
+                            Download Custom Files
+                          </a>
+                        </div>
+                      )}
+                      
                       {order.items.map((item, i) => {
                         const hasReviewed = reviews.some(r => r.productId === item.id && r.userEmail === currentUser?.email);
                         return (

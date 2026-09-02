@@ -15,6 +15,15 @@
   --font-body: 'Inter', sans-serif;
 }
 
+[data-theme='light'] {
+  --bg-dark: #f8f9fa;
+  --bg-light: #ffffff;
+  --text-main: #212529;
+  --text-muted: #6c757d;
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(0, 0, 0, 0.08);
+}
+
 html {
   scroll-behavior: smooth;
 }

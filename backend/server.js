@@ -97,6 +97,17 @@ app.post('/api/users', async (req, res) => {
   } catch (err) { res.status(400).json({ error: err.message }); }
 });
 
+app.post('/api/users/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const user = await User.findOne({ email });
+    if (!user || user.password !== password) {
+      return res.status(401).json({ error: 'Invalid email or password' });
+    }
+    res.json(user);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
 app.put('/api/users/:email', async (req, res) => {
   try {
     // Update password by email

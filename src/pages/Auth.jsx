@@ -11,7 +11,8 @@ const Auth = () => {
   const [error, setError] = useState('');
   const [isAnimating, setIsAnimating] = useState(false);
   
-  const { users, setUsers, currentUser, setCurrentUser, addToast } = useContext(AppContext);
+  const [showPassword, setShowPassword] = useState(false);
+  const { loginUser, currentUser, setCurrentUser, addToast, API_URL } = useContext(AppContext);
   const navigate = useNavigate();
 
   // If already logged in, redirect to home
@@ -21,7 +22,7 @@ const Auth = () => {
     }
   }, [currentUser, navigate]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     
@@ -31,30 +32,32 @@ const Auth = () => {
         return;
       }
       setIsAnimating(true);
-      setTimeout(() => {
-        const user = users.find(u => u.email === email && u.password === password);
-        if (user) {
-          setCurrentUser(user);
-          addToast('Logged in successfully!', 'success');
-          navigate('/');
-        } else {
-          setIsAnimating(false);
-          setError('Invalid email or password.');
-        }
-      }, 2000);
+      try {
+        await loginUser(email, password);
+        addToast('Logged in successfully!', 'success');
+        navigate('/');
+      } catch (err) {
+        setIsAnimating(false);
+        setError('Invalid email or password.');
+      }
     } else {
       setIsLoading(true);
-      setTimeout(() => {
-        if (users.find(u => u.email === email)) {
-          setError('Email is already registered.');
-          setIsLoading(false);
-        } else {
-          const newUser = { email, password };
-          setUsers([...users, newUser]);
-          setCurrentUser(newUser);
-          navigate('/');
-        }
-      }, 1500);
+      try {
+        // Basic registration logic hitting the real backend
+        const res = await fetch(`${API_URL}/users`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+        if (!res.ok) throw new Error('Registration failed. Email might exist.');
+        const newUser = await res.json();
+        setCurrentUser(newUser);
+        addToast('Registered and logged in successfully!', 'success');
+        navigate('/');
+      } catch (err) {
+        setError(err.message);
+        setIsLoading(false);
+      }
     }
   };
 
@@ -88,21 +91,36 @@ const Auth = () => {
               outline: 'none'
             }} 
           />
-          <input 
-            type="password" 
-            placeholder="Password" 
-            required 
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            style={{ 
-              padding: '12px', 
-              borderRadius: '8px', 
-              border: '1px solid var(--glass-border)', 
-              background: 'rgba(0,0,0,0.5)', 
-              color: 'white',
-              outline: 'none'
-            }} 
-          />
+          <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+            <input 
+              type={showPassword ? "text" : "password"} 
+              placeholder="Password" 
+              required 
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              style={{ 
+                width: '100%',
+                padding: '12px', 
+                borderRadius: '8px', 
+                border: '1px solid var(--glass-border)', 
+                background: 'rgba(0,0,0,0.5)', 
+                color: 'white',
+                outline: 'none',
+                paddingRight: '40px'
+              }} 
+            />
+            <span 
+              onClick={() => setShowPassword(!showPassword)}
+              style={{
+                position: 'absolute',
+                right: '12px',
+                cursor: 'pointer',
+                color: 'var(--text-muted)'
+              }}
+            >
+              {showPassword ? '🙈' : '👁️'}
+            </span>
+          </div>
           <button type="submit" className="btn-primary" style={{ padding: '12px', fontSize: '1rem', marginTop: '10px' }}>
             {isLogin ? 'Login' : 'Register'}
           </button>

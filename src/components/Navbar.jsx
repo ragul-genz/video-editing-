@@ -4,7 +4,7 @@ import { AppContext } from '../context/AppContext';
 import './Navbar.css';
 
 const Navbar = ({ cartCount = 0, onCartClick }) => {
-  const { siteSettings, currentUser, setCurrentUser } = useContext(AppContext);
+  const { siteSettings, currentUser, setCurrentUser, theme, toggleTheme, wishlist } = useContext(AppContext);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const closeMenu = () => setIsMenuOpen(false);
@@ -40,6 +40,19 @@ const Navbar = ({ cartCount = 0, onCartClick }) => {
                 <span className="bar"></span>
                 <span className="bar"></span>
               </div>
+
+              <button 
+                onClick={toggleTheme} 
+                style={{ background: 'transparent', border: 'none', color: 'var(--text)', fontSize: '1.2rem', cursor: 'pointer', padding: '5px' }}
+                title="Toggle Theme"
+              >
+                {theme === 'dark' ? '☀️' : '🌙'}
+              </button>
+
+              <Link to="/wishlist" onClick={closeMenu} style={{ position: 'relative', display: 'flex', alignItems: 'center', textDecoration: 'none', padding: '5px', color: 'var(--text)' }}>
+                <span style={{ fontSize: '1.2rem' }}>❤️</span>
+                {wishlist.length > 0 && <span className="cart-badge">{wishlist.length}</span>}
+              </Link>
 
               <button className="cart-btn" aria-label="Cart" onClick={() => { onCartClick(); closeMenu(); }}>
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
