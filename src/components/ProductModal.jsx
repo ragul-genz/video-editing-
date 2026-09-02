@@ -8,6 +8,27 @@ const ProductModal = ({ product, isOpen, onClose, addToCart, onProductClick }) =
   
   if (!isOpen || !product) return null;
 
+  const getEmbedUrl = (url) => {
+    if (!url) return '';
+    try {
+      if (url.includes('youtube.com/watch?v=')) {
+        const videoId = url.split('v=')[1]?.split('&')[0];
+        return `https://www.youtube.com/embed/${videoId}`;
+      }
+      if (url.includes('youtu.be/')) {
+        const videoId = url.split('youtu.be/')[1]?.split('?')[0];
+        return `https://www.youtube.com/embed/${videoId}`;
+      }
+      if (url.includes('vimeo.com/') && !url.includes('player.vimeo.com')) {
+        const videoId = url.split('vimeo.com/')[1]?.split(/[?/#]/)[0];
+        if (videoId) return `https://player.vimeo.com/video/${videoId}`;
+      }
+    } catch (e) {
+      return url;
+    }
+    return url;
+  };
+
   const relatedProducts = products
     .filter(p => p.id !== product.id)
     .sort(() => 0.5 - Math.random())
@@ -58,7 +79,7 @@ const ProductModal = ({ product, isOpen, onClose, addToCart, onProductClick }) =
               <h3 style={{ marginBottom: '15px' }}>Video Preview</h3>
               {product.previewVideoUrl.includes('youtube.com') || product.previewVideoUrl.includes('youtu.be') || product.previewVideoUrl.includes('vimeo.com') ? (
                 <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0, overflow: 'hidden', borderRadius: '10px', marginBottom: '20px' }}>
-                  <iframe src={product.previewVideoUrl} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: '0' }} allowFullScreen></iframe>
+                  <iframe src={getEmbedUrl(product.previewVideoUrl)} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: '0' }} allowFullScreen></iframe>
                 </div>
               ) : (
                 <video controls style={{ width: '100%', borderRadius: '10px', marginBottom: '20px', background: 'black' }} src={product.previewVideoUrl}></video>
