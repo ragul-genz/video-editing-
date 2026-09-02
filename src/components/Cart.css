@@ -24,6 +24,7 @@
   width: 400px;
   max-width: 100vw;
   height: 100vh;
+  height: 100dvh;
   background: var(--bg-light);
   z-index: 1001;
   border-radius: 20px 0 0 20px;
@@ -100,6 +101,7 @@
 
 .cart-footer {
   padding: 20px;
+  padding-bottom: 40px; /* Extra padding to avoid mobile bottom nav bar */
   border-top: 1px solid var(--glass-border);
 }
 
