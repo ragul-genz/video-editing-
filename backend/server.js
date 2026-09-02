@@ -121,6 +121,14 @@ app.post('/api/orders', async (req, res) => {
   } catch (err) { res.status(400).json({ error: err.message }); }
 });
 
+app.put('/api/orders/:id', async (req, res) => {
+  try {
+    // using id since our frontend uses string id instead of _id
+    const order = await Order.findOneAndUpdate({ id: req.params.id }, req.body, { new: true });
+    res.json(order);
+  } catch (err) { res.status(400).json({ error: err.message }); }
+});
+
 // Site Settings
 app.get('/api/settings', async (req, res) => {
   try {

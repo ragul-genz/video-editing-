@@ -185,6 +185,28 @@ export const AppContextProvider = ({ children }) => {
     setOrdersState(newOrders);
   };
 
+  const addOrder = async (order) => {
+    try {
+      const res = await axios.post(`${API_URL}/orders`, order);
+      setOrdersState([res.data, ...orders]);
+      return res.data;
+    } catch (err) {
+      console.error(err);
+      throw err;
+    }
+  };
+
+  const updateOrder = async (id, updatedFields) => {
+    try {
+      const res = await axios.put(`${API_URL}/orders/${id}`, updatedFields);
+      setOrdersState(orders.map(o => o.id === id ? res.data : o));
+      return res.data;
+    } catch (err) {
+      console.error(err);
+      throw err;
+    }
+  };
+
   const setUsers = (newUsers) => {
     setUsersState(newUsers);
   };
@@ -226,7 +248,7 @@ export const AppContextProvider = ({ children }) => {
     <AppContext.Provider value={{ 
       products, addProduct, updateProduct, deleteProduct, setProductsState,
       siteSettings, setSiteSettings, 
-      orders, setOrders,
+      orders, setOrders, addOrder, updateOrder,
       users, setUsers,
       currentUser, setCurrentUser,
       reviews, addReview, deleteReview,

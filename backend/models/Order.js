@@ -1,13 +1,19 @@
 const mongoose = require('mongoose');
 
 const orderSchema = new mongoose.Schema({
-  orderId: { type: String, required: true },
+  id: { type: String, required: true },
   date: { type: Date, default: Date.now },
-  total: { type: Number, required: true },
-  status: { type: String, default: 'Completed' },
+  total: { type: String, required: true },
+  status: { type: String, default: 'Pending' },
+  name: { type: String, required: true },
+  paymentMethod: { type: String, required: true },
+  transactionId: { type: String, required: true },
+  userEmail: { type: String, required: true },
   items: [{
+    id: { type: String },
     title: { type: String },
-    price: { type: String }
+    price: { type: String },
+    driveLink: { type: String }
   }]
 }, { timestamps: true });
 

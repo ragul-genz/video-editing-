@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { AppContext } from '../context/AppContext';
 
 const AdminDashboard = () => {
-  const { products, addProduct, updateProduct, deleteProduct, siteSettings, setSiteSettings, orders, setOrders, reviews, deleteReview, addToast } = useContext(AppContext);
+  const { products, addProduct, updateProduct, deleteProduct, siteSettings, setSiteSettings, orders, updateOrder, reviews, deleteReview, addToast } = useContext(AppContext);
   const navigate = useNavigate();
 
   const [activeTab, setActiveTab] = useState('products');
@@ -159,8 +159,13 @@ const AdminDashboard = () => {
     navigate('/');
   };
 
-  const handleApproveOrder = (orderId) => {
-    setOrders(orders.map(o => o.id === orderId ? { ...o, status: 'Approved' } : o));
+  const handleApproveOrder = async (orderId) => {
+    try {
+      await updateOrder(orderId, { status: 'Approved' });
+      addToast("Order approved successfully!", "success");
+    } catch (err) {
+      addToast("Failed to approve order.", "error");
+    }
   };
 
   return (

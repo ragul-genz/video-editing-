@@ -7,7 +7,7 @@ import './Cart.css';
 const Cart = ({ isOpen, onClose, cartItems, cartTotal, clearCart }) => {
   const [checkoutStep, setCheckoutStep] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
-  const { orders, setOrders, currentUser, addToast } = useContext(AppContext);
+  const { addOrder, currentUser, addToast } = useContext(AppContext);
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -24,7 +24,7 @@ const Cart = ({ isOpen, onClose, cartItems, cartTotal, clearCart }) => {
     e.preventDefault();
     setIsLoading(true);
 
-    setTimeout(() => {
+    setTimeout(async () => {
       // Save order to context
       const newOrder = {
         id: Date.now().toString().slice(-6),
@@ -38,7 +38,14 @@ const Cart = ({ isOpen, onClose, cartItems, cartTotal, clearCart }) => {
         userEmail: currentUser?.email
       };
       
-      setOrders([newOrder, ...orders]);
+      try {
+        await addOrder(newOrder);
+      } catch (err) {
+        addToast("Failed to save order to database. Please try again.", "error");
+        setIsLoading(false);
+        return;
+      }
+      
       setIsLoading(false);
       setCheckoutStep(2);
 
