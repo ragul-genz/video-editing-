@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import Loader from './Loader';
 import './Cart.css';
 
-const Cart = ({ isOpen, onClose, cartItems, cartTotal, clearCart }) => {
+const Cart = ({ isOpen, onClose, cartItems, cartTotal, clearCart, removeFromCart }) => {
   const [checkoutStep, setCheckoutStep] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [isWaitingForReturn, setIsWaitingForReturn] = useState(false);
@@ -137,10 +137,17 @@ const Cart = ({ isOpen, onClose, cartItems, cartTotal, clearCart }) => {
                         item.icon
                       )}
                     </div>
-                    <div className="cart-item-details">
+                    <div className="cart-item-details" style={{ flex: 1 }}>
                       <h4>{item.title}</h4>
                       <p>{item.price}</p>
                     </div>
+                    <button 
+                      onClick={() => removeFromCart(item.id)}
+                      style={{ background: 'transparent', border: 'none', color: '#ff0054', fontSize: '1.2rem', cursor: 'pointer', padding: '5px' }}
+                      title="Remove from cart"
+                    >
+                      ✖
+                    </button>
                   </div>
                 ))
               )}

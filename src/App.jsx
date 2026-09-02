@@ -42,8 +42,15 @@ const AppContent = () => {
   const isAdminRoute = location.pathname.startsWith('/admin');
 
   const addToCart = (product) => {
-    setCartItems([...cartItems, product]);
+    const isAlreadyInCart = cartItems.some(item => item.id === product.id);
+    if (!isAlreadyInCart) {
+      setCartItems([...cartItems, product]);
+    }
     setIsCartOpen(true);
+  };
+
+  const removeFromCart = (productId) => {
+    setCartItems(cartItems.filter(item => item.id !== productId));
   };
 
   const previewProduct = (product) => {
@@ -85,6 +92,7 @@ const AppContent = () => {
             cartItems={cartItems}
             cartTotal={cartTotal}
             clearCart={() => setCartItems([])}
+            removeFromCart={removeFromCart}
           />
           <ProductModal 
             product={selectedProduct}
