@@ -17,6 +17,7 @@ import ProductModal from './components/ProductModal';
 import { ToastContainer } from './components/Toast';
 import { AppContextProvider, AppContext } from './context/AppContext';
 import Loader from './components/Loader';
+import SocialMedia from './pages/SocialMedia';
 
 import Wishlist from './pages/Wishlist';
 import { Instagram, Facebook, Youtube } from 'lucide-react';
@@ -87,6 +88,7 @@ const AppContent = () => {
           <Route path="/my-orders" element={<ProtectedRoute><MyOrders /></ProtectedRoute>} />
           <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
           <Route path="/wishlist" element={<ProtectedRoute><Wishlist addToCart={addToCart} onProductClick={openProductDetails} /></ProtectedRoute>} />
+          <Route path="/social-media" element={<ProtectedRoute><SocialMedia /></ProtectedRoute>} />
           <Route path="/admin" element={<AdminLogin />} />
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
         </Routes>

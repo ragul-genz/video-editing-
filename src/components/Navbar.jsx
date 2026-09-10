@@ -31,6 +31,7 @@ const Navbar = ({ cartCount = 0, onCartClick }) => {
               <li><Link to="/bundles" onClick={closeMenu}>Bundles</Link></li>
               <li><Link to="/contact" onClick={closeMenu}>Contact</Link></li>
               <li><Link to="/reviews" onClick={closeMenu}>Reviews</Link></li>
+              <li><Link to="/social-media" onClick={closeMenu}>Socials</Link></li>
               <li><Link to="/my-orders" onClick={closeMenu} style={{ color: 'var(--primary)' }}>My Orders</Link></li>
               <li><Link to="/profile" onClick={closeMenu}>Profile</Link></li>
             </ul>
