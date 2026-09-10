@@ -16,8 +16,10 @@ import Cart from './components/Cart';
 import ProductModal from './components/ProductModal';
 import { ToastContainer } from './components/Toast';
 import { AppContextProvider, AppContext } from './context/AppContext';
+import Loader from './components/Loader';
 
 import Wishlist from './pages/Wishlist';
+import { Instagram, Facebook, Youtube } from 'lucide-react';
 
 const ProtectedRoute = ({ children }) => {
   const { currentUser } = useContext(AppContext);
@@ -38,6 +40,7 @@ const AppContent = () => {
   const [activeDemo, setActiveDemo] = useState(null);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const location = useLocation();
+  const { loading } = useContext(AppContext);
 
   const isAdminRoute = location.pathname.startsWith('/admin');
 
@@ -65,6 +68,10 @@ const AppContent = () => {
   const cartTotal = cartItems.reduce((total, item) => {
     return total + parseFloat(item.price.replace('₹', '').replace('$', ''));
   }, 0);
+
+  if (loading) {
+    return <Loader fullScreen={true} text="Loading assets... (Server might take up to 30s to wake up on first load)" />;
+  }
 
   return (
     <div className="app">
@@ -102,6 +109,28 @@ const AppContent = () => {
             onProductClick={openProductDetails}
           />
           <footer style={{ textAlign: 'center', padding: '20px', color: 'var(--text-muted)', fontSize: '0.9rem', borderTop: '1px solid var(--glass-border)', marginTop: '40px' }}>
+            <div style={{ marginBottom: '15px', display: 'flex', justifyContent: 'center', gap: '20px', flexWrap: 'wrap' }}>
+              <a href="https://www.instagram.com/ds3__studio?utm_source=ig_web_button_share_sheet&stkn=ZDNlZDc0MzIxNw==" target="_blank" rel="noopener noreferrer" style={{ color: 'inherit', transition: 'color 0.3s ease', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px' }} title="DS3 Studio Instagram" onMouseOver={(e) => e.currentTarget.style.color = 'var(--primary)'} onMouseOut={(e) => e.currentTarget.style.color = 'inherit'}>
+                <Instagram size={24} />
+                <span style={{ fontSize: '0.75rem' }}>DS3 Studio</span>
+              </a>
+              <a href="https://www.instagram.com/i_m__d_s_3?utm_source=ig_web_button_share_sheet&stkn=ZDNlZDc0MzIxNw==" target="_blank" rel="noopener noreferrer" style={{ color: 'inherit', transition: 'color 0.3s ease', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px' }} title="Personal Instagram" onMouseOver={(e) => e.currentTarget.style.color = 'var(--primary)'} onMouseOut={(e) => e.currentTarget.style.color = 'inherit'}>
+                <Instagram size={24} />
+                <span style={{ fontSize: '0.75rem' }}>Personal</span>
+              </a>
+              <a href="https://www.facebook.com/share/1dX3XBPtTR/" target="_blank" rel="noopener noreferrer" style={{ color: 'inherit', transition: 'color 0.3s ease', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px' }} title="Facebook" onMouseOver={(e) => e.currentTarget.style.color = 'var(--primary)'} onMouseOut={(e) => e.currentTarget.style.color = 'inherit'}>
+                <Facebook size={24} />
+                <span style={{ fontSize: '0.75rem' }}>Facebook</span>
+              </a>
+              <a href="https://youtube.com/@ds3-official?si=WNYzp9ShxgMh87Mr" target="_blank" rel="noopener noreferrer" style={{ color: 'inherit', transition: 'color 0.3s ease', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px' }} title="YouTube Main Channel" onMouseOver={(e) => e.currentTarget.style.color = 'var(--primary)'} onMouseOut={(e) => e.currentTarget.style.color = 'inherit'}>
+                <Youtube size={24} />
+                <span style={{ fontSize: '0.75rem' }}>Main Channel</span>
+              </a>
+              <a href="https://youtube.com/@ds3_--_official?si=93AFYkEc3JE1nVVx" target="_blank" rel="noopener noreferrer" style={{ color: 'inherit', transition: 'color 0.3s ease', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px' }} title="YouTube 2nd Channel" onMouseOver={(e) => e.currentTarget.style.color = 'var(--primary)'} onMouseOut={(e) => e.currentTarget.style.color = 'inherit'}>
+                <Youtube size={24} />
+                <span style={{ fontSize: '0.75rem' }}>2nd Channel</span>
+              </a>
+            </div>
             Developed by : GenZ Neural X & Win Tech
           </footer>
           <a 

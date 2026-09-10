@@ -99,9 +99,9 @@ const AdminDashboard = () => {
     }
   }, [navigate]);
 
-  const handleUpdateLogo = (e) => {
+  const handleUpdateLogo = async (e) => {
     e.preventDefault();
-    setSiteSettings({ ...siteSettings, logoUrl: newLogoUrl });
+    await setSiteSettings({ ...siteSettings, logoUrl: newLogoUrl });
     addToast("Logo updated successfully!", "success");
   };
 

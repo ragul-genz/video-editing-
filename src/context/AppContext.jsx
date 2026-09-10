@@ -235,10 +235,12 @@ export const AppContextProvider = ({ children }) => {
 
   const setSiteSettings = async (newSettings) => {
     try {
+      setSiteSettingsState(newSettings); // Optimistic UI update
       const res = await axios.put(`${API_URL}/settings`, newSettings);
       setSiteSettingsState(res.data);
     } catch (err) {
       console.error(err);
+      addToast("Failed to update logo", "error");
     }
   };
 
