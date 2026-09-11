@@ -133,7 +133,10 @@ const AppContent = () => {
                 <span style={{ fontSize: '0.75rem' }}>2nd Channel</span>
               </a>
             </div>
-            Developed by : GenZ Neural X & Win Tech
+            <div style={{ marginTop: '15px' }}>
+              Copyright © 2026 DS3 Studio All Rights Reserved.<br />
+              <span style={{ fontSize: '0.8rem', opacity: 0.7 }}>Developed by : GenZ Neural X & Win Tech</span>
+            </div>
           </footer>
           <a 
             href="https://wa.me/919611015006?text=Hi%20DS3%20Studio!%20I%20have%20a%20question." 
