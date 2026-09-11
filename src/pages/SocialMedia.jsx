@@ -1,5 +1,6 @@
 import React from 'react';
-import { Instagram, Facebook, Youtube, ExternalLink } from 'lucide-react';
+import { ExternalLink } from 'lucide-react';
+import { Instagram, Facebook, Youtube } from '../components/BrandIcons';
 import './SocialMedia.css';
 
 const SocialMedia = () => {

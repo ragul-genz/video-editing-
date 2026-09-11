@@ -20,7 +20,7 @@ import Loader from './components/Loader';
 import SocialMedia from './pages/SocialMedia';
 
 import Wishlist from './pages/Wishlist';
-import { Instagram, Facebook, Youtube } from 'lucide-react';
+import { Instagram, Facebook, Youtube } from './components/BrandIcons';
 
 const ProtectedRoute = ({ children }) => {
   const { currentUser } = useContext(AppContext);
