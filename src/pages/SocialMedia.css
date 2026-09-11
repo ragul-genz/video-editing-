@@ -127,15 +127,44 @@
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
+  .social-media-page {
+    padding: 20px 15px;
+    min-height: auto;
+  }
+
+  .social-header {
+    margin-bottom: 30px;
+  }
+
   .social-header h1 {
     font-size: 2rem;
   }
   
   .social-grid {
     grid-template-columns: 1fr;
+    gap: 20px;
   }
   
   .social-card {
-    padding: 25px;
+    padding: 20px;
+  }
+
+  .social-icon-wrapper {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 20px;
+  }
+
+  .social-icon-wrapper svg {
+    width: 30px;
+    height: 30px;
+  }
+
+  .social-content h2 {
+    font-size: 1.25rem;
+  }
+
+  .social-content p {
+    font-size: 0.9rem;
   }
 }
