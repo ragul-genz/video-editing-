@@ -217,13 +217,28 @@ const Cart = ({ isOpen, onClose, cartItems, cartTotal, clearCart, removeFromCart
           </div>
         )}
 
-        {/* --- STEP 0: Cart Items List --- */}
+        {/* --- STEP 0: Cart Items List (Professional UI) --- */}
         {checkoutStep === 0 && (
           <>
             <div className="cart-header">
-              <h3>Your Cart</h3>
-              <button className="close-cart" onClick={resetCart} title="Close Cart">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <div className="cart-header-title-wrap">
+                <div className="cart-header-icon-box">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="9" cy="21" r="1"></circle>
+                    <circle cx="20" cy="21" r="1"></circle>
+                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="cart-header-title">Your Cart</h3>
+                  <span className="cart-header-badge">
+                    {cartItems.length} {cartItems.length === 1 ? 'item' : 'items'}
+                  </span>
+                </div>
+              </div>
+
+              <button className="close-cart-btn" onClick={resetCart} title="Close Cart">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                   <line x1="18" y1="6" x2="6" y2="18"></line>
                   <line x1="6" y1="6" x2="18" y2="18"></line>
                 </svg>
@@ -232,53 +247,143 @@ const Cart = ({ isOpen, onClose, cartItems, cartTotal, clearCart, removeFromCart
 
             <div className="cart-items">
               {cartItems.length === 0 ? (
-                <div className="empty-cart">Your cart is empty.</div>
+                <div className="empty-cart-container">
+                  <div className="empty-cart-icon-bubble">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="9" cy="21" r="1"></circle>
+                      <circle cx="20" cy="21" r="1"></circle>
+                      <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                    </svg>
+                  </div>
+                  <h4 style={{ margin: '12px 0 6px 0', fontSize: '1.1rem', color: '#fff' }}>Your cart is empty</h4>
+                  <p style={{ margin: 0, fontSize: '0.88rem', color: 'var(--text-muted)', lineHeight: '1.4', maxWidth: '240px' }}>
+                    Explore our curated video editing packs and sound kits to upgrade your projects.
+                  </p>
+                  <button
+                    className="btn-primary"
+                    style={{ marginTop: '18px', padding: '10px 20px', fontSize: '0.85rem' }}
+                    onClick={onClose}
+                  >
+                    Browse Assets
+                  </button>
+                </div>
               ) : (
                 cartItems.map((item, index) => (
-                  <div key={index} className="cart-item">
-                    <div className="cart-item-icon">
+                  <div key={index} className="cart-item-card">
+                    {/* Fixed Size Thumbnail */}
+                    <div className="cart-item-thumb">
                       {item.image ? (
-                        <img src={item.image} alt={item.title} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '6px' }} />
+                        <img src={item.image} alt={item.title} className="cart-item-img" />
                       ) : (
-                        item.icon
+                        <div className="cart-item-placeholder">
+                          {item.icon || (
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                              <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                              <line x1="8" y1="21" x2="16" y2="21"></line>
+                              <line x1="12" y1="17" x2="12" y2="21"></line>
+                            </svg>
+                          )}
+                        </div>
                       )}
                     </div>
-                    <div className="cart-item-details" style={{ flex: 1 }}>
-                      <h4>{item.title}</h4>
-                      <p>{item.price}</p>
+
+                    {/* Clean Item Content */}
+                    <div className="cart-item-content">
+                      <div className="cart-item-tag-row">
+                        <span className="cart-item-tag">DIGITAL ASSET</span>
+                        <span className="cart-item-license">• Lifetime Access</span>
+                      </div>
+                      <h4 className="cart-item-title" title={item.title}>{item.title}</h4>
+                      <div className="cart-item-price-wrap">
+                        <span className="cart-item-price">{item.price}</span>
+                        <span className="cart-item-instant">Instant Download</span>
+                      </div>
                     </div>
+
+                    {/* Modern Trash Icon Button */}
                     <button
+                      className="cart-item-remove-btn"
                       onClick={() => removeFromCart(item.id)}
-                      style={{ background: 'transparent', border: 'none', color: '#ff0054', fontSize: '1.2rem', cursor: 'pointer', padding: '5px' }}
-                      title="Remove from cart"
+                      title="Remove item"
+                      aria-label="Remove item"
                     >
-                      ✖
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                        <line x1="10" y1="11" x2="10" y2="17"></line>
+                        <line x1="14" y1="11" x2="14" y2="17"></line>
+                      </svg>
                     </button>
                   </div>
                 ))
               )}
             </div>
 
-            <div className="cart-footer">
-              <div className="cart-total">
-                <span>Total:</span>
-                <span>₹{cartTotal.toFixed(2)}</span>
+            {/* Footer Breakdown */}
+            {cartItems.length > 0 && (
+              <div className="cart-footer">
+                <div className="cart-summary-box">
+                  <div className="summary-row">
+                    <span>Subtotal</span>
+                    <span>₹{cartTotal.toFixed(2)}</span>
+                  </div>
+                  <div className="summary-row">
+                    <span>Delivery</span>
+                    <span style={{ color: '#27c93f', fontWeight: '600' }}>Instant (Free)</span>
+                  </div>
+                  <div className="summary-divider"></div>
+                  <div className="summary-row total-row">
+                    <span>Total Amount</span>
+                    <span className="total-amount">₹{cartTotal.toFixed(2)}</span>
+                  </div>
+                </div>
+
+                <button
+                  className="btn-primary checkout-btn"
+                  onClick={handleProceedToPayment}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                  </svg>
+                  <span>Proceed to Checkout</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                    <polyline points="12 5 19 12 12 19"></polyline>
+                  </svg>
+                </button>
+
+                <div className="cart-trust-badges">
+                  <span>🔒 256-Bit SSL Checkout</span>
+                  <span>•</span>
+                  <span>⚡ Instant Google Drive Files</span>
+                </div>
               </div>
-              <button className="btn-primary checkout-btn" disabled={cartItems.length === 0} onClick={handleProceedToPayment}>
-                Proceed to Checkout
-              </button>
-            </div>
+            )}
           </>
         )}
 
-        {/* --- STEP 1: Razorpay Payment Gateway (Sole Payment Method) --- */}
+        {/* --- STEP 1: Razorpay Payment Gateway --- */}
         {checkoutStep === 1 && (
           <div className="checkout-payment" style={{ overflowY: 'auto' }}>
             <div className="cart-header">
-              <h3>Secure Checkout</h3>
-              <button className="close-cart" onClick={() => setCheckoutStep(0)} title="Back to Cart">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="15 18 9 12 15 6"></polyline>
+              <div className="cart-header-title-wrap">
+                <button className="back-step-btn" onClick={() => setCheckoutStep(0)} title="Back to Cart">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                  </svg>
+                </button>
+                <div>
+                  <h3 className="cart-header-title">Checkout</h3>
+                  <span className="cart-header-badge">Step 2 of 2</span>
+                </div>
+              </div>
+
+              <button className="close-cart-btn" onClick={resetCart} title="Close">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
                 </svg>
               </button>
             </div>
@@ -286,8 +391,8 @@ const Cart = ({ isOpen, onClose, cartItems, cartTotal, clearCart, removeFromCart
             {/* Order Summary Pill */}
             <div style={{ margin: '15px 20px 0 20px', padding: '14px 18px', borderRadius: '12px', background: 'rgba(255, 255, 255, 0.04)', border: '1px solid var(--glass-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
-                <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block' }}>Purchasing {cartItems.length} Asset(s)</span>
-                <span style={{ fontSize: '0.85rem', color: '#00e5ff' }}>User: {currentUser?.email}</span>
+                <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)', display: 'block' }}>Order of {cartItems.length} Asset(s)</span>
+                <span style={{ fontSize: '0.85rem', color: '#00e5ff', fontWeight: '500' }}>{currentUser?.email}</span>
               </div>
               <div style={{ textAlign: 'right' }}>
                 <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block' }}>Amount to Pay</span>
