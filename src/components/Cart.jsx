@@ -512,7 +512,7 @@ const Cart = ({ isOpen, onClose, cartItems, cartTotal, clearCart, removeFromCart
                       type="tel"
                       value={formData.phone}
                       onChange={e => setFormData({ ...formData, phone: e.target.value })}
-                      placeholder="+91 98765 43210"
+                      placeholder="Enter a number"
                       className="checkout-input"
                     />
                   </div>
