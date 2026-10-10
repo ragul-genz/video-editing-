@@ -3,7 +3,7 @@ import { AppContext } from '../context/AppContext';
 
 
 const MyOrders = () => {
-  const { orders, currentUser, addReview, addToast, reviews } = useContext(AppContext);
+  const { orders, currentUser, addReview, addToast, reviews, products } = useContext(AppContext);
   const [reviewModalOpen, setReviewModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [rating, setRating] = useState(5);
@@ -94,19 +94,42 @@ const MyOrders = () => {
                       
                       {order.items.map((item, i) => {
                         const hasReviewed = reviews.some(r => r.productId === item.id && r.userEmail === currentUser?.email);
+                        const downloadUrl = item.driveLink || products?.find(p => p.id === item.id || p.title === item.title)?.driveLink || 'https://drive.google.com';
+
                         return (
-                          <div key={i} style={{ display: 'flex', gap: '10px', flexDirection: 'column' }}>
-                            {hasReviewed ? (
-                              <a href={item.driveLink || 'https://drive.google.com'} target="_blank" rel="noopener noreferrer" className="btn-primary" style={{ display: 'inline-block', padding: '10px 16px', fontSize: '0.9rem', textAlign: 'center', textDecoration: 'none' }}>
-                                Download {item.title}
-                              </a>
-                            ) : (
+                          <div key={i} style={{ display: 'flex', gap: '8px', flexDirection: 'column', alignItems: 'flex-end', marginBottom: '8px' }}>
+                            <a 
+                              href={downloadUrl} 
+                              target="_blank" 
+                              rel="noopener noreferrer" 
+                              className="btn-primary" 
+                              style={{ 
+                                display: 'inline-flex', 
+                                alignItems: 'center', 
+                                gap: '8px', 
+                                padding: '10px 18px', 
+                                fontSize: '0.9rem', 
+                                textAlign: 'center', 
+                                textDecoration: 'none',
+                                background: 'linear-gradient(135deg, #00e5ff, #0088ff)',
+                                color: '#000',
+                                fontWeight: '700',
+                                borderRadius: '8px',
+                                boxShadow: '0 4px 12px rgba(0, 229, 255, 0.3)'
+                              }}
+                            >
+                              <span>📥 Download {item.title}</span>
+                            </a>
+                            
+                            {!hasReviewed ? (
                               <button 
                                 onClick={() => openReviewModal(item)}
-                                style={{ background: 'transparent', border: '1px solid var(--primary)', color: 'var(--primary)', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', transition: '0.3s' }}
+                                style={{ background: 'transparent', border: '1px solid rgba(255, 255, 255, 0.2)', color: 'var(--text-muted)', padding: '5px 12px', borderRadius: '6px', cursor: 'pointer', fontSize: '0.8rem', transition: '0.2s' }}
                               >
-                                ⭐ Write a Review to Unlock Download
+                                ⭐ Leave a Review
                               </button>
+                            ) : (
+                              <span style={{ fontSize: '0.75rem', color: '#27c93f' }}>✓ Reviewed</span>
                             )}
                           </div>
                         );

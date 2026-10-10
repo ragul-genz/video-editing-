@@ -22,19 +22,15 @@ const loadRazorpayScript = () => {
 };
 
 const Cart = ({ isOpen, onClose, cartItems, cartTotal, clearCart, removeFromCart }) => {
-  const [checkoutStep, setCheckoutStep] = useState(0); // 0: Cart items, 1: Checkout/Payment, 2: Success, 3: WhatsApp
-  const [paymentTab, setPaymentTab] = useState('razorpay'); // 'razorpay' | 'manual'
+  const [checkoutStep, setCheckoutStep] = useState(0); // 0: Cart items, 1: Razorpay Payment, 2: Success
   const [isLoading, setIsLoading] = useState(false);
   const [loadingText, setLoadingText] = useState('Processing...');
-  const [isWaitingForReturn, setIsWaitingForReturn] = useState(false);
   const { addOrder, currentUser, addToast, API_URL } = useContext(AppContext);
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     name: '',
-    phone: '',
-    paymentMethod: 'Razorpay',
-    transactionId: ''
+    phone: ''
   });
 
   useEffect(() => {
@@ -45,37 +41,6 @@ const Cart = ({ isOpen, onClose, cartItems, cartTotal, clearCart, removeFromCart
       }));
     }
   }, [currentUser]);
-
-  useEffect(() => {
-    const handleFocus = () => {
-      if (isWaitingForReturn) {
-        setIsWaitingForReturn(false);
-        setCheckoutStep(2);
-
-        // Wait for animation then navigate
-        setTimeout(() => {
-          clearCart();
-          setCheckoutStep(0);
-          setFormData({ name: '', phone: '', paymentMethod: 'Razorpay', transactionId: '' });
-          onClose();
-          navigate('/my-orders');
-        }, 3000);
-      }
-    };
-
-    window.addEventListener('focus', handleFocus);
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        handleFocus();
-      }
-    };
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-
-    return () => {
-      window.removeEventListener('focus', handleFocus);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
-  }, [isWaitingForReturn]);
 
   const handleProceedToPayment = () => {
     if (!currentUser) {
@@ -88,7 +53,9 @@ const Cart = ({ isOpen, onClose, cartItems, cartTotal, clearCart, removeFromCart
   };
 
   // --- Online Razorpay Payment Flow ---
-  const handleRazorpayPayment = async () => {
+  const handleRazorpayPayment = async (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+
     if (!currentUser) {
       addToast("Please login before checkout.", "error");
       onClose();
@@ -109,7 +76,7 @@ const Cart = ({ isOpen, onClose, cartItems, cartTotal, clearCart, removeFromCart
     }
 
     try {
-      // 1. Try to create order on server
+      // 1. Try to create server-side order
       let serverOrderData = null;
       try {
         const orderRes = await axios.post(`${API_URL}/payment/create-order`, {
@@ -132,7 +99,7 @@ const Cart = ({ isOpen, onClose, cartItems, cartTotal, clearCart, removeFromCart
         amount: amountPaise,
         currency: serverOrderData?.currency || 'INR',
         name: 'DS3 STUDIO',
-        description: `Order of ${cartItems.length} digital asset(s)`,
+        description: `Order for ${cartItems.length} digital asset(s)`,
         image: '/ds3_logo.jpg',
         order_id: serverOrderData?.orderId || undefined,
         prefill: {
@@ -148,18 +115,24 @@ const Cart = ({ isOpen, onClose, cartItems, cartTotal, clearCart, removeFromCart
           color: '#00e5ff'
         },
         handler: async function (response) {
-          setLoadingText("Verifying Payment & Confirming Order...");
+          setLoadingText("Verifying Payment & Unlocking Assets...");
           setIsLoading(true);
 
           const generatedOrderId = Date.now().toString().slice(-6);
           const paymentId = response.razorpay_payment_id;
 
+          // Save each purchased asset with its download link
           const newOrder = {
             id: generatedOrderId,
             date: new Date().toISOString(),
             total: `₹${cartTotal.toFixed(2)}`,
-            items: [...cartItems],
-            status: 'Approved', // Auto-approved upon verified Razorpay payment!
+            items: cartItems.map(item => ({
+              id: item.id || '',
+              title: item.title,
+              price: item.price,
+              driveLink: item.driveLink || ''
+            })),
+            status: 'Approved', // Auto-approved immediately upon payment!
             name: customerName,
             paymentMethod: 'Razorpay',
             transactionId: paymentId,
@@ -180,11 +153,11 @@ const Cart = ({ isOpen, onClose, cartItems, cartTotal, clearCart, removeFromCart
               });
               await addOrder(newOrder);
             } else {
-              // Direct order confirmation
+              // Direct order creation
               await addOrder(newOrder);
             }
           } catch (err) {
-            console.warn("Server verification issue, falling back to direct order save:", err);
+            console.warn("Server verification warning, saving order directly:", err);
             try {
               await addOrder(newOrder);
             } catch (saveErr) {
@@ -198,16 +171,16 @@ const Cart = ({ isOpen, onClose, cartItems, cartTotal, clearCart, removeFromCart
           setTimeout(() => {
             clearCart();
             setCheckoutStep(0);
-            setFormData({ name: '', phone: '', paymentMethod: 'Razorpay', transactionId: '' });
+            setFormData({ name: '', phone: '' });
             onClose();
             navigate('/my-orders');
-            addToast("Payment successful! Your order has been approved.", "success");
-          }, 3000);
+            addToast("Payment successful! Your purchased assets are ready for download.", "success");
+          }, 2500);
         },
         modal: {
           ondismiss: function () {
             setIsLoading(false);
-            addToast("Payment cancelled.", "info");
+            addToast("Payment window closed.", "info");
           }
         }
       };
@@ -226,46 +199,6 @@ const Cart = ({ isOpen, onClose, cartItems, cartTotal, clearCart, removeFromCart
       console.error("Razorpay payment error:", err);
       addToast("Failed to initiate payment gateway. Please try again.", "error");
     }
-  };
-
-  // --- Manual UPI / QR Code Fallback Flow ---
-  const handleManualPaymentSubmit = (e) => {
-    e.preventDefault();
-    setLoadingText("Processing Order...");
-    setIsLoading(true);
-
-    setTimeout(async () => {
-      const newOrder = {
-        id: Date.now().toString().slice(-6),
-        date: new Date().toISOString(),
-        total: `₹${cartTotal.toFixed(2)}`,
-        items: [...cartItems],
-        status: 'Pending',
-        name: formData.name || (currentUser?.email ? currentUser.email.split('@')[0] : 'Customer'),
-        paymentMethod: formData.paymentMethod || 'Manual UPI',
-        transactionId: formData.transactionId,
-        userEmail: currentUser?.email
-      };
-
-      try {
-        await addOrder(newOrder);
-      } catch (err) {
-        addToast("Failed to save order. Please try again.", "error");
-        setIsLoading(false);
-        return;
-      }
-
-      setIsLoading(false);
-
-      const itemsList = cartItems.map(i => i.title).join(", ");
-      const message = `Hello! I just made a manual payment for an order on DS3 Studio.\n\n*Name:* ${formData.name}\n*Email:* ${currentUser?.email}\n*Payment Method:* ${formData.paymentMethod}\n*Transaction ID:* ${formData.transactionId}\n*Amount:* ₹${cartTotal.toFixed(2)}\n*Items:* ${itemsList}\n\nPlease approve my order so I can download the files!`;
-
-      const whatsappUrl = `https://wa.me/919611015006?text=${encodeURIComponent(message)}`;
-      window.open(whatsappUrl, '_blank');
-
-      setCheckoutStep(3);
-      setIsWaitingForReturn(true);
-    }, 1200);
   };
 
   const resetCart = () => {
@@ -338,11 +271,11 @@ const Cart = ({ isOpen, onClose, cartItems, cartTotal, clearCart, removeFromCart
           </>
         )}
 
-        {/* --- STEP 1: Payment Selection --- */}
+        {/* --- STEP 1: Razorpay Payment Gateway (Sole Payment Method) --- */}
         {checkoutStep === 1 && (
           <div className="checkout-payment" style={{ overflowY: 'auto' }}>
             <div className="cart-header">
-              <h3>Checkout & Pay</h3>
+              <h3>Secure Checkout</h3>
               <button className="close-cart" onClick={() => setCheckoutStep(0)} title="Back to Cart">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="15 18 9 12 15 6"></polyline>
@@ -351,56 +284,38 @@ const Cart = ({ isOpen, onClose, cartItems, cartTotal, clearCart, removeFromCart
             </div>
 
             {/* Order Summary Pill */}
-            <div style={{ margin: '15px 20px 0 20px', padding: '12px 16px', borderRadius: '12px', background: 'rgba(255, 255, 255, 0.04)', border: '1px solid var(--glass-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ margin: '15px 20px 0 20px', padding: '14px 18px', borderRadius: '12px', background: 'rgba(255, 255, 255, 0.04)', border: '1px solid var(--glass-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
-                <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block' }}>Items: {cartItems.length}</span>
-                <span style={{ fontSize: '0.85rem', color: '#00e5ff' }}>Logged in as: {currentUser?.email}</span>
+                <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block' }}>Purchasing {cartItems.length} Asset(s)</span>
+                <span style={{ fontSize: '0.85rem', color: '#00e5ff' }}>User: {currentUser?.email}</span>
               </div>
               <div style={{ textAlign: 'right' }}>
-                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block' }}>Total Payable</span>
-                <strong style={{ fontSize: '1.3rem', color: '#fff' }}>₹{cartTotal.toFixed(2)}</strong>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block' }}>Amount to Pay</span>
+                <strong style={{ fontSize: '1.35rem', color: '#fff' }}>₹{cartTotal.toFixed(2)}</strong>
               </div>
             </div>
 
-            {/* Payment Method Switch Tabs */}
-            <div className="payment-tabs">
-              <button
-                type="button"
-                className={`payment-tab-btn ${paymentTab === 'razorpay' ? 'active' : ''}`}
-                onClick={() => setPaymentTab('razorpay')}
-              >
-                <span>⚡ Razorpay Online</span>
-              </button>
-              <button
-                type="button"
-                className={`payment-tab-btn ${paymentTab === 'manual' ? 'active' : ''}`}
-                onClick={() => setPaymentTab('manual')}
-              >
-                <span>Manual UPI / QR</span>
-              </button>
-            </div>
-
-            {/* Tab A: Razorpay Online Payment */}
-            {paymentTab === 'razorpay' && (
-              <div className="razorpay-box">
-                <div className="razorpay-card">
-                  <div className="razorpay-badge">
-                    <span>● Instant Access</span>
-                  </div>
-                  <h4 style={{ margin: '0 0 6px 0', color: '#fff', fontSize: '1.1rem' }}>Razorpay Payment Gateway</h4>
-                  <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: '1.4' }}>
-                    Pay securely using UPI, Cards, or NetBanking. Once payment succeeds, your download links are unlocked instantly!
-                  </p>
-                  
-                  <div className="razorpay-methods-list">
-                    <span className="method-tag">Google Pay</span>
-                    <span className="method-tag">PhonePe</span>
-                    <span className="method-tag">Paytm UPI</span>
-                    <span className="method-tag">Credit / Debit Card</span>
-                    <span className="method-tag">Net Banking</span>
-                  </div>
+            {/* Razorpay Gateway Box */}
+            <div className="razorpay-box">
+              <div className="razorpay-card">
+                <div className="razorpay-badge">
+                  <span>● Automated Instant Download</span>
                 </div>
+                <h4 style={{ margin: '0 0 6px 0', color: '#fff', fontSize: '1.15rem' }}>Razorpay Payment Gateway</h4>
+                <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: '1.4' }}>
+                  Pay via any UPI app, Card, or NetBanking. Once payment is made, your purchased assets are unlocked for immediate download in your account!
+                </p>
 
+                <div className="razorpay-methods-list">
+                  <span className="method-tag">Google Pay</span>
+                  <span className="method-tag">PhonePe</span>
+                  <span className="method-tag">Paytm UPI</span>
+                  <span className="method-tag">Credit / Debit Cards</span>
+                  <span className="method-tag">Net Banking</span>
+                </div>
+              </div>
+
+              <form onSubmit={handleRazorpayPayment} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                 <div className="form-group">
                   <label>Full Name</label>
                   <input
@@ -423,76 +338,25 @@ const Cart = ({ isOpen, onClose, cartItems, cartTotal, clearCart, removeFromCart
                 </div>
 
                 <button
-                  type="button"
+                  type="submit"
                   className="razorpay-submit-btn"
-                  onClick={handleRazorpayPayment}
+                  style={{ marginTop: '5px' }}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                     <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
                   </svg>
                   Pay ₹{cartTotal.toFixed(2)} with Razorpay
                 </button>
+              </form>
 
-                <div className="security-footer">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                  </svg>
-                  <span>256-Bit SSL Encrypted Razorpay Checkout</span>
-                </div>
+              <div className="security-footer">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+                <span>256-Bit SSL Encrypted Razorpay Checkout</span>
               </div>
-            )}
-
-            {/* Tab B: Manual UPI / QR Code Fallback */}
-            {paymentTab === 'manual' && (
-              <div style={{ padding: '0 20px 20px 20px' }}>
-                <div style={{ textAlign: 'center', marginTop: '10px' }}>
-                  <div className="glass-panel" style={{ padding: '15px', marginBottom: '15px', background: 'rgba(255,255,255,0.05)' }}>
-                    <h4 style={{ color: 'var(--primary)', marginBottom: '10px' }}>Pay via UPI QR</h4>
-                    <img src="/payment_qr.jpg" alt="Payment QR Code" style={{ width: '100%', maxWidth: '180px', borderRadius: '10px', marginBottom: '10px' }} />
-                    <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>UPI ID: sujaynayar@oksbi</p>
-                  </div>
-
-                  <div className="glass-panel" style={{ padding: '12px', marginBottom: '15px', textAlign: 'left', background: 'rgba(255,255,255,0.05)', fontSize: '0.85rem' }}>
-                    <h5 style={{ color: 'var(--primary)', marginBottom: '5px' }}>Bank Transfer Details</h5>
-                    <p style={{ margin: '3px 0' }}><strong>Name:</strong> Sujay J</p>
-                    <p style={{ margin: '3px 0' }}><strong>Account No:</strong> 40264044813</p>
-                    <p style={{ margin: '3px 0' }}><strong>IFSC:</strong> SBIN0000876</p>
-                  </div>
-                </div>
-
-                <form className="payment-form" onSubmit={handleManualPaymentSubmit} style={{ padding: 0 }}>
-                  <h4 style={{ marginBottom: '8px', color: 'white', fontSize: '0.95rem' }}>Submit Manual Payment Proof</h4>
-
-                  <div className="form-group">
-                    <label>Your Name</label>
-                    <input type="text" required value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} placeholder="John Doe" />
-                  </div>
-
-                  <div className="form-group">
-                    <label>Payment Method</label>
-                    <select
-                      required
-                      value={formData.paymentMethod}
-                      onChange={e => setFormData({ ...formData, paymentMethod: e.target.value })}
-                      style={{ padding: '12px', borderRadius: '8px', border: '1px solid var(--glass-border)', background: 'rgba(0,0,0,0.5)', color: 'white', fontFamily: 'inherit' }}
-                    >
-                      <option value="UPI / GPay">UPI / GPay / PhonePe</option>
-                      <option value="Bank Transfer">Bank Transfer (NEFT/IMPS)</option>
-                    </select>
-                  </div>
-
-                  <div className="form-group">
-                    <label>Transaction ID / UTR No.</label>
-                    <input type="text" required value={formData.transactionId} onChange={e => setFormData({ ...formData, transactionId: e.target.value })} placeholder="12-digit number" />
-                  </div>
-
-                  <button type="submit" className="btn-primary checkout-btn mt-4" style={{ marginTop: '15px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px' }}>
-                    Submit & WhatsApp Owner
-                  </button>
-                </form>
-              </div>
-            )}
+            </div>
           </div>
         )}
 
@@ -507,7 +371,7 @@ const Cart = ({ isOpen, onClose, cartItems, cartTotal, clearCart, removeFromCart
             </svg>
             <h2 style={{ marginTop: '20px', color: 'var(--primary)', animation: 'fadeInUp 0.5s ease-out forwards', opacity: 0 }}>Payment Successful!</h2>
             <p style={{ marginTop: '10px', color: 'var(--text-muted)', animation: 'fadeInUp 0.5s ease-out 0.2s forwards', opacity: 0 }}>
-              Order Approved! Redirecting to your Orders...
+              Order Approved! Redirecting to your Orders & Downloads...
             </p>
             <style>{`
               .success-checkmark {
@@ -549,31 +413,6 @@ const Cart = ({ isOpen, onClose, cartItems, cartTotal, clearCart, removeFromCart
               @keyframes fadeInUp {
                 from { opacity: 0; transform: translateY(20px); }
                 to { opacity: 1; transform: translateY(0); }
-              }
-            `}</style>
-          </div>
-        )}
-
-        {/* --- STEP 3: Manual WhatsApp Waiting Screen --- */}
-        {checkoutStep === 3 && (
-          <div style={{
-            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', padding: '20px', textAlign: 'center'
-          }}>
-            <div style={{
-              width: '60px',
-              height: '60px',
-              border: '4px solid rgba(39, 201, 63, 0.2)',
-              borderTopColor: '#27c93f',
-              borderRadius: '50%',
-              animation: 'spin 1s linear infinite'
-            }}></div>
-            <h2 style={{ marginTop: '20px', color: 'var(--primary)' }}>WhatsApp Opened!</h2>
-            <p style={{ marginTop: '10px', color: 'var(--text-muted)' }}>
-              Please send the message to the owner in the new tab, then <strong>return to this tab</strong> to complete your order.
-            </p>
-            <style>{`
-              @keyframes spin {
-                to { transform: rotate(360deg); }
               }
             `}</style>
           </div>
