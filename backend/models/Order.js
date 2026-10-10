@@ -10,6 +10,9 @@ const orderSchema = new mongoose.Schema({
   transactionId: { type: String, required: true },
   userEmail: { type: String, required: true },
   deliveryLink: { type: String }, // For custom video edits delivered by Admin
+  razorpayOrderId: { type: String },
+  razorpayPaymentId: { type: String },
+  razorpaySignature: { type: String },
   items: [{
     id: { type: String },
     title: { type: String },
