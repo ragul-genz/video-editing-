@@ -391,115 +391,400 @@
   color: var(--text-muted);
 }
 
-/* --- Checkout Payment Page Styles --- */
+/* --- Checkout Payment Page Styles (Luxury Fintech UI) --- */
 .checkout-payment {
   display: flex;
   flex-direction: column;
   height: 100%;
 }
 
-.razorpay-box {
-  padding: 20px;
+.checkout-body {
+  padding: 16px 22px 30px 22px;
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 16px;
 }
 
-.razorpay-card {
-  background: linear-gradient(135deg, rgba(0, 229, 255, 0.08), rgba(99, 102, 241, 0.08));
-  border: 1px solid rgba(0, 229, 255, 0.3);
-  border-radius: 14px;
-  padding: 18px;
-  text-align: left;
+/* 1. Order Summary Card */
+.checkout-summary-card {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.015) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 14px 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
 }
 
-.razorpay-badge {
+.checkout-summary-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.checkout-summary-badge {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 10px;
-  border-radius: 20px;
-  background: rgba(39, 201, 63, 0.15);
-  color: #27c93f;
-  font-size: 0.75rem;
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: #00e5ff;
+  letter-spacing: 0.6px;
+  background: rgba(0, 229, 255, 0.1);
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+.checkout-account-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  background: rgba(255, 255, 255, 0.05);
+  padding: 3px 8px;
+  border-radius: 10px;
+  max-width: 170px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.checkout-items-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 130px;
+  overflow-y: auto;
+}
+
+.checkout-mini-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 8px 10px;
+  border-radius: 10px;
+}
+
+.checkout-mini-thumb {
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #000;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.checkout-mini-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.checkout-mini-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.checkout-mini-name {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.checkout-mini-desc {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+}
+
+.checkout-mini-price {
+  font-size: 0.88rem;
   font-weight: 700;
-  text-transform: uppercase;
+  color: #00e5ff;
+  white-space: nowrap;
+}
+
+.checkout-summary-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.08);
+  margin: 12px 0 10px 0;
+}
+
+.checkout-summary-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.checkout-total-subtitle {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  display: block;
+}
+
+.checkout-free-delivery {
+  font-size: 0.7rem;
+  color: #27c93f;
+  font-weight: 600;
+}
+
+.checkout-total-val {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #00e5ff;
+  letter-spacing: -0.3px;
+}
+
+/* 2. Gateway Showcase Card */
+.checkout-gateway-card {
+  background: linear-gradient(135deg, rgba(0, 229, 255, 0.06) 0%, rgba(0, 136, 255, 0.02) 100%);
+  border: 1px solid rgba(0, 229, 255, 0.22);
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 4px 20px rgba(0, 229, 255, 0.06);
+}
+
+.gateway-top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 10px;
 }
 
-.razorpay-methods-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 12px;
+.gateway-brand-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #00e5ff;
+  background: rgba(0, 229, 255, 0.12);
+  padding: 3px 9px;
+  border-radius: 12px;
+  letter-spacing: 0.3px;
 }
 
-.method-tag {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 4px 10px;
-  border-radius: 6px;
+.gateway-pulse-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #00e5ff;
+  box-shadow: 0 0 8px #00e5ff;
+  animation: pulseDot 2s infinite ease-in-out;
+}
+
+@keyframes pulseDot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.85); }
+}
+
+.instant-unlock-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #27c93f;
+  background: rgba(39, 201, 63, 0.12);
+  padding: 3px 8px;
+  border-radius: 10px;
+}
+
+.gateway-title {
+  font-size: 0.96rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 4px 0;
+}
+
+.gateway-subtitle {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin: 0 0 12px 0;
+  line-height: 1.45;
+}
+
+.gateway-methods-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 7px;
+}
+
+.method-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  padding: 7px 11px;
+  border-radius: 9px;
   font-size: 0.78rem;
   color: #ddd;
+  font-weight: 500;
+  transition: all 0.2s ease;
 }
 
-.razorpay-submit-btn {
-  width: 100%;
-  padding: 14px;
-  font-size: 1.05rem;
-  font-weight: 700;
-  background: linear-gradient(135deg, #00e5ff, #0088ff);
-  color: #000;
-  border: none;
-  border-radius: 12px;
-  cursor: pointer;
-  box-shadow: 0 4px 15px rgba(0, 229, 255, 0.4);
-  transition: all 0.25s ease;
+.method-pill:hover {
+  border-color: rgba(0, 229, 255, 0.35);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.method-pill-icon {
+  font-size: 0.95rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
 }
 
-.razorpay-submit-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 229, 255, 0.6);
-}
-
-.security-footer {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  font-size: 0.75rem;
-  color: var(--text-muted);
-  margin-top: 5px;
-}
-
-.form-group {
+/* 3. Input Groups */
+.checkout-form {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 13px;
+}
+
+.checkout-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
   text-align: left;
 }
 
-.form-group label {
-  font-size: 0.9rem;
+.checkout-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.checkout-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.checkout-label-hint {
+  font-size: 0.7rem;
   color: var(--text-muted);
 }
 
-.form-group input {
-  padding: 12px;
-  border-radius: 8px;
-  border: 1px solid var(--glass-border);
-  background: rgba(0, 0, 0, 0.2);
-  color: white;
-  font-family: inherit;
+.checkout-input-field-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
 }
 
-.form-group input:focus {
+.checkout-input-icon {
+  position: absolute;
+  left: 14px;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+  transition: color 0.2s ease;
+}
+
+.checkout-input {
+  width: 100%;
+  padding: 13px 14px 13px 44px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.035);
+  color: #fff;
+  font-size: 0.92rem;
+  font-family: inherit;
+  transition: all 0.2s ease;
+}
+
+.checkout-input:focus {
   outline: none;
-  border-color: var(--primary);
+  border-color: #00e5ff;
+  background: rgba(0, 229, 255, 0.02);
+  box-shadow: 0 0 0 3px rgba(0, 229, 255, 0.18);
+}
+
+.checkout-input-field-wrap:focus-within .checkout-input-icon {
+  color: #00e5ff;
+}
+
+/* 4. Luxury Pay Button */
+.checkout-pay-btn {
+  width: 100%;
+  height: 52px;
+  border-radius: 13px;
+  background: linear-gradient(135deg, #00e5ff 0%, #0088ff 100%);
+  color: #000;
+  border: none;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 18px;
+  box-shadow: 0 8px 24px rgba(0, 229, 255, 0.35);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  margin-top: 4px;
+}
+
+.checkout-pay-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 32px rgba(0, 229, 255, 0.55);
+}
+
+.checkout-pay-btn:active {
+  transform: scale(0.98);
+}
+
+.checkout-pay-btn-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.checkout-pay-btn-text {
+  flex: 1;
+  text-align: center;
+  font-size: 1.02rem;
+}
+
+.checkout-pay-btn-arrow {
+  transition: transform 0.2s ease;
+}
+
+.checkout-pay-btn:hover .checkout-pay-btn-arrow {
+  transform: translateX(3px);
+}
+
+/* 5. Trust Strip */
+.checkout-trust-strip {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.74rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.trust-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.trust-dot {
+  color: rgba(255, 255, 255, 0.2);
 }
 
 @media (max-width: 480px) {
@@ -508,3 +793,4 @@
     border-radius: 0;
   }
 }
+

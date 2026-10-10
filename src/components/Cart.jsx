@@ -363,7 +363,7 @@ const Cart = ({ isOpen, onClose, cartItems, cartTotal, clearCart, removeFromCart
           </>
         )}
 
-        {/* --- STEP 1: Razorpay Payment Gateway --- */}
+        {/* --- STEP 1: Razorpay Payment Gateway (Luxury Fintech UI) --- */}
         {checkoutStep === 1 && (
           <div className="checkout-payment" style={{ overflowY: 'auto' }}>
             <div className="cart-header">
@@ -376,7 +376,7 @@ const Cart = ({ isOpen, onClose, cartItems, cartTotal, clearCart, removeFromCart
                 </button>
                 <div>
                   <h3 className="cart-header-title">Checkout</h3>
-                  <span className="cart-header-badge">Step 2 of 2</span>
+                  <span className="cart-header-badge">Step 2 of 2 • Secure Payment</span>
                 </div>
               </div>
 
@@ -388,78 +388,170 @@ const Cart = ({ isOpen, onClose, cartItems, cartTotal, clearCart, removeFromCart
               </button>
             </div>
 
-            {/* Order Summary Pill */}
-            <div style={{ margin: '15px 20px 0 20px', padding: '14px 18px', borderRadius: '12px', background: 'rgba(255, 255, 255, 0.04)', border: '1px solid var(--glass-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div>
-                <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)', display: 'block' }}>Order of {cartItems.length} Asset(s)</span>
-                <span style={{ fontSize: '0.85rem', color: '#00e5ff', fontWeight: '500' }}>{currentUser?.email}</span>
-              </div>
-              <div style={{ textAlign: 'right' }}>
-                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block' }}>Amount to Pay</span>
-                <strong style={{ fontSize: '1.35rem', color: '#fff' }}>₹{cartTotal.toFixed(2)}</strong>
-              </div>
-            </div>
+            <div className="checkout-body">
+              {/* Luxury Order Summary Box with Item Previews */}
+              <div className="checkout-summary-card">
+                <div className="checkout-summary-header">
+                  <div className="checkout-summary-badge">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                      <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                      <line x1="3" y1="6" x2="21" y2="6"></line>
+                      <path d="M16 10a4 4 0 0 1-8 0"></path>
+                    </svg>
+                    <span>PURCHASING {cartItems.length} ASSET{cartItems.length > 1 ? 'S' : ''}</span>
+                  </div>
 
-            {/* Razorpay Gateway Box */}
-            <div className="razorpay-box">
-              <div className="razorpay-card">
-                <div className="razorpay-badge">
-                  <span>● Automated Instant Download</span>
+                  <div className="checkout-account-chip" title={currentUser?.email}>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                      <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                    <span>{currentUser?.email}</span>
+                  </div>
                 </div>
-                <h4 style={{ margin: '0 0 6px 0', color: '#fff', fontSize: '1.15rem' }}>Razorpay Payment Gateway</h4>
-                <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: '1.4' }}>
-                  Pay via any UPI app, Card, or NetBanking. Once payment is made, your purchased assets are unlocked for immediate download in your account!
+
+                {/* Items Mini Preview */}
+                <div className="checkout-items-preview">
+                  {cartItems.map((item, idx) => (
+                    <div key={idx} className="checkout-mini-item">
+                      <div className="checkout-mini-thumb">
+                        {item.image ? (
+                          <img src={item.image} alt={item.title} />
+                        ) : (
+                          <span>📦</span>
+                        )}
+                      </div>
+                      <div className="checkout-mini-info">
+                        <span className="checkout-mini-name">{item.title}</span>
+                        <span className="checkout-mini-desc">1x Digital License • GDrive</span>
+                      </div>
+                      <span className="checkout-mini-price">{item.price}</span>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="checkout-summary-divider"></div>
+
+                <div className="checkout-summary-footer">
+                  <div>
+                    <span className="checkout-total-subtitle">Total Amount</span>
+                    <span className="checkout-free-delivery">⚡ Direct to Google Drive</span>
+                  </div>
+                  <div className="checkout-total-val">₹{cartTotal.toFixed(2)}</div>
+                </div>
+              </div>
+
+              {/* Gateway Brand Showcase Card */}
+              <div className="checkout-gateway-card">
+                <div className="gateway-top-bar">
+                  <div className="gateway-brand-badge">
+                    <span className="gateway-pulse-dot"></span>
+                    <span className="gateway-brand-name">Razorpay Verified</span>
+                  </div>
+                  <span className="instant-unlock-badge">⚡ Instant Unlock</span>
+                </div>
+
+                <h4 className="gateway-title">All Payment Methods Supported</h4>
+                <p className="gateway-subtitle">
+                  Pay with any Indian UPI app, Debit/Credit Card, or NetBanking. Once authorized, files unlock in your account.
                 </p>
 
-                <div className="razorpay-methods-list">
-                  <span className="method-tag">Google Pay</span>
-                  <span className="method-tag">PhonePe</span>
-                  <span className="method-tag">Paytm UPI</span>
-                  <span className="method-tag">Credit / Debit Cards</span>
-                  <span className="method-tag">Net Banking</span>
+                <div className="gateway-methods-grid">
+                  <div className="method-pill upi">
+                    <span className="method-pill-icon">📱</span>
+                    <span>UPI (GPay / PhonePe / Paytm)</span>
+                  </div>
+                  <div className="method-pill card">
+                    <span className="method-pill-icon">💳</span>
+                    <span>Cards (Visa, RuPay, MC)</span>
+                  </div>
+                  <div className="method-pill netbanking">
+                    <span className="method-pill-icon">🏦</span>
+                    <span>Net Banking & Wallets</span>
+                  </div>
                 </div>
               </div>
 
-              <form onSubmit={handleRazorpayPayment} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                <div className="form-group">
-                  <label>Full Name</label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.name}
-                    onChange={e => setFormData({ ...formData, name: e.target.value })}
-                    placeholder="Enter your name"
-                  />
+              {/* Customer Details Form */}
+              <form onSubmit={handleRazorpayPayment} className="checkout-form">
+                <div className="checkout-input-group">
+                  <div className="checkout-label-row">
+                    <label className="checkout-label">Full Name</label>
+                    <span className="checkout-label-hint">For order invoice</span>
+                  </div>
+                  <div className="checkout-input-field-wrap">
+                    <span className="checkout-input-icon">
+                      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                      </svg>
+                    </span>
+                    <input
+                      type="text"
+                      required
+                      value={formData.name}
+                      onChange={e => setFormData({ ...formData, name: e.target.value })}
+                      placeholder="Enter your name"
+                      className="checkout-input"
+                    />
+                  </div>
                 </div>
 
-                <div className="form-group">
-                  <label>Phone Number (Optional for SMS receipt)</label>
-                  <input
-                    type="tel"
-                    value={formData.phone}
-                    onChange={e => setFormData({ ...formData, phone: e.target.value })}
-                    placeholder="+91 9876543210"
-                  />
+                <div className="checkout-input-group">
+                  <div className="checkout-label-row">
+                    <label className="checkout-label">Phone Number</label>
+                    <span className="checkout-label-hint">Optional for SMS receipt</span>
+                  </div>
+                  <div className="checkout-input-field-wrap">
+                    <span className="checkout-input-icon">
+                      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                      </svg>
+                    </span>
+                    <input
+                      type="tel"
+                      value={formData.phone}
+                      onChange={e => setFormData({ ...formData, phone: e.target.value })}
+                      placeholder="+91 98765 43210"
+                      className="checkout-input"
+                    />
+                  </div>
                 </div>
 
+                {/* High-End Payment Button */}
                 <button
                   type="submit"
-                  className="razorpay-submit-btn"
-                  style={{ marginTop: '5px' }}
+                  className="checkout-pay-btn"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                  <div className="checkout-pay-btn-icon">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+                      <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                    </svg>
+                  </div>
+                  <span className="checkout-pay-btn-text">Pay ₹{cartTotal.toFixed(2)} via Razorpay</span>
+                  <svg className="checkout-pay-btn-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                    <polyline points="12 5 19 12 12 19"></polyline>
                   </svg>
-                  Pay ₹{cartTotal.toFixed(2)} with Razorpay
                 </button>
               </form>
 
-              <div className="security-footer">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                  <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                </svg>
-                <span>256-Bit SSL Encrypted Razorpay Checkout</span>
+              {/* Trust & Security Strip */}
+              <div className="checkout-trust-strip">
+                <div className="trust-item">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                  </svg>
+                  <span>256-Bit SSL Encrypted</span>
+                </div>
+                <span className="trust-dot">•</span>
+                <div className="trust-item">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                  </svg>
+                  <span>Razorpay Verified</span>
+                </div>
               </div>
             </div>
           </div>
