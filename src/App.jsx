@@ -70,8 +70,8 @@ const AppContent = () => {
     return total + parseFloat(item.price.replace('₹', '').replace('$', ''));
   }, 0);
 
-  if (loading) {
-    return <Loader fullScreen={true} text="Loading assets... (Server might take up to 30s to wake up on first load)" />;
+  if (loading && (!products || products.length === 0)) {
+    return <Loader fullScreen={true} text="Starting DS3 Studio..." />;
   }
 
   return (

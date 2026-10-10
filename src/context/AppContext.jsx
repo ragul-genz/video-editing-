@@ -63,16 +63,31 @@ const initialReviews = [
 export const AppContextProvider = ({ children }) => {
   const [toasts, setToasts] = useState([]);
   
-  const [products, setProductsState] = useState([]);
-  const [siteSettings, setSiteSettingsState] = useState({ logoUrl: '/ds3_logo.jpg' });
-  const [orders, setOrdersState] = useState([]);
-  const [users, setUsersState] = useState([]);
+  const [products, setProductsState] = useState(() => {
+    const saved = localStorage.getItem('ds3_products');
+    return saved ? JSON.parse(saved) : initialProducts;
+  });
+  const [siteSettings, setSiteSettingsState] = useState(() => {
+    const saved = localStorage.getItem('ds3_siteSettings');
+    return saved ? JSON.parse(saved) : { logoUrl: '/ds3_logo.jpg' };
+  });
+  const [orders, setOrdersState] = useState(() => {
+    const saved = localStorage.getItem('ds3_orders');
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [users, setUsersState] = useState(() => {
+    const saved = localStorage.getItem('ds3_users');
+    return saved ? JSON.parse(saved) : [{ email: 'genzdevoff@gmail.com', password: 'password123' }];
+  });
   const [currentUser, setCurrentUser] = useState(() => {
     const saved = localStorage.getItem('ds3_currentUser');
     return saved ? JSON.parse(saved) : null;
   });
-  const [reviews, setReviewsState] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [reviews, setReviewsState] = useState(() => {
+    const saved = localStorage.getItem('ds3_reviews');
+    return saved ? JSON.parse(saved) : initialReviews;
+  });
+  const [loading, setLoading] = useState(false);
   
   // New States
   const [wishlist, setWishlist] = useState(() => {
@@ -84,57 +99,40 @@ export const AppContextProvider = ({ children }) => {
     return localStorage.getItem('ds3_theme') || 'dark';
   });
 
-  // Helper to fetch data
+  // Helper to fetch data in background without blocking UI
   const fetchData = async () => {
     try {
+      const axiosConfig = { timeout: 15000 };
       const [prodRes, revRes, userRes, ordRes, setRes] = await Promise.all([
-        axios.get(`${API_URL}/products`),
-        axios.get(`${API_URL}/reviews`),
-        axios.get(`${API_URL}/users`),
-        axios.get(`${API_URL}/orders`),
-        axios.get(`${API_URL}/settings`)
+        axios.get(`${API_URL}/products`, axiosConfig),
+        axios.get(`${API_URL}/reviews`, axiosConfig),
+        axios.get(`${API_URL}/users`, axiosConfig),
+        axios.get(`${API_URL}/orders`, axiosConfig),
+        axios.get(`${API_URL}/settings`, axiosConfig)
       ]);
 
-      // Seed initial data if DB is empty
-      if (prodRes.data.length === 0) {
-        for (const p of initialProducts) {
-          await axios.post(`${API_URL}/products`, p);
-        }
-        const newProds = await axios.get(`${API_URL}/products`);
-        setProductsState(newProds.data);
-      } else {
+      if (prodRes.data && prodRes.data.length > 0) {
         setProductsState(prodRes.data);
+        localStorage.setItem('ds3_products', JSON.stringify(prodRes.data));
       }
-
-      if (revRes.data.length === 0) {
-        for (const r of initialReviews) {
-          await axios.post(`${API_URL}/reviews`, r);
-        }
-        const newRevs = await axios.get(`${API_URL}/reviews`);
-        setReviewsState(newRevs.data);
-      } else {
+      if (revRes.data && revRes.data.length > 0) {
         setReviewsState(revRes.data);
+        localStorage.setItem('ds3_reviews', JSON.stringify(revRes.data));
       }
-
-      if (userRes.data.length === 0) {
-        const defaultUser = { email: 'genzdevoff@gmail.com', password: 'password123' };
-        await axios.post(`${API_URL}/users`, defaultUser);
-        setUsersState([defaultUser]);
-      } else {
+      if (userRes.data && userRes.data.length > 0) {
         setUsersState(userRes.data);
+        localStorage.setItem('ds3_users', JSON.stringify(userRes.data));
       }
-
-      setOrdersState(ordRes.data);
-      setSiteSettingsState(setRes.data || { logoUrl: '/ds3_logo.jpg' });
-      
+      if (ordRes.data) {
+        setOrdersState(ordRes.data);
+        localStorage.setItem('ds3_orders', JSON.stringify(ordRes.data));
+      }
+      if (setRes.data) {
+        setSiteSettingsState(setRes.data);
+        localStorage.setItem('ds3_siteSettings', JSON.stringify(setRes.data));
+      }
     } catch (err) {
-      console.error("Failed to fetch data from backend:", err);
-      // Fallback to initial data to ensure no errors are displayed to the user, with temporary IDs
-      setProductsState(initialProducts.map((p, i) => ({ ...p, id: `fallback-${i}` })));
-      setReviewsState(initialReviews.map((r, i) => ({ ...r, id: `fallback-${i}` })));
-      setUsersState([{ email: 'genzdevoff@gmail.com', password: 'password123' }]);
-      setOrdersState([]);
-      setSiteSettingsState({ logoUrl: '/ds3_logo.jpg' });
+      console.warn("Backend server is warming up or slow, using instant cached assets:", err.message);
     } finally {
       setLoading(false);
     }
