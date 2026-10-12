@@ -269,7 +269,7 @@ const Cart = ({ isOpen, onClose, cartItems, cartTotal, clearCart, removeFromCart
                 </div>
               ) : (
                 cartItems.map((item, index) => (
-                  <div key={index} className="cart-item-card">
+                  <div key={item.id || item._id || index} className="cart-item-card">
                     {/* Fixed Size Thumbnail */}
                     <div className="cart-item-thumb">
                       {item.image ? (
@@ -303,7 +303,7 @@ const Cart = ({ isOpen, onClose, cartItems, cartTotal, clearCart, removeFromCart
                     {/* Modern Trash Icon Button */}
                     <button
                       className="cart-item-remove-btn"
-                      onClick={() => removeFromCart(item.id)}
+                      onClick={() => removeFromCart(item.id || item._id || item.title)}
                       title="Remove item"
                       aria-label="Remove item"
                     >

@@ -1,6 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import { useContext } from 'react';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import About from './pages/About';
@@ -36,26 +35,23 @@ const ToastWrapper = () => {
 };
 
 const AppContent = () => {
-  const [cartItems, setCartItems] = useState([]);
-  const [isCartOpen, setIsCartOpen] = useState(false);
+  const {
+    cartItems,
+    addToCart,
+    removeFromCart,
+    clearCart,
+    cartTotal,
+    isCartOpen,
+    setIsCartOpen,
+    loading,
+    products
+  } = useContext(AppContext);
+
   const [activeDemo, setActiveDemo] = useState(null);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const location = useLocation();
-  const { loading } = useContext(AppContext);
 
   const isAdminRoute = location.pathname.startsWith('/admin');
-
-  const addToCart = (product) => {
-    const isAlreadyInCart = cartItems.some(item => item.id === product.id);
-    if (!isAlreadyInCart) {
-      setCartItems([...cartItems, product]);
-    }
-    setIsCartOpen(true);
-  };
-
-  const removeFromCart = (productId) => {
-    setCartItems(cartItems.filter(item => item.id !== productId));
-  };
 
   const previewProduct = (product) => {
     setActiveDemo(product);
@@ -65,10 +61,6 @@ const AppContent = () => {
   const openProductDetails = (product) => {
     setSelectedProduct(product);
   };
-
-  const cartTotal = cartItems.reduce((total, item) => {
-    return total + parseFloat(item.price.replace('₹', '').replace('$', ''));
-  }, 0);
 
   if (loading && (!products || products.length === 0)) {
     return <Loader fullScreen={true} text="Starting DS3 Studio..." />;
@@ -100,7 +92,7 @@ const AppContent = () => {
             onClose={() => setIsCartOpen(false)} 
             cartItems={cartItems}
             cartTotal={cartTotal}
-            clearCart={() => setCartItems([])}
+            clearCart={clearCart}
             removeFromCart={removeFromCart}
           />
           <ProductModal 

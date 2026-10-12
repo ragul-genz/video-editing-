@@ -7,6 +7,7 @@ const API_URL = import.meta.env.VITE_API_URL || 'https://video-editing-h7vr.onre
 
 const initialProducts = [
   {
+    id: "prod-1",
     title: "FL Studio Master Template",
     description: "Industry-standard mixing & mastering template for FL Studio 21+.",
     price: "₹29.99",
@@ -16,6 +17,7 @@ const initialProducts = [
     driveLink: "https://drive.google.com/drive/folders/placeholder_1"
   },
   {
+    id: "prod-2",
     title: "Logic Pro Vocal Chain",
     description: "Get pristine vocals instantly with our premium Logic Pro X channel strips.",
     price: "₹34.99",
@@ -25,6 +27,7 @@ const initialProducts = [
     driveLink: "https://drive.google.com/drive/folders/placeholder_2"
   },
   {
+    id: "prod-3",
     title: "Ableton Live Synth Presets",
     description: "100+ Serum & Vital presets tailored for Ableton Live 11+.",
     price: "₹24.99",
@@ -34,6 +37,7 @@ const initialProducts = [
     driveLink: "https://drive.google.com/drive/folders/placeholder_3"
   },
   {
+    id: "prod-4",
     title: "Cubase Orchestral Template",
     description: "Massive orchestral routing template for Cubase Pro.",
     price: "₹49.99",
@@ -43,6 +47,7 @@ const initialProducts = [
     driveLink: "https://drive.google.com/drive/folders/placeholder_4"
   },
   {
+    id: "prod-5",
     title: "Studio One Mixing Preset",
     description: "Pro mixing console presets designed for Studio One 6.",
     price: "₹29.99",
@@ -64,8 +69,16 @@ export const AppContextProvider = ({ children }) => {
   const [toasts, setToasts] = useState([]);
   
   const [products, setProductsState] = useState(() => {
-    const saved = localStorage.getItem('ds3_products');
-    return saved ? JSON.parse(saved) : initialProducts;
+    try {
+      const saved = localStorage.getItem('ds3_products');
+      const list = saved ? JSON.parse(saved) : initialProducts;
+      return list.map((p, idx) => ({
+        ...p,
+        id: p.id || p._id || `prod-${idx + 1}`
+      }));
+    } catch (e) {
+      return initialProducts;
+    }
   });
   const [siteSettings, setSiteSettingsState] = useState(() => {
     const saved = localStorage.getItem('ds3_siteSettings');
@@ -94,6 +107,19 @@ export const AppContextProvider = ({ children }) => {
     const saved = localStorage.getItem('ds3_wishlist');
     return saved ? JSON.parse(saved) : [];
   });
+
+  // Cart state persisted in localStorage across page refreshes
+  const [cartItems, setCartItems] = useState(() => {
+    try {
+      const saved = localStorage.getItem('ds3_cart');
+      return saved ? JSON.parse(saved) : [];
+    } catch (e) {
+      console.error("Failed to parse ds3_cart from localStorage:", e);
+      return [];
+    }
+  });
+
+  const [isCartOpen, setIsCartOpen] = useState(false);
   
   const [theme, setTheme] = useState(() => {
     return localStorage.getItem('ds3_theme') || 'dark';
@@ -151,6 +177,14 @@ export const AppContextProvider = ({ children }) => {
   }, [wishlist]);
 
   useEffect(() => {
+    try {
+      localStorage.setItem('ds3_cart', JSON.stringify(cartItems));
+    } catch (e) {
+      console.error("Failed to save ds3_cart to localStorage:", e);
+    }
+  }, [cartItems]);
+
+  useEffect(() => {
     localStorage.setItem('ds3_theme', theme);
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
@@ -179,6 +213,49 @@ export const AppContextProvider = ({ children }) => {
     setWishlist(wishlist.filter(item => item.id !== productId));
     addToast('Removed from wishlist', 'success');
   };
+
+  const addToCart = (product) => {
+    if (!product) return;
+    const prodId = product.id || product._id || product.title;
+    let added = false;
+
+    setCartItems(prev => {
+      const exists = prev.some(item => (item.id || item._id || item.title) === prodId);
+      if (!exists) {
+        added = true;
+        return [...prev, product];
+      }
+      return prev;
+    });
+
+    if (added) {
+      addToast(`${product.title} added to cart!`, 'success');
+    } else {
+      addToast(`${product.title} is already in your cart!`, 'info');
+    }
+    setIsCartOpen(true);
+  };
+
+  const removeFromCart = (productId) => {
+    setCartItems(prev => prev.filter(item => (item.id || item._id || item.title) !== productId));
+    addToast('Item removed from cart', 'info');
+  };
+
+  const clearCart = () => {
+    setCartItems([]);
+    try {
+      localStorage.removeItem('ds3_cart');
+    } catch (e) {
+      console.error("Failed to remove ds3_cart from localStorage:", e);
+    }
+  };
+
+  const cartTotal = cartItems.reduce((total, item) => {
+    if (!item || !item.price) return total;
+    const priceStr = typeof item.price === 'string' ? item.price : String(item.price);
+    const num = parseFloat(priceStr.replace(/[^0-9.]/g, '')) || 0;
+    return total + num;
+  }, 0);
 
   const loginUser = async (email, password) => {
     try {
@@ -320,6 +397,8 @@ export const AppContextProvider = ({ children }) => {
       toasts, addToast, removeToast,
       updateUserPassword,
       wishlist, addToWishlist, removeFromWishlist,
+      cartItems, setCartItems, addToCart, removeFromCart, clearCart, cartTotal,
+      isCartOpen, setIsCartOpen,
       theme, toggleTheme,
       loading, API_URL
     }}>
