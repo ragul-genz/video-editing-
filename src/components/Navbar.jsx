@@ -4,11 +4,19 @@ import { AppContext } from '../context/AppContext';
 import { Sun, Moon, Bookmark } from 'lucide-react';
 import './Navbar.css';
 
-const Navbar = ({ cartCount = 0, onCartClick }) => {
-  const { siteSettings, currentUser, setCurrentUser, theme, toggleTheme, wishlist } = useContext(AppContext);
+const Navbar = ({ cartCount, onCartClick }) => {
+  const { siteSettings, currentUser, setCurrentUser, theme, toggleTheme, wishlist, cartItems, setIsCartOpen } = useContext(AppContext);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+  const activeCartCount = cartCount !== undefined ? cartCount : (cartItems?.length || 0);
+
   const closeMenu = () => setIsMenuOpen(false);
+
+  const handleCartClick = () => {
+    if (onCartClick) onCartClick();
+    else if (setIsCartOpen) setIsCartOpen(true);
+    closeMenu();
+  };
 
   const handleLogout = () => {
     setCurrentUser(null);
@@ -56,13 +64,13 @@ const Navbar = ({ cartCount = 0, onCartClick }) => {
                 {wishlist.length > 0 && <span className="cart-badge">{wishlist.length}</span>}
               </Link>
 
-              <button className="cart-btn" aria-label="Cart" onClick={() => { onCartClick(); closeMenu(); }}>
+              <button className="cart-btn" aria-label="Cart" onClick={handleCartClick}>
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="9" cy="21" r="1"></circle>
                   <circle cx="20" cy="21" r="1"></circle>
                   <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
                 </svg>
-                {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
+                {activeCartCount > 0 && <span className="cart-badge">{activeCartCount}</span>}
               </button>
 
               <button onClick={handleLogout} className="btn-secondary" style={{ padding: '6px 12px', fontSize: '0.85rem', marginLeft: '10px', height: 'fit-content', alignSelf: 'center' }}>

@@ -21,11 +21,18 @@ const loadRazorpayScript = () => {
   });
 };
 
-const Cart = ({ isOpen, onClose, cartItems, cartTotal, clearCart, removeFromCart }) => {
+const Cart = (props) => {
+  const context = useContext(AppContext);
+  const isOpen = props.isOpen !== undefined ? props.isOpen : context.isCartOpen;
+  const onClose = props.onClose || (() => context.setIsCartOpen(false));
+  const cartItems = props.cartItems || context.cartItems || [];
+  const cartTotal = props.cartTotal !== undefined ? props.cartTotal : context.cartTotal;
+  const clearCart = props.clearCart || context.clearCart;
+  const removeFromCart = props.removeFromCart || context.removeFromCart;
   const [checkoutStep, setCheckoutStep] = useState(0); // 0: Cart items, 1: Razorpay Payment, 2: Success
   const [isLoading, setIsLoading] = useState(false);
   const [loadingText, setLoadingText] = useState('Processing...');
-  const { addOrder, currentUser, addToast, API_URL } = useContext(AppContext);
+  const { addOrder, currentUser, addToast, API_URL } = context;
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({

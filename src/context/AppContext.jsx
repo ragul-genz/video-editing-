@@ -108,13 +108,38 @@ export const AppContextProvider = ({ children }) => {
     return saved ? JSON.parse(saved) : [];
   });
 
-  // Cart state persisted in localStorage across page refreshes
+  // Helper to safely write cart to localStorage and sessionStorage with quota protection
+  const saveCartToStorage = (items) => {
+    try {
+      localStorage.setItem('ds3_cart', JSON.stringify(items));
+    } catch (err) {
+      console.warn("Storage quota limit reached when saving cart. Clearing product cache to free space...", err);
+      try {
+        localStorage.removeItem('ds3_products');
+        localStorage.setItem('ds3_cart', JSON.stringify(items));
+      } catch (retryErr) {
+        console.error("Failed to save cart to localStorage even after clearing cache:", retryErr);
+      }
+    }
+
+    try {
+      sessionStorage.setItem('ds3_cart', JSON.stringify(items));
+    } catch (_) {}
+  };
+
+  // Cart state persisted across page refreshes
   const [cartItems, setCartItems] = useState(() => {
     try {
-      const saved = localStorage.getItem('ds3_cart');
-      return saved ? JSON.parse(saved) : [];
+      const localSaved = localStorage.getItem('ds3_cart');
+      const sessionSaved = sessionStorage.getItem('ds3_cart');
+      const saved = localSaved || sessionSaved;
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) return parsed;
+      }
+      return [];
     } catch (e) {
-      console.error("Failed to parse ds3_cart from localStorage:", e);
+      console.error("Failed to parse ds3_cart from storage:", e);
       return [];
     }
   });
@@ -139,7 +164,21 @@ export const AppContextProvider = ({ children }) => {
 
       if (prodRes.data && prodRes.data.length > 0) {
         setProductsState(prodRes.data);
-        localStorage.setItem('ds3_products', JSON.stringify(prodRes.data));
+        // Cache products without heavy base64 audio/video to avoid filling the 5MB browser quota
+        try {
+          const cacheFriendlyProducts = prodRes.data.map(p => {
+            const { previewUrl, previewVideoUrl, ...rest } = p;
+            return {
+              ...rest,
+              previewUrl: (typeof previewUrl === 'string' && previewUrl.startsWith('data:')) ? '' : (previewUrl || ''),
+              previewVideoUrl: (typeof previewVideoUrl === 'string' && previewVideoUrl.startsWith('data:')) ? '' : (previewVideoUrl || '')
+            };
+          });
+          localStorage.setItem('ds3_products', JSON.stringify(cacheFriendlyProducts));
+        } catch (cacheErr) {
+          console.warn("Could not cache products to localStorage (quota exceeded):", cacheErr.message);
+          try { localStorage.removeItem('ds3_products'); } catch (_) {}
+        }
       }
       if (revRes.data && revRes.data.length > 0) {
         setReviewsState(revRes.data);
@@ -177,11 +216,7 @@ export const AppContextProvider = ({ children }) => {
   }, [wishlist]);
 
   useEffect(() => {
-    try {
-      localStorage.setItem('ds3_cart', JSON.stringify(cartItems));
-    } catch (e) {
-      console.error("Failed to save ds3_cart to localStorage:", e);
-    }
+    saveCartToStorage(cartItems);
   }, [cartItems]);
 
   useEffect(() => {
@@ -214,16 +249,34 @@ export const AppContextProvider = ({ children }) => {
     addToast('Removed from wishlist', 'success');
   };
 
+  const sanitizeCartProduct = (product) => {
+    if (!product) return null;
+    return {
+      id: product.id || product._id || product.title,
+      _id: product._id || product.id,
+      title: product.title || '',
+      price: product.price || '₹0',
+      image: (product.image && product.image.length < 500000) ? product.image : '',
+      color: product.color || '#ff7b00',
+      features: Array.isArray(product.features) ? product.features : [],
+      driveLink: product.driveLink || '',
+      description: product.description || ''
+    };
+  };
+
   const addToCart = (product) => {
     if (!product) return;
-    const prodId = product.id || product._id || product.title;
+    const sanitized = sanitizeCartProduct(product);
+    const prodId = sanitized.id;
     let added = false;
 
     setCartItems(prev => {
       const exists = prev.some(item => (item.id || item._id || item.title) === prodId);
       if (!exists) {
         added = true;
-        return [...prev, product];
+        const nextCart = [...prev, sanitized];
+        saveCartToStorage(nextCart);
+        return nextCart;
       }
       return prev;
     });
@@ -237,7 +290,11 @@ export const AppContextProvider = ({ children }) => {
   };
 
   const removeFromCart = (productId) => {
-    setCartItems(prev => prev.filter(item => (item.id || item._id || item.title) !== productId));
+    setCartItems(prev => {
+      const nextCart = prev.filter(item => (item.id || item._id || item.title) !== productId);
+      saveCartToStorage(nextCart);
+      return nextCart;
+    });
     addToast('Item removed from cart', 'info');
   };
 
@@ -245,8 +302,9 @@ export const AppContextProvider = ({ children }) => {
     setCartItems([]);
     try {
       localStorage.removeItem('ds3_cart');
+      sessionStorage.removeItem('ds3_cart');
     } catch (e) {
-      console.error("Failed to remove ds3_cart from localStorage:", e);
+      console.error("Failed to remove ds3_cart from storage:", e);
     }
   };
 
