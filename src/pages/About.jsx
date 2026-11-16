@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 const About = () => {
   return (
@@ -21,6 +22,11 @@ const About = () => {
         <br/><br/>
         <strong style={{ color: 'var(--primary)', fontSize: '1.2rem', textAlign: 'center', display: 'block' }}>DS3 Studio — Sound. Vision. Story.</strong>
       </p>
+      <div style={{ marginTop: '20px' }}>
+        <Link to="/portfolio" className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}>
+          Explore Work Portfolio
+        </Link>
+      </div>
     </section>
   );
 };

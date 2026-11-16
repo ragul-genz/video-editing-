@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'r
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import About from './pages/About';
+import Portfolio from './pages/Portfolio';
 import Bundles from './pages/Bundles';
 import Contact from './pages/Contact';
 import Reviews from './pages/Reviews';
@@ -74,6 +75,7 @@ const AppContent = () => {
           <Route path="/login" element={<Auth />} />
           <Route path="/" element={<ProtectedRoute><Home addToCart={addToCart} onPreview={previewProduct} onProductClick={openProductDetails} activeDemo={activeDemo} onCloseDemo={() => setActiveDemo(null)} /></ProtectedRoute>} />
           <Route path="/about" element={<ProtectedRoute><About /></ProtectedRoute>} />
+          <Route path="/portfolio" element={<ProtectedRoute><Portfolio /></ProtectedRoute>} />
           <Route path="/bundles" element={<ProtectedRoute><Bundles addToCart={addToCart} onPreview={previewProduct} onProductClick={openProductDetails} activeDemo={activeDemo} onCloseDemo={() => setActiveDemo(null)} /></ProtectedRoute>} />
           <Route path="/contact" element={<ProtectedRoute><Contact /></ProtectedRoute>} />
           <Route path="/reviews" element={<ProtectedRoute><Reviews /></ProtectedRoute>} />

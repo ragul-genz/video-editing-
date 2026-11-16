@@ -33,10 +33,7 @@ const Hero = () => {
           </p>
           <div className="hero-actions">
             <button className="btn-primary" onClick={() => navigate('/bundles')}>Explore Bundles</button>
-            <button className="btn-secondary" onClick={() => {
-              navigate('/bundles');
-              setTimeout(() => document.getElementById('demo')?.scrollIntoView({ behavior: 'smooth' }), 100);
-            }}>Watch Demo</button>
+            <button className="btn-secondary" onClick={() => navigate('/portfolio')}>Work Portfolio</button>
           </div>
           
           <div className="supported-daws floating-element delay-3" style={{ maxWidth: '800px', margin: '40px auto 0 auto', background: 'rgba(0,0,0,0.4)', padding: '20px', borderRadius: '15px', border: '1px solid rgba(255,255,255,0.1)' }}>

@@ -36,6 +36,7 @@ const Navbar = ({ cartCount, onCartClick }) => {
             <ul className={`nav-links ${isMenuOpen ? 'active' : ''}`}>
               <li><Link to="/" onClick={closeMenu}>Home</Link></li>
               <li><Link to="/about" onClick={closeMenu}>About</Link></li>
+              <li><Link to="/portfolio" onClick={closeMenu}>Portfolio</Link></li>
               <li><Link to="/bundles" onClick={closeMenu}>Bundles</Link></li>
               <li><Link to="/contact" onClick={closeMenu}>Contact</Link></li>
               <li><Link to="/reviews" onClick={closeMenu}>Reviews</Link></li>
