@@ -1,0 +1,355 @@
+/* ==========================================================================
+   DS3 STUDIO - CLIENT DELIVERY PAGE (FINAL OUTPUT)
+   ========================================================================== */
+
+.client-delivery-page {
+  min-height: 100vh;
+  padding: 120px 20px 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: #000000;
+  color: #ffffff;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Background Ambient Lighting */
+.delivery-bg-glow {
+  position: absolute;
+  top: 15%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 800px;
+  height: 450px;
+  background: radial-gradient(circle, rgba(0, 136, 255, 0.15) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Outer Shell / Main Theater Card */
+.delivery-cinema-card {
+  position: relative;
+  max-width: 960px;
+  width: 100%;
+  border-radius: 44px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.9), 0 0 40px rgba(0, 136, 255, 0.2);
+  z-index: 1;
+  background: #09090d;
+}
+
+/* Cinema Backdrop Image inside the card */
+.cinema-backdrop-overlay {
+  position: absolute;
+  inset: 0;
+  background-image: url('https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1600&q=80');
+  background-size: cover;
+  background-position: center;
+  opacity: 0.22;
+  filter: contrast(1.2) brightness(0.85);
+  pointer-events: none;
+}
+
+.cinema-vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(10, 10, 16, 0.6) 20%, rgba(5, 5, 8, 0.95) 100%);
+  pointer-events: none;
+}
+
+/* Card Content Body */
+.delivery-card-content {
+  position: relative;
+  z-index: 2;
+  padding: 55px 40px 50px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+/* Heading: FINAL OUTPUT */
+.delivery-title {
+  font-family: var(--font-heading);
+  font-size: clamp(2.4rem, 5vw, 3.8rem);
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #ffffff;
+  margin: 0 0 6px 0;
+  line-height: 1.1;
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
+}
+
+.delivery-subtitle {
+  font-family: var(--font-heading);
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #ffffff;
+  margin: 0 0 35px 0;
+  opacity: 0.95;
+}
+
+/* Google Drive Center Piece */
+.gdrive-logo-wrap {
+  margin: 10px auto 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: transform 0.3s ease;
+}
+
+.gdrive-logo-wrap.interactive:hover {
+  transform: scale(1.06);
+}
+
+.gdrive-logo-svg {
+  width: 120px;
+  height: 105px;
+  filter: drop-shadow(0 10px 25px rgba(0, 0, 0, 0.6));
+}
+
+/* Order ID Label */
+.order-id-label {
+  font-family: var(--font-heading);
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #0099ff;
+  margin-bottom: 12px;
+  text-shadow: 0 0 10px rgba(0, 153, 255, 0.5);
+}
+
+/* Input / Pill Row */
+.order-input-capsule-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  max-width: 520px;
+  width: 100%;
+  margin-bottom: 24px;
+}
+
+.id-badge-icon {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.order-id-capsule-input {
+  flex: 1;
+  background: linear-gradient(90deg, #0080ff, #00aaff);
+  border: none;
+  border-radius: 40px;
+  padding: 14px 24px;
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #ffffff;
+  text-align: center;
+  letter-spacing: 0.08em;
+  outline: none;
+  box-shadow: 0 8px 25px rgba(0, 128, 255, 0.5), inset 0 2px 4px rgba(255, 255, 255, 0.3);
+  transition: all 0.3s ease;
+}
+
+.order-id-capsule-input::placeholder {
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+}
+
+.order-id-capsule-input:focus {
+  box-shadow: 0 0 30px rgba(0, 170, 255, 0.8), inset 0 2px 4px rgba(255, 255, 255, 0.4);
+  transform: scale(1.02);
+}
+
+/* Pay Now Button (Exact Black Capsule Button) */
+.pay-now-pill-btn {
+  background: #000000;
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 12px 48px;
+  border-radius: 30px;
+  font-family: var(--font-heading);
+  font-size: 1.15rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.8);
+  transition: all 0.25s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.pay-now-pill-btn:hover {
+  background: #111111;
+  border-color: #0099ff;
+  color: #00aaff;
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(0, 153, 255, 0.35);
+}
+
+.pay-now-pill-btn.success-download {
+  background: linear-gradient(135deg, #00c853, #009624);
+  border-color: #00e676;
+  color: #ffffff;
+  box-shadow: 0 8px 30px rgba(0, 230, 118, 0.45);
+}
+
+.pay-now-pill-btn.success-download:hover {
+  transform: translateY(-3px) scale(1.03);
+  box-shadow: 0 12px 35px rgba(0, 230, 118, 0.65);
+}
+
+/* Active Order Details Panel (Shown when order is matched) */
+.order-matched-details {
+  background: rgba(0, 0, 0, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+  padding: 16px 24px;
+  margin: 18px 0 10px;
+  max-width: 520px;
+  width: 100%;
+  text-align: left;
+  font-size: 0.9rem;
+  animation: fadeIn 0.3s ease;
+}
+
+.order-detail-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  color: var(--text-muted);
+}
+
+.order-detail-row strong {
+  color: #ffffff;
+}
+
+.order-detail-badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+}
+
+.order-detail-badge.delivered {
+  background: rgba(39, 201, 63, 0.2);
+  color: #27c93f;
+  border: 1px solid #27c93f;
+}
+
+.order-detail-badge.pending {
+  background: rgba(255, 189, 46, 0.2);
+  color: #ffbd2e;
+  border: 1px solid #ffbd2e;
+}
+
+/* ==========================================================================
+   THANK YOU & APPRECIATION MESSAGE (BOTTOM SECTION)
+   ========================================================================== */
+.delivery-footer-message {
+  margin-top: 50px;
+  max-width: 820px;
+  width: 100%;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  color: #ffffff;
+  z-index: 1;
+}
+
+.delivery-appreciation-p {
+  font-family: var(--font-heading);
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.7;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.delivery-signoff-wrap {
+  margin-top: 25px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.delivery-signoff-title {
+  font-family: var(--font-heading);
+  font-size: 0.9rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.delivery-signoff-team {
+  font-family: var(--font-heading);
+  font-size: 1.05rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--secondary);
+}
+
+.delivery-signoff-motto {
+  font-family: var(--font-heading);
+  font-size: 0.85rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.7);
+  margin-top: 2px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .delivery-cinema-card {
+    border-radius: 28px;
+  }
+
+  .delivery-card-content {
+    padding: 35px 20px 35px;
+  }
+
+  .delivery-title {
+    font-size: 2.2rem;
+  }
+
+  .delivery-subtitle {
+    font-size: 0.8rem;
+    margin-bottom: 25px;
+  }
+
+  .order-input-capsule-row {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .order-id-capsule-input {
+    width: 100%;
+  }
+
+  .delivery-appreciation-p {
+    font-size: 0.85rem;
+  }
+}

@@ -151,22 +151,50 @@ export const AppContextProvider = ({ children }) => {
   });
 
   // Helper to fetch data in background without blocking UI
-  const fetchData = async () => {
+  const fetchOrders = async () => {
     try {
-      const axiosConfig = { timeout: 15000 };
-      const [prodRes, revRes, userRes, ordRes, setRes] = await Promise.all([
-        axios.get(`${API_URL}/products`, axiosConfig),
-        axios.get(`${API_URL}/reviews`, axiosConfig),
-        axios.get(`${API_URL}/users`, axiosConfig),
+      const res = await axios.get(`${API_URL}/orders`, { timeout: 35000 });
+      if (res.data && Array.isArray(res.data)) {
+        setOrdersState(res.data);
+        try {
+          localStorage.setItem('ds3_orders', JSON.stringify(res.data));
+        } catch (_) {}
+        return res.data;
+      }
+    } catch (err) {
+      console.warn("Could not fetch orders from backend:", err.message);
+      try {
+        const saved = localStorage.getItem('ds3_orders');
+        if (saved) return JSON.parse(saved);
+      } catch (_) {}
+    }
+    return [];
+  };
+
+  const fetchData = async () => {
+    const axiosConfig = { timeout: 35000 };
+
+    // Fetch each resource independently with Promise.allSettled so one slow/failing request doesn't block orders
+    try {
+      const results = await Promise.allSettled([
         axios.get(`${API_URL}/orders`, axiosConfig),
+        axios.get(`${API_URL}/products`, axiosConfig),
+        axios.get(`${API_URL}/users`, axiosConfig),
+        axios.get(`${API_URL}/reviews`, axiosConfig),
         axios.get(`${API_URL}/settings`, axiosConfig)
       ]);
 
-      if (prodRes.data && prodRes.data.length > 0) {
-        setProductsState(prodRes.data);
-        // Cache products without heavy base64 audio/video to avoid filling the 5MB browser quota
+      const [ordRes, prodRes, userRes, revRes, setRes] = results;
+
+      if (ordRes.status === 'fulfilled' && ordRes.value.data && Array.isArray(ordRes.value.data)) {
+        setOrdersState(ordRes.value.data);
+        try { localStorage.setItem('ds3_orders', JSON.stringify(ordRes.value.data)); } catch (_) {}
+      }
+
+      if (prodRes.status === 'fulfilled' && prodRes.value.data && prodRes.value.data.length > 0) {
+        setProductsState(prodRes.value.data);
         try {
-          const cacheFriendlyProducts = prodRes.data.map(p => {
+          const cacheFriendlyProducts = prodRes.value.data.map(p => {
             const { previewUrl, previewVideoUrl, ...rest } = p;
             return {
               ...rest,
@@ -176,25 +204,24 @@ export const AppContextProvider = ({ children }) => {
           });
           localStorage.setItem('ds3_products', JSON.stringify(cacheFriendlyProducts));
         } catch (cacheErr) {
-          console.warn("Could not cache products to localStorage (quota exceeded):", cacheErr.message);
+          console.warn("Could not cache products to localStorage:", cacheErr.message);
           try { localStorage.removeItem('ds3_products'); } catch (_) {}
         }
       }
-      if (revRes.data && revRes.data.length > 0) {
-        setReviewsState(revRes.data);
-        localStorage.setItem('ds3_reviews', JSON.stringify(revRes.data));
+
+      if (userRes.status === 'fulfilled' && userRes.value.data && userRes.value.data.length > 0) {
+        setUsersState(userRes.value.data);
+        try { localStorage.setItem('ds3_users', JSON.stringify(userRes.value.data)); } catch (_) {}
       }
-      if (userRes.data && userRes.data.length > 0) {
-        setUsersState(userRes.data);
-        localStorage.setItem('ds3_users', JSON.stringify(userRes.data));
+
+      if (revRes.status === 'fulfilled' && revRes.value.data && revRes.value.data.length > 0) {
+        setReviewsState(revRes.value.data);
+        try { localStorage.setItem('ds3_reviews', JSON.stringify(revRes.value.data)); } catch (_) {}
       }
-      if (ordRes.data) {
-        setOrdersState(ordRes.data);
-        localStorage.setItem('ds3_orders', JSON.stringify(ordRes.data));
-      }
-      if (setRes.data) {
-        setSiteSettingsState(setRes.data);
-        localStorage.setItem('ds3_siteSettings', JSON.stringify(setRes.data));
+
+      if (setRes.status === 'fulfilled' && setRes.value.data) {
+        setSiteSettingsState(setRes.value.data);
+        try { localStorage.setItem('ds3_siteSettings', JSON.stringify(setRes.value.data)); } catch (_) {}
       }
     } catch (err) {
       console.warn("Backend server is warming up or slow, using instant cached assets:", err.message);
@@ -218,6 +245,12 @@ export const AppContextProvider = ({ children }) => {
   useEffect(() => {
     saveCartToStorage(cartItems);
   }, [cartItems]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('ds3_orders', JSON.stringify(orders));
+    } catch (_) {}
+  }, [orders]);
 
   useEffect(() => {
     localStorage.setItem('ds3_theme', theme);
@@ -379,27 +412,46 @@ export const AppContextProvider = ({ children }) => {
 
   const setOrders = async (newOrders) => {
     setOrdersState(newOrders);
+    try { localStorage.setItem('ds3_orders', JSON.stringify(newOrders)); } catch (_) {}
   };
 
   const addOrder = async (order) => {
+    if (!order) return null;
+
+    // 1. Optimistically save to local state and localStorage immediately
+    setOrdersState(prev => {
+      const exists = prev.some(o => (o.id && o.id === order.id) || (o.transactionId && order.transactionId && o.transactionId === order.transactionId));
+      if (exists) {
+        return prev.map(o => (o.id === order.id || (o.transactionId && o.transactionId === order.transactionId)) ? { ...o, ...order } : o);
+      }
+      const updated = [order, ...prev];
+      try { localStorage.setItem('ds3_orders', JSON.stringify(updated)); } catch (_) {}
+      return updated;
+    });
+
+    // 2. Persist to backend database
     try {
-      const res = await axios.post(`${API_URL}/orders`, order);
-      setOrdersState(prev => [res.data, ...prev]);
-      return res.data;
+      const res = await axios.post(`${API_URL}/orders`, order, { timeout: 35000 });
+      if (res.data) {
+        setOrdersState(prev => prev.map(o => (o.id === order.id || o.transactionId === order.transactionId) ? res.data : o));
+        return res.data;
+      }
     } catch (err) {
-      console.error(err);
-      throw err;
+      console.warn("Backend order creation warning (saved locally in browser):", err.message);
     }
+    return order;
   };
 
   const updateOrder = async (id, updatedFields) => {
+    // Optimistic UI update
+    setOrdersState(prev => prev.map(o => o.id === id ? { ...o, ...updatedFields } : o));
     try {
-      const res = await axios.put(`${API_URL}/orders/${id}`, updatedFields);
+      const res = await axios.put(`${API_URL}/orders/${id}`, updatedFields, { timeout: 35000 });
       setOrdersState(prev => prev.map(o => o.id === id ? res.data : o));
       return res.data;
     } catch (err) {
-      console.error(err);
-      throw err;
+      console.warn("Backend order update warning (updated locally):", err.message);
+      return { id, ...updatedFields };
     }
   };
 
@@ -448,7 +500,7 @@ export const AppContextProvider = ({ children }) => {
     <AppContext.Provider value={{ 
       products, addProduct, updateProduct, deleteProduct, setProductsState,
       siteSettings, setSiteSettings, 
-      orders, setOrders, addOrder, updateOrder,
+      orders, setOrders, addOrder, updateOrder, fetchOrders, fetchData,
       users, setUsers,
       currentUser, setCurrentUser, loginUser,
       reviews, addReview, deleteReview,

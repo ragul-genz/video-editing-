@@ -3,16 +3,58 @@ import { useNavigate } from 'react-router-dom';
 import { AppContext } from '../context/AppContext';
 
 const AdminDashboard = () => {
-  const { products, addProduct, updateProduct, deleteProduct, siteSettings, setSiteSettings, orders, updateOrder, reviews, deleteReview, users, addToast } = useContext(AppContext);
+  const { products, addProduct, updateProduct, deleteProduct, siteSettings, setSiteSettings, orders, updateOrder, reviews, deleteReview, users, addToast, fetchOrders } = useContext(AppContext);
   const navigate = useNavigate();
 
   const [activeTab, setActiveTab] = useState('overview');
   const [newLogoUrl, setNewLogoUrl] = useState(siteSettings.logoUrl);
+  const [isRefreshingOrders, setIsRefreshingOrders] = useState(false);
   
   const [newProduct, setNewProduct] = useState({
     title: '', description: '', price: '', image: '', color: '#007bff', features: '', driveLink: '', previewUrl: '', previewVideoUrl: ''
   });
   const [editingProductId, setEditingProductId] = useState(null);
+
+  // Deduplicate orders by id or transactionId so same order never duplicates in UI
+  const uniqueOrders = React.useMemo(() => {
+    if (!Array.isArray(orders)) return [];
+    const seen = new Set();
+    return orders.filter(order => {
+      const key = order.id || order.transactionId || order._id;
+      if (!key || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  }, [orders]);
+
+  // Extract all distinct customers from users list AND from orders
+  const allCustomers = React.useMemo(() => {
+    const map = new Map();
+    // From users
+    (users || []).forEach(u => {
+      if (u && u.email) {
+        map.set(u.email.toLowerCase(), {
+          email: u.email,
+          name: u.name || '',
+          isRegistered: true
+        });
+      }
+    });
+    // From orders
+    (uniqueOrders || []).forEach(o => {
+      if (o && o.userEmail) {
+        const lower = o.userEmail.toLowerCase();
+        if (!map.has(lower)) {
+          map.set(lower, {
+            email: o.userEmail,
+            name: o.name || '',
+            isRegistered: false
+          });
+        }
+      }
+    });
+    return Array.from(map.values());
+  }, [users, uniqueOrders]);
 
   const compressImage = (file, callback) => {
     const reader = new FileReader();
@@ -96,8 +138,30 @@ const AdminDashboard = () => {
     const isAuth = localStorage.getItem('ds3_admin_auth');
     if (!isAuth) {
       navigate('/admin');
+      return;
     }
-  }, [navigate]);
+
+    // Fetch fresh orders immediately on dashboard mount
+    if (fetchOrders) {
+      fetchOrders();
+    }
+
+    // Auto-refresh orders every 20 seconds so new customer buys pop up live
+    const interval = setInterval(() => {
+      if (fetchOrders) {
+        fetchOrders();
+      }
+    }, 20000);
+
+    return () => clearInterval(interval);
+  }, [navigate, fetchOrders]);
+
+  const handleTabClick = (tab) => {
+    setActiveTab(tab);
+    if ((tab === 'orders' || tab === 'overview' || tab === 'customers') && fetchOrders) {
+      fetchOrders();
+    }
+  };
 
   const handleUpdateLogo = async (e) => {
     e.preventDefault();
@@ -179,7 +243,7 @@ const AdminDashboard = () => {
         {['overview', 'products', 'orders', 'customers', 'reviews', 'settings'].map(tab => (
           <button 
             key={tab}
-            onClick={() => setActiveTab(tab)}
+            onClick={() => handleTabClick(tab)}
             style={{
               background: activeTab === tab ? 'var(--primary)' : 'transparent',
               color: activeTab === tab ? 'black' : 'white',
@@ -193,28 +257,42 @@ const AdminDashboard = () => {
               whiteSpace: 'nowrap'
             }}
           >
-            {tab}
+            {tab === 'orders' ? `Orders (${uniqueOrders.length})` : tab}
           </button>
         ))}
       </div>
 
       {activeTab === 'overview' && (
         <div className="glass-panel" style={{ padding: '30px', marginBottom: '40px' }}>
-          <h3>Dashboard Overview</h3>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+            <h3 style={{ margin: 0 }}>Dashboard Overview</h3>
+            <button
+              onClick={async () => {
+                setIsRefreshingOrders(true);
+                if (fetchOrders) await fetchOrders();
+                setIsRefreshingOrders(false);
+                addToast("Live data refreshed!", "success");
+              }}
+              className="btn-secondary"
+              style={{ padding: '6px 14px', fontSize: '0.8rem', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+            >
+              <span>{isRefreshingOrders ? 'Refreshing...' : '🔄 Refresh Data'}</span>
+            </button>
+          </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px', marginTop: '20px' }}>
             <div style={{ background: 'rgba(255,255,255,0.05)', padding: '20px', borderRadius: '10px', textAlign: 'center' }}>
-              <h2 style={{ fontSize: '2.5rem', color: 'var(--primary)', margin: '0 0 10px 0' }}>{orders.length}</h2>
+              <h2 style={{ fontSize: '2.5rem', color: 'var(--primary)', margin: '0 0 10px 0' }}>{uniqueOrders.length}</h2>
               <p style={{ color: 'var(--text-muted)', margin: 0 }}>Total Orders</p>
             </div>
             <div style={{ background: 'rgba(255,255,255,0.05)', padding: '20px', borderRadius: '10px', textAlign: 'center' }}>
               <h2 style={{ fontSize: '2.5rem', color: '#27c93f', margin: '0 0 10px 0' }}>
-                ₹{orders.reduce((acc, o) => acc + parseFloat(o.total.replace('₹', '') || 0), 0).toFixed(2)}
+                ₹{uniqueOrders.reduce((acc, o) => acc + (parseFloat(String(o?.total || '').replace(/[^0-9.]/g, '')) || 0), 0).toFixed(2)}
               </h2>
               <p style={{ color: 'var(--text-muted)', margin: 0 }}>Total Revenue</p>
             </div>
             <div style={{ background: 'rgba(255,255,255,0.05)', padding: '20px', borderRadius: '10px', textAlign: 'center' }}>
-              <h2 style={{ fontSize: '2.5rem', color: '#ffc107', margin: '0 0 10px 0' }}>{users.length}</h2>
-              <p style={{ color: 'var(--text-muted)', margin: 0 }}>Registered Customers</p>
+              <h2 style={{ fontSize: '2.5rem', color: '#ffc107', margin: '0 0 10px 0' }}>{allCustomers.length}</h2>
+              <p style={{ color: 'var(--text-muted)', margin: 0 }}>Total Customers</p>
             </div>
             <div style={{ background: 'rgba(255,255,255,0.05)', padding: '20px', borderRadius: '10px', textAlign: 'center' }}>
               <h2 style={{ fontSize: '2.5rem', color: '#ff0054', margin: '0 0 10px 0' }}>{products.length}</h2>
@@ -340,31 +418,98 @@ const AdminDashboard = () => {
 
       {activeTab === 'orders' && (
       <div className="glass-panel" style={{ padding: '30px', marginTop: '40px' }}>
-        <h3>Manage Customer Orders</h3>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '15px' }}>
+          <div>
+            <h3 style={{ margin: 0 }}>Manage Customer Orders</h3>
+            <p style={{ margin: '5px 0 0 0', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+              Total Orders: <strong style={{ color: 'var(--primary)' }}>{uniqueOrders.length}</strong> • Auto-refreshes every 20s
+            </p>
+          </div>
+          <button
+            onClick={async () => {
+              setIsRefreshingOrders(true);
+              if (fetchOrders) await fetchOrders();
+              setIsRefreshingOrders(false);
+              addToast("Orders refreshed from server!", "success");
+            }}
+            className="btn-secondary"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '8px 18px', fontSize: '0.85rem' }}
+            disabled={isRefreshingOrders}
+          >
+            <span style={{ display: 'inline-block', transform: isRefreshingOrders ? 'rotate(360deg)' : 'none', transition: 'transform 0.8s ease' }}>🔄</span>
+            <span>{isRefreshingOrders ? 'Checking Server...' : 'Refresh Orders'}</span>
+          </button>
+        </div>
+
         <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '15px' }}>
-          {(!orders || orders.length === 0) ? (
-            <p style={{ color: 'var(--text-muted)' }}>No orders yet.</p>
+          {(!uniqueOrders || uniqueOrders.length === 0) ? (
+            <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--text-muted)' }}>
+              <p style={{ fontSize: '1.1rem', marginBottom: '15px' }}>No customer orders found yet.</p>
+              <button
+                onClick={async () => {
+                  setIsRefreshingOrders(true);
+                  if (fetchOrders) await fetchOrders();
+                  setIsRefreshingOrders(false);
+                }}
+                className="btn-primary"
+                style={{ padding: '8px 20px', fontSize: '0.85rem' }}
+              >
+                Fetch Orders From Database
+              </button>
+            </div>
           ) : (
-            orders.map(order => (
-              <div key={order.id} style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'flex-start', gap: '15px', background: 'rgba(255,255,255,0.05)', padding: '20px', borderRadius: '12px' }}>
-                <div>
-                  <h4 style={{ margin: '0 0 10px 0', color: 'var(--primary)' }}>Order #{order.id} <span style={{fontSize: '0.8rem', color: 'var(--text-muted)'}}>({new Date(order.date).toLocaleDateString()})</span></h4>
-                  <p style={{ margin: '5px 0' }}><strong>Customer:</strong> {order.name}</p>
-                  <p style={{ margin: '5px 0' }}><strong>Method:</strong> {order.paymentMethod}</p>
-                  <p style={{ margin: '5px 0' }}><strong>Txn ID:</strong> {order.transactionId}</p>
-                  <p style={{ margin: '5px 0' }}><strong>Total:</strong> {order.total}</p>
-                  <div style={{ margin: '10px 0 0 0' }}>
-                    <strong>Items:</strong>
-                    <ul style={{ paddingLeft: '20px', margin: '5px 0 0 0' }}>
-                      {order.items.map((item, i) => <li key={i}>{item.title}</li>)}
+            uniqueOrders.map(order => (
+              <div key={order.id || order.transactionId || order._id} style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'flex-start', gap: '15px', background: 'rgba(255,255,255,0.05)', padding: '20px', borderRadius: '12px', border: '1px solid var(--glass-border)' }}>
+                <div style={{ flex: '1 1 300px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '8px' }}>
+                    <h4 style={{ margin: 0, color: 'var(--primary)' }}>Order #{order.id}</h4>
+                    <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                      ({order.date ? new Date(order.date).toLocaleString() : 'Recent'})
+                    </span>
+                  </div>
+                  <p style={{ margin: '4px 0' }}><strong>Customer:</strong> {order.name || 'Customer'}</p>
+                  <p style={{ margin: '4px 0' }}>
+                    <strong>Email:</strong>{' '}
+                    <span style={{ color: 'var(--secondary)' }}>{order.userEmail || 'N/A'}</span>
+                  </p>
+                  <p style={{ margin: '4px 0' }}><strong>Payment Method:</strong> {order.paymentMethod || 'Razorpay'}</p>
+                  <p style={{ margin: '4px 0' }}>
+                    <strong>Txn ID:</strong>{' '}
+                    <code style={{ background: 'rgba(0,0,0,0.4)', padding: '2px 6px', borderRadius: '4px', fontSize: '0.8rem', color: '#fff' }}>
+                      {order.transactionId || 'N/A'}
+                    </code>
+                  </p>
+                  <p style={{ margin: '4px 0', fontSize: '1.05rem' }}>
+                    <strong>Total Paid:</strong>{' '}
+                    <strong style={{ color: '#27c93f' }}>{order.total}</strong>
+                  </p>
+                  <div style={{ margin: '12px 0 0 0' }}>
+                    <strong style={{ display: 'block', marginBottom: '4px' }}>Purchased Items:</strong>
+                    <ul style={{ paddingLeft: '20px', margin: 0 }}>
+                      {((order.items && Array.isArray(order.items)) ? order.items : []).map((item, i) => (
+                        <li key={i} style={{ marginBottom: '4px' }}>
+                          <strong>{item.title}</strong>{' '}
+                          <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>({item.price})</span>
+                          {item.driveLink && (
+                            <a
+                              href={item.driveLink}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{ marginLeft: '8px', color: 'var(--secondary)', fontSize: '0.8rem', textDecoration: 'underline' }}
+                            >
+                              Drive Link ↗
+                            </a>
+                          )}
+                        </li>
+                      ))}
                     </ul>
                   </div>
                 </div>
                 
-                <div style={{ textAlign: 'right' }}>
+                <div style={{ textAlign: 'right', minWidth: '180px' }}>
                   <div style={{ 
                     display: 'inline-block',
-                    padding: '6px 12px', 
+                    padding: '6px 14px', 
                     borderRadius: '20px', 
                     background: ['Approved', 'Delivered'].includes(order.status) ? 'rgba(39, 201, 63, 0.2)' : 'rgba(255, 189, 46, 0.2)',
                     color: ['Approved', 'Delivered'].includes(order.status) ? '#27c93f' : '#ffbd2e',
@@ -372,7 +517,7 @@ const AdminDashboard = () => {
                     fontWeight: 'bold',
                     marginBottom: '15px'
                   }}>
-                    {order.status}
+                    {order.status || 'Approved'}
                   </div>
                   
                   {order.status === 'Pending' && (
@@ -381,12 +526,14 @@ const AdminDashboard = () => {
                     </button>
                   )}
 
-                  {order.status === 'Approved' && (
-                    <div style={{ marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  {['Approved', 'Delivered'].includes(order.status) && (
+                    <div style={{ marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '8px', textAlign: 'left' }}>
+                      <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Deliver Custom Edits / Files:</label>
                       <input 
                         type="url" 
-                        placeholder="Google Drive Link for Custom Edit" 
+                        placeholder="Google Drive Link (https://...)" 
                         id={`delivery-link-${order.id}`}
+                        defaultValue={order.deliveryLink || ''}
                         style={{ padding: '8px', borderRadius: '6px', border: '1px solid var(--glass-border)', background: 'rgba(0,0,0,0.5)', color: 'white', width: '100%', fontSize: '0.85rem' }} 
                       />
                       <button 
@@ -404,9 +551,9 @@ const AdminDashboard = () => {
                           }
                         }}
                         className="btn-primary" 
-                        style={{ padding: '8px 16px', fontSize: '0.9rem', width: '100%', background: 'linear-gradient(45deg, #27c93f, #149c28)' }}
+                        style={{ padding: '8px 16px', fontSize: '0.85rem', width: '100%', background: 'linear-gradient(45deg, #27c93f, #149c28)' }}
                       >
-                        Mark Delivered
+                        {order.deliveryLink ? 'Update Link' : 'Mark Delivered'}
                       </button>
                     </div>
                   )}
@@ -450,46 +597,50 @@ const AdminDashboard = () => {
       )}
       {activeTab === 'customers' && (
         <div className="glass-panel" style={{ padding: '30px', marginTop: '40px' }}>
-          <h3>Manage Customers</h3>
+          <h3>Manage Customers ({allCustomers.length})</h3>
           <div style={{ marginTop: '20px', overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
                 <tr style={{ borderBottom: '1px solid var(--glass-border)', color: 'var(--primary)' }}>
-                  <th style={{ padding: '10px', textAlign: 'left' }}>Email</th>
+                  <th style={{ padding: '10px', textAlign: 'left' }}>Email / Customer</th>
                   <th style={{ padding: '10px', textAlign: 'left' }}>Total Orders</th>
                   <th style={{ padding: '10px', textAlign: 'left' }}>Total Spent</th>
-                  <th style={{ padding: '10px', textAlign: 'left' }}>Password</th>
+                  <th style={{ padding: '10px', textAlign: 'left' }}>Account Type</th>
                 </tr>
               </thead>
               <tbody>
-                {users.map(user => {
-                  const userOrders = orders.filter(o => o.userEmail === user.email);
-                  const totalSpent = userOrders.reduce((acc, o) => acc + parseFloat(o.total.replace('₹', '') || 0), 0);
+                {allCustomers.map(customer => {
+                  const customerOrders = uniqueOrders.filter(o => o.userEmail?.toLowerCase() === customer.email?.toLowerCase());
+                  const totalSpent = customerOrders.reduce((acc, o) => acc + (parseFloat(String(o?.total || '').replace(/[^0-9.]/g, '')) || 0), 0);
                   
                   return (
-                    <tr key={user.email} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                    <tr key={customer.email} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                       <td style={{ padding: '15px 10px' }}>
-                        <div style={{ fontWeight: 'bold' }}>{user.email}</div>
-                        {userOrders.length > 0 && (
+                        <div style={{ fontWeight: 'bold' }}>
+                          {customer.name ? `${customer.name} (${customer.email})` : customer.email}
+                        </div>
+                        {customerOrders.length > 0 && (
                           <div style={{ marginTop: '10px', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
                             <strong>Purchased Items:</strong>
                             <ul style={{ paddingLeft: '20px', margin: '5px 0 0 0', color: 'var(--primary)' }}>
-                              {userOrders.flatMap(o => o.items).map((item, i) => (
+                              {customerOrders.flatMap(o => (o.items && Array.isArray(o.items)) ? o.items : []).map((item, i) => (
                                 <li key={i}>{item.title}</li>
                               ))}
                             </ul>
                           </div>
                         )}
                       </td>
-                      <td style={{ padding: '15px 10px', verticalAlign: 'top' }}>{userOrders.length}</td>
-                      <td style={{ padding: '15px 10px', verticalAlign: 'top' }}>₹{totalSpent.toFixed(2)}</td>
-                      <td style={{ padding: '15px 10px', verticalAlign: 'top', color: 'var(--primary)' }}>{user.password}</td>
+                      <td style={{ padding: '15px 10px', verticalAlign: 'top' }}>{customerOrders.length}</td>
+                      <td style={{ padding: '15px 10px', verticalAlign: 'top', color: '#27c93f', fontWeight: 'bold' }}>₹{totalSpent.toFixed(2)}</td>
+                      <td style={{ padding: '15px 10px', verticalAlign: 'top', color: customer.isRegistered ? 'var(--primary)' : 'var(--text-muted)' }}>
+                        {customer.isRegistered ? 'Registered User' : 'Buyer'}
+                      </td>
                     </tr>
                   );
                 })}
-                {users.length === 0 && (
+                {allCustomers.length === 0 && (
                   <tr>
-                    <td colSpan="4" style={{ padding: '20px', textAlign: 'center', color: 'var(--text-muted)' }}>No registered users.</td>
+                    <td colSpan="4" style={{ padding: '20px', textAlign: 'center', color: 'var(--text-muted)' }}>No customers found.</td>
                   </tr>
                 )}
               </tbody>

@@ -152,13 +152,14 @@ const Cart = (props) => {
           try {
             // Verify on server if signature is available
             if (response.razorpay_signature && response.razorpay_order_id) {
-              await axios.post(`${API_URL}/payment/verify`, {
+              const verifyRes = await axios.post(`${API_URL}/payment/verify`, {
                 razorpay_order_id: response.razorpay_order_id,
                 razorpay_payment_id: response.razorpay_payment_id,
                 razorpay_signature: response.razorpay_signature,
                 orderData: newOrder
               });
-              await addOrder(newOrder);
+              const confirmedOrder = verifyRes.data?.order || newOrder;
+              await addOrder(confirmedOrder);
             } else {
               // Direct order creation
               await addOrder(newOrder);

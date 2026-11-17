@@ -1,15 +1,31 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { AppContext } from '../context/AppContext';
 
-
 const MyOrders = () => {
-  const { orders, currentUser, addReview, addToast, reviews, products } = useContext(AppContext);
+  const { orders, currentUser, addReview, addToast, reviews, products, fetchOrders } = useContext(AppContext);
   const [reviewModalOpen, setReviewModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [rating, setRating] = useState(5);
   const [reviewText, setReviewText] = useState('');
 
-  const userOrders = orders.filter(order => order.userEmail === currentUser?.email);
+  useEffect(() => {
+    if (fetchOrders) {
+      fetchOrders();
+    }
+  }, [fetchOrders]);
+
+  const userOrders = React.useMemo(() => {
+    if (!Array.isArray(orders)) return [];
+    const seen = new Set();
+    return orders
+      .filter(order => order.userEmail?.toLowerCase() === currentUser?.email?.toLowerCase())
+      .filter(order => {
+        const key = order.id || order.transactionId || order._id;
+        if (!key || seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+  }, [orders, currentUser]);
 
   const openReviewModal = (item) => {
     setSelectedProduct(item);
@@ -62,7 +78,7 @@ const MyOrders = () => {
                   <div style={{ marginTop: '15px' }}>
                     <strong>Items:</strong>
                     <ul style={{ paddingLeft: '20px', marginTop: '5px', color: 'var(--primary)' }}>
-                      {order.items.map((item, i) => <li key={i}>{item.title}</li>)}
+                      {(order.items || []).map((item, i) => <li key={i}>{item.title}</li>)}
                     </ul>
                   </div>
                 </div>
@@ -92,7 +108,7 @@ const MyOrders = () => {
                         </div>
                       )}
                       
-                      {order.items.map((item, i) => {
+                      {(order.items || []).map((item, i) => {
                         const hasReviewed = reviews.some(r => r.productId === item.id && r.userEmail === currentUser?.email);
                         const downloadUrl = item.driveLink || products?.find(p => p.id === item.id || p.title === item.title)?.driveLink || 'https://drive.google.com';
 

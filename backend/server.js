@@ -134,6 +134,18 @@ app.get('/api/orders', async (req, res) => {
 
 app.post('/api/orders', async (req, res) => {
   try {
+    // Check if order already exists by id or transactionId
+    if (req.body.id || req.body.transactionId) {
+      const existing = await Order.findOne({
+        $or: [
+          ...(req.body.id ? [{ id: req.body.id }] : []),
+          ...(req.body.transactionId ? [{ transactionId: req.body.transactionId }] : [])
+        ]
+      });
+      if (existing) {
+        return res.status(200).json(existing);
+      }
+    }
     const order = new Order(req.body);
     await order.save();
     res.status(201).json(order);

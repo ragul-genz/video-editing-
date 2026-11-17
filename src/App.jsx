@@ -18,6 +18,7 @@ import { ToastContainer } from './components/Toast';
 import { AppContextProvider, AppContext } from './context/AppContext';
 import Loader from './components/Loader';
 import SocialMedia from './pages/SocialMedia';
+import ClientDelivery from './pages/ClientDelivery';
 
 import Wishlist from './pages/Wishlist';
 import { Instagram, Facebook, Youtube } from './components/BrandIcons';
@@ -83,6 +84,8 @@ const AppContent = () => {
           <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
           <Route path="/wishlist" element={<ProtectedRoute><Wishlist addToCart={addToCart} onProductClick={openProductDetails} /></ProtectedRoute>} />
           <Route path="/social-media" element={<ProtectedRoute><SocialMedia /></ProtectedRoute>} />
+          <Route path="/delivery" element={<ClientDelivery />} />
+          <Route path="/client-delivery" element={<ClientDelivery />} />
           <Route path="/admin" element={<AdminLogin />} />
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
         </Routes>

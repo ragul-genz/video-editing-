@@ -1,0 +1,270 @@
+/* ==========================================================================
+   DS3 STUDIO - ABOUT & OUR WORK SECTION
+   ========================================================================== */
+
+.about-page-container {
+  min-height: 100vh;
+  padding: 120px 20px 80px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+/* About Header */
+.about-header-wrap {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.about-main-title {
+  font-size: clamp(2.2rem, 5vw, 3.4rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin-bottom: 24px;
+}
+
+/* Content paragraphs */
+.about-text-content {
+  max-width: 850px;
+  margin: 0 auto 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.about-paragraph {
+  font-size: 1.1rem;
+  line-height: 1.8;
+  color: var(--text-muted);
+  text-align: justify;
+}
+
+.about-paragraph strong {
+  color: #fff;
+}
+
+.about-quote-box {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--glass-border);
+  border-radius: 14px;
+  padding: 26px 30px;
+  margin: 10px 0 20px;
+  text-align: justify;
+  line-height: 1.8;
+  color: #ffffff;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+.about-motto {
+  color: var(--primary);
+  font-size: 1.25rem;
+  font-weight: 700;
+  text-align: center;
+  display: block;
+  margin-top: 18px;
+  letter-spacing: 0.05em;
+}
+
+/* ==========================================================================
+   OUR WORK SECTION (EXACT MOCKUP REPLICATION)
+   ========================================================================== */
+.our-work-section {
+  margin-top: 60px;
+  text-align: center;
+}
+
+.our-work-title {
+  font-family: var(--font-heading);
+  font-size: 1.7rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--secondary);
+  margin-bottom: 24px;
+  display: inline-block;
+  text-shadow: 0 0 20px rgba(0, 210, 255, 0.4);
+}
+
+/* The Grand Capsule Box */
+.our-work-capsule {
+  display: grid;
+  grid-template-columns: 1fr 1px 1fr;
+  border: 1.8px solid rgba(0, 123, 255, 0.45);
+  border-radius: 36px;
+  background: rgba(8, 8, 12, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 15px 45px rgba(0, 0, 0, 0.7), inset 0 0 30px rgba(0, 123, 255, 0.08);
+  padding: 45px 35px 50px;
+  min-height: 380px;
+  position: relative;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.our-work-capsule:hover {
+  border-color: rgba(0, 210, 255, 0.65);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 30px rgba(0, 210, 255, 0.2);
+}
+
+/* Middle Vertical Divider */
+.work-capsule-divider {
+  width: 1px;
+  background: rgba(255, 255, 255, 0.22);
+  align-self: stretch;
+}
+
+/* Work Column */
+.work-capsule-col {
+  display: flex;
+  flex-direction: column;
+  padding: 10px 40px;
+  text-align: left;
+}
+
+.work-col-heading {
+  font-family: var(--font-heading);
+  font-size: clamp(2.4rem, 4vw, 3.4rem);
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #ffffff;
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.work-col-subcategories {
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #ffffff;
+  text-align: center;
+  margin-bottom: 45px;
+  line-height: 1.6;
+}
+
+/* Action Links in Red */
+.work-col-links-group {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: auto;
+  padding-left: 10px;
+}
+
+.work-red-link-item {
+  font-family: var(--font-heading);
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #ff3344;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  padding: 4px 0;
+  width: fit-content;
+  transition: all 0.25s ease;
+}
+
+.work-red-link-item:hover {
+  color: #ff6677;
+  transform: translateX(6px);
+  text-shadow: 0 0 16px rgba(255, 51, 68, 0.7);
+}
+
+.work-red-link-item svg {
+  transition: transform 0.2s ease;
+}
+
+.work-red-link-item:hover svg {
+  transform: translateX(3px);
+}
+
+/* ==========================================================================
+   COVERPAGE MODAL PREVIEW
+   ========================================================================== */
+.coverpage-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.88);
+  backdrop-filter: blur(12px);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: fadeIn 0.25s ease;
+}
+
+.coverpage-modal-card {
+  position: relative;
+  max-width: 700px;
+  width: 100%;
+  background: #0d0d12;
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.85);
+  padding: 30px;
+  text-align: center;
+}
+
+.coverpage-modal-card h3 {
+  font-size: 1.6rem;
+  margin-bottom: 10px;
+}
+
+.coverpage-modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease;
+}
+
+.coverpage-modal-close:hover {
+  background: var(--primary);
+}
+
+/* Responsive */
+@media (max-width: 868px) {
+  .our-work-capsule {
+    grid-template-columns: 1fr;
+    border-radius: 24px;
+    padding: 30px 20px;
+    min-height: auto;
+    gap: 25px;
+  }
+
+  .work-capsule-divider {
+    width: 100%;
+    height: 1px;
+    margin: 10px 0;
+  }
+
+  .work-capsule-col {
+    padding: 10px 15px;
+  }
+
+  .work-col-subcategories {
+    margin-bottom: 25px;
+  }
+
+  .work-col-links-group {
+    padding-left: 0;
+    align-items: center;
+  }
+}
