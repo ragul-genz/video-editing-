@@ -100,6 +100,35 @@ const IdBadgeIcon = () => (
   </svg>
 );
 
+const isOrderMatch = (order, query) => {
+  if (!order || !query) return false;
+  const cleanQ = String(query).trim().replace(/^#/, '');
+  const orderId = String(order.id || '').trim();
+  const txId = String(order.transactionId || '').trim();
+  const rzpOrderId = String(order.razorpayOrderId || '').trim();
+
+  // 1. Exact match on id, transactionId, or razorpayOrderId
+  if (orderId.toLowerCase() === cleanQ.toLowerCase()) return true;
+  if (txId && txId.toLowerCase() === cleanQ.toLowerCase()) return true;
+  if (rzpOrderId && rzpOrderId.toLowerCase() === cleanQ.toLowerCase()) return true;
+
+  // 2. Normalized match (without hyphens, underscores, or spaces)
+  const normQ = cleanQ.replace(/[-_\s]/g, '').toLowerCase();
+  const normId = orderId.replace(/[-_\s]/g, '').toLowerCase();
+  if (normId && normQ && (normId === normQ || normId.includes(normQ))) return true;
+
+  // 3. Sequential number match (e.g. searching '001' or '1' matches '17112026-001')
+  const matchSeq = orderId.match(/[_-](\d+)$/);
+  if (matchSeq) {
+    const seqNum = matchSeq[1];
+    if (cleanQ === seqNum || parseInt(cleanQ, 10) === parseInt(seqNum, 10)) {
+      return true;
+    }
+  }
+
+  return false;
+};
+
 const ClientDelivery = () => {
   const [searchParams] = useSearchParams();
   const { orders, fetchOrders, updateOrder, addToast, currentUser } = useContext(AppContext);
@@ -121,17 +150,13 @@ const ClientDelivery = () => {
     setIsSearching(true);
 
     // 1. Check local state first
-    let found = (orders || []).find(
-      (o) => String(o.id) === query || String(o.transactionId) === query
-    );
+    let found = (orders || []).find((o) => isOrderMatch(o, query));
 
     // 2. If not found in local state, fetch from server
     if (!found && fetchOrders) {
       try {
         const freshOrders = await fetchOrders();
-        found = (freshOrders || []).find(
-          (o) => String(o.id) === query || String(o.transactionId) === query
-        );
+        found = (freshOrders || []).find((o) => isOrderMatch(o, query));
       } catch (err) {
         console.warn('Order lookup error:', err);
       }
@@ -301,7 +326,7 @@ const ClientDelivery = () => {
               onKeyDown={(e) => {
                 if (e.key === 'Enter') handleAction();
               }}
-              placeholder="ENTER YOUR ORDER ID"
+              placeholder="ENTER YOUR ORDER ID (e.g. 17112026-001)"
               aria-label="Order ID Input"
             />
           </div>

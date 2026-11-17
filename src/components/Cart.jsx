@@ -21,6 +21,42 @@ const loadRazorpayScript = () => {
   });
 };
 
+// Helper to generate continuous sequential Order ID: DDMMYYYY-001, DDMMYYYY-002, etc.
+const generateNextOrderId = (existingOrders = []) => {
+  let list = existingOrders;
+  if (!Array.isArray(list) || list.length === 0) {
+    try {
+      const cached = JSON.parse(localStorage.getItem('ds3_orders') || '[]');
+      if (Array.isArray(cached) && cached.length > 0) {
+        list = cached;
+      }
+    } catch {
+      // ignore storage parse error
+    }
+  }
+
+  const now = new Date();
+  const day = String(now.getDate()).padStart(2, '0');
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const year = String(now.getFullYear());
+  const datePrefix = `${day}${month}${year}`;
+
+  let maxSeq = 0;
+  (list || []).forEach(o => {
+    const idStr = String(o?.id || '').trim();
+    const match = idStr.match(/[_-](\d+)$/);
+    if (match) {
+      const num = parseInt(match[1], 10);
+      if (!isNaN(num) && num > maxSeq) {
+        maxSeq = num;
+      }
+    }
+  });
+
+  const nextSeq = maxSeq + 1;
+  return `${datePrefix}-${String(nextSeq).padStart(3, '0')}`;
+};
+
 const Cart = (props) => {
   const context = useContext(AppContext);
   const isOpen = props.isOpen !== undefined ? props.isOpen : context.isCartOpen;
@@ -32,7 +68,7 @@ const Cart = (props) => {
   const [checkoutStep, setCheckoutStep] = useState(0); // 0: Cart items, 1: Razorpay Payment, 2: Success
   const [isLoading, setIsLoading] = useState(false);
   const [loadingText, setLoadingText] = useState('Processing...');
-  const { addOrder, currentUser, addToast, API_URL } = context;
+  const { addOrder, currentUser, addToast, API_URL, orders } = context;
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -125,7 +161,7 @@ const Cart = (props) => {
           setLoadingText("Verifying Payment & Unlocking Assets...");
           setIsLoading(true);
 
-          const generatedOrderId = Date.now().toString().slice(-6);
+          const generatedOrderId = generateNextOrderId(orders);
           const paymentId = response.razorpay_payment_id;
 
           // Save each purchased asset with its download link

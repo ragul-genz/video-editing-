@@ -124,6 +124,31 @@ app.put('/api/users/:email', async (req, res) => {
   } catch (err) { res.status(400).json({ error: err.message }); }
 });
 
+// Helper to generate continuous sequential Order ID: DDMMYYYY-001, DDMMYYYY-002, etc.
+async function generateServerOrderId() {
+  const now = new Date();
+  const day = String(now.getDate()).padStart(2, '0');
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const year = String(now.getFullYear());
+  const datePrefix = `${day}${month}${year}`;
+
+  const allOrders = await Order.find();
+  let maxSeq = 0;
+  allOrders.forEach(o => {
+    const idStr = String(o.id || '').trim();
+    const match = idStr.match(/[_-](\d+)$/);
+    if (match) {
+      const num = parseInt(match[1], 10);
+      if (!isNaN(num) && num > maxSeq) {
+        maxSeq = num;
+      }
+    }
+  });
+
+  const nextSeq = maxSeq + 1;
+  return `${datePrefix}-${String(nextSeq).padStart(3, '0')}`;
+}
+
 // Orders
 app.get('/api/orders', async (req, res) => {
   try {
@@ -134,6 +159,17 @@ app.get('/api/orders', async (req, res) => {
 
 app.post('/api/orders', async (req, res) => {
   try {
+    // If no order id provided, generate sequential continuous ID
+    if (!req.body.id) {
+      req.body.id = await generateServerOrderId();
+    } else {
+      // If order with this exact ID already exists (and not same transaction), assign next sequential ID
+      const existingSameId = await Order.findOne({ id: req.body.id });
+      if (existingSameId && (!req.body.transactionId || existingSameId.transactionId !== req.body.transactionId)) {
+        req.body.id = await generateServerOrderId();
+      }
+    }
+
     // Check if order already exists by id or transactionId
     if (req.body.id || req.body.transactionId) {
       const existing = await Order.findOne({
@@ -220,8 +256,18 @@ app.post('/api/payment/verify', async (req, res) => {
     // Payment verified! Create order in DB with status 'Approved'
     let savedOrder = null;
     if (orderData) {
+      let finalOrderId = orderData.id;
+      if (!finalOrderId) {
+        finalOrderId = await generateServerOrderId();
+      } else {
+        const existingOrder = await Order.findOne({ id: finalOrderId });
+        if (existingOrder && existingOrder.transactionId !== razorpay_payment_id) {
+          finalOrderId = await generateServerOrderId();
+        }
+      }
+
       savedOrder = new Order({
-        id: orderData.id || Date.now().toString().slice(-6),
+        id: finalOrderId,
         date: new Date(),
         total: orderData.total,
         status: 'Approved',
