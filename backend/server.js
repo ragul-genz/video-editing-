@@ -294,6 +294,156 @@ app.post('/api/payment/verify', async (req, res) => {
   }
 });
 
+// Helper to recover and save an order directly from a captured Razorpay payment
+async function recoverOrderFromRazorpayPayment(payment) {
+  if (!payment || payment.status !== 'captured') return null;
+
+  // Check if order already exists by transactionId
+  const existing = await Order.findOne({ transactionId: payment.id });
+  if (existing) return existing;
+
+  const allProducts = await Product.find();
+  let matchedItems = [];
+
+  const rawItemTitle = payment.notes?.items || '';
+  if (rawItemTitle) {
+    const titles = rawItemTitle.split(',').map(s => s.trim());
+    titles.forEach(t => {
+      const prod = allProducts.find(p => p.title.toLowerCase() === t.toLowerCase());
+      if (prod) {
+        matchedItems.push({
+          id: String(prod._id || prod.id),
+          title: prod.title,
+          price: prod.price || `₹${(payment.amount / 100).toFixed(2)}`,
+          driveLink: prod.driveLink || ''
+        });
+      } else {
+        matchedItems.push({
+          id: 'item-' + Date.now(),
+          title: t,
+          price: `₹${(payment.amount / 100).toFixed(2)}`,
+          driveLink: allProducts[0]?.driveLink || 'https://drive.google.com'
+        });
+      }
+    });
+  }
+
+  if (matchedItems.length === 0) {
+    const amountInRupees = payment.amount / 100;
+    const prodByPrice = allProducts.find(p => {
+      const num = parseFloat(String(p.price).replace(/[^0-9.]/g, ''));
+      return Math.abs(num - amountInRupees) < 0.05;
+    });
+    if (prodByPrice) {
+      matchedItems.push({
+        id: String(prodByPrice._id || prodByPrice.id),
+        title: prodByPrice.title,
+        price: prodByPrice.price,
+        driveLink: prodByPrice.driveLink || ''
+      });
+    } else if (allProducts.length > 0) {
+      matchedItems.push({
+        id: String(allProducts[0]._id || allProducts[0].id),
+        title: allProducts[0].title,
+        price: `₹${amountInRupees.toFixed(2)}`,
+        driveLink: allProducts[0].driveLink || ''
+      });
+    }
+  }
+
+  const newOrderId = await generateServerOrderId();
+  const customerEmail = payment.notes?.customerEmail || payment.email || 'customer@ds3studio.com';
+  const customerName = customerEmail.split('@')[0] || 'Valued Customer';
+  const deliveryLink = matchedItems[0]?.driveLink || allProducts[0]?.driveLink || 'https://drive.google.com';
+
+  const newOrder = new Order({
+    id: newOrderId,
+    date: payment.created_at ? new Date(payment.created_at * 1000) : new Date(),
+    total: `₹${(payment.amount / 100).toFixed(2)}`,
+    status: 'Approved',
+    name: customerName,
+    paymentMethod: payment.method ? `Razorpay (${payment.method.toUpperCase()})` : 'Razorpay',
+    transactionId: payment.id,
+    userEmail: customerEmail,
+    deliveryLink: deliveryLink,
+    razorpayOrderId: payment.order_id || '',
+    razorpayPaymentId: payment.id,
+    items: matchedItems
+  });
+
+  return await newOrder.save();
+}
+
+// Sync / Recover single payment by ID (used by frontend delivery lookup & order restore)
+app.get('/api/payment/sync-payment/:paymentId', async (req, res) => {
+  try {
+    const { paymentId } = req.params;
+    if (!paymentId) return res.status(400).json({ error: 'Payment ID is required' });
+
+    // 1. Check if already in DB
+    const existing = await Order.findOne({
+      $or: [{ transactionId: paymentId }, { razorpayPaymentId: paymentId }, { id: paymentId }]
+    });
+    if (existing) {
+      return res.json({ success: true, order: existing, recovered: false });
+    }
+
+    // 2. Fetch from Razorpay API
+    const payment = await razorpay.payments.fetch(paymentId);
+    if (!payment || payment.status !== 'captured') {
+      return res.status(404).json({ success: false, error: 'Payment not found or not captured yet in Razorpay' });
+    }
+
+    // 3. Recover and save order
+    const recovered = await recoverOrderFromRazorpayPayment(payment);
+    return res.json({ success: true, order: recovered, recovered: true });
+  } catch (err) {
+    console.error('Error syncing payment:', err);
+    res.status(500).json({ success: false, error: err.message || 'Failed to sync payment' });
+  }
+});
+
+// Admin Sync: Fetch recent payments from Razorpay and recover any missing orders
+app.post('/api/payment/sync-all', async (req, res) => {
+  try {
+    const list = await razorpay.payments.all({ count: 50 });
+    const recoveredOrders = [];
+
+    for (const payment of (list.items || [])) {
+      if (payment.status === 'captured') {
+        const existing = await Order.findOne({ transactionId: payment.id });
+        if (!existing) {
+          const recovered = await recoverOrderFromRazorpayPayment(payment);
+          if (recovered) recoveredOrders.push(recovered);
+        }
+      }
+    }
+
+    res.json({
+      success: true,
+      recoveredCount: recoveredOrders.length,
+      orders: recoveredOrders
+    });
+  } catch (err) {
+    console.error('Error syncing all payments:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Razorpay Webhook listener (catches payment.captured & order.paid directly from Razorpay server)
+app.post('/api/payment/webhook', async (req, res) => {
+  try {
+    const event = req.body.event;
+    if (event === 'payment.captured' && req.body.payload?.payment?.entity) {
+      await recoverOrderFromRazorpayPayment(req.body.payload.payment.entity);
+    }
+    res.status(200).json({ status: 'ok' });
+  } catch (err) {
+    console.error('Webhook error:', err);
+    res.status(200).json({ status: 'ok', warning: err.message });
+  }
+});
+
 // Site Settings
 app.get('/api/settings', async (req, res) => {
   try {

@@ -1,8 +1,18 @@
 import React, { useState, useEffect, useCallback, useContext } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import axios from 'axios';
 import { AppContext } from '../context/AppContext';
 import { ArrowRight, Download, Loader2 } from 'lucide-react';
 import './ClientDelivery.css';
+
+const getDriveDirectLink = (url) => {
+  if (!url) return '';
+  const match = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+  if (match && match[1]) {
+    return `https://drive.usercontent.google.com/download?id=${match[1]}&export=download`;
+  }
+  return url;
+};
 
 const RAZORPAY_KEY_ID = import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_live_TWTH9nOKea11hk';
 
@@ -131,7 +141,7 @@ const isOrderMatch = (order, query) => {
 
 const ClientDelivery = () => {
   const [searchParams] = useSearchParams();
-  const { orders, fetchOrders, updateOrder, addToast, currentUser } = useContext(AppContext);
+  const { orders, fetchOrders, updateOrder, addToast, currentUser, API_URL } = useContext(AppContext);
 
   const [orderIdInput, setOrderIdInput] = useState(() => {
     return (searchParams.get('orderId') || searchParams.get('id') || '').trim();
@@ -143,7 +153,7 @@ const ClientDelivery = () => {
   const handleLookup = useCallback(async (idToSearch) => {
     const query = (idToSearch || orderIdInput).trim();
     if (!query) {
-      addToast('Please enter your Order ID', 'info');
+      addToast('Please enter your Order ID or Payment ID', 'info');
       return;
     }
 
@@ -162,6 +172,19 @@ const ClientDelivery = () => {
       }
     }
 
+    // 3. If still not found and query looks like a Razorpay payment ID (starts with pay_)
+    if (!found && query.toLowerCase().startsWith('pay_')) {
+      try {
+        const syncRes = await axios.get(`${API_URL}/payment/sync-payment/${query}`);
+        if (syncRes.data?.success && syncRes.data?.order) {
+          found = syncRes.data.order;
+          if (fetchOrders) fetchOrders();
+        }
+      } catch (err) {
+        console.warn('Razorpay live sync lookup error:', err);
+      }
+    }
+
     setIsSearching(false);
 
     if (found) {
@@ -171,7 +194,7 @@ const ClientDelivery = () => {
       setMatchedOrder(null);
       addToast(`Order #${query} not found. Please double-check your Order ID.`, 'error');
     }
-  }, [orderIdInput, orders, fetchOrders, addToast]);
+  }, [orderIdInput, orders, fetchOrders, addToast, API_URL]);
 
   // Auto-fill from query param (?orderId=... or ?id=...)
   useEffect(() => {
@@ -358,6 +381,48 @@ const ClientDelivery = () => {
                   <strong style={{ color: 'var(--secondary)' }}>
                     {matchedOrder.items[0].title}
                   </strong>
+                </div>
+              )}
+
+              {isDeliveredOrApproved && targetDriveLink && (
+                <div style={{ marginTop: '14px', paddingTop: '12px', borderTop: '1px solid rgba(255,255,255,0.1)', display: 'flex', gap: '8px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                  <a
+                    href={getDriveDirectLink(targetDriveLink)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn-primary"
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      padding: '8px 14px',
+                      fontSize: '0.8rem',
+                      textDecoration: 'none',
+                      borderRadius: '8px',
+                      background: 'linear-gradient(135deg, #00e5ff, #0088ff)',
+                      color: '#000',
+                      fontWeight: '700'
+                    }}
+                  >
+                    <span>📥 Direct Download</span>
+                  </a>
+                  <a
+                    href={targetDriveLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn-secondary"
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      padding: '8px 14px',
+                      fontSize: '0.8rem',
+                      textDecoration: 'none',
+                      borderRadius: '8px'
+                    }}
+                  >
+                    <span>📂 Google Drive</span>
+                  </a>
                 </div>
               )}
             </div>

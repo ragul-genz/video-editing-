@@ -1,18 +1,54 @@
 import React, { useContext, useState, useEffect } from 'react';
+import axios from 'axios';
 import { AppContext } from '../context/AppContext';
 
+const getDriveDirectLink = (url) => {
+  if (!url) return '';
+  const match = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+  if (match && match[1]) {
+    return `https://drive.usercontent.google.com/download?id=${match[1]}&export=download`;
+  }
+  return url;
+};
+
 const MyOrders = () => {
-  const { orders, currentUser, addReview, addToast, reviews, products, fetchOrders } = useContext(AppContext);
+  const { orders, currentUser, addReview, addToast, reviews, products, fetchOrders, API_URL } = useContext(AppContext);
   const [reviewModalOpen, setReviewModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [rating, setRating] = useState(5);
   const [reviewText, setReviewText] = useState('');
+  const [recoveryPaymentId, setRecoveryPaymentId] = useState('');
+  const [isRecovering, setIsRecovering] = useState(false);
 
   useEffect(() => {
     if (fetchOrders) {
       fetchOrders();
     }
   }, [fetchOrders]);
+
+  const handleRecoverOrder = async () => {
+    const pid = (recoveryPaymentId || '').trim();
+    if (!pid) {
+      addToast('Please enter your Razorpay Payment ID (e.g. pay_...)', 'info');
+      return;
+    }
+    setIsRecovering(true);
+    try {
+      const res = await axios.get(`${API_URL}/payment/sync-payment/${pid}`);
+      if (res.data?.success && res.data?.order) {
+        addToast('Order found & download unlocked!', 'success');
+        setRecoveryPaymentId('');
+        if (fetchOrders) await fetchOrders();
+      } else {
+        addToast(res.data?.error || 'Payment not found in Razorpay', 'error');
+      }
+    } catch (err) {
+      console.error('Order recovery error:', err);
+      addToast(err.response?.data?.error || 'Could not verify payment ID. Please check and try again.', 'error');
+    } finally {
+      setIsRecovering(false);
+    }
+  };
 
   const userOrders = React.useMemo(() => {
     if (!Array.isArray(orders)) return [];
@@ -59,8 +95,33 @@ const MyOrders = () => {
   return (
     <section style={{ padding: '120px 20px', maxWidth: '1000px', margin: '0 auto', minHeight: '80vh' }}>
       <h1 className="section-title">Purchase <span className="text-gradient">History</span></h1>
-      <p style={{ color: 'var(--text-muted)', marginBottom: '30px' }}>Welcome back, {currentUser?.email}</p>
+      <p style={{ color: 'var(--text-muted)', marginBottom: '20px' }}>Welcome back, {currentUser?.email}</p>
       
+      {/* Self-Service Order Recovery (Instant UPI Fix) */}
+      <div style={{ marginBottom: '30px', padding: '16px 20px', background: 'rgba(0, 229, 255, 0.05)', borderRadius: '12px', border: '1px solid rgba(0, 229, 255, 0.2)' }}>
+        <p style={{ margin: '0 0 10px 0', fontSize: '0.9rem', color: '#fff' }}>
+          💡 <strong>Paid via UPI and don't see your download?</strong> Enter your Razorpay Payment ID from UPI SMS/App to instantly restore access:
+        </p>
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+          <input
+            type="text"
+            placeholder="Payment ID (e.g. pay_U0pqJBMZaS5qJs)"
+            value={recoveryPaymentId}
+            onChange={(e) => setRecoveryPaymentId(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter') handleRecoverOrder(); }}
+            style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--glass-border)', background: 'rgba(0,0,0,0.5)', color: '#fff', flex: '1', minWidth: '220px', fontSize: '0.9rem' }}
+          />
+          <button
+            onClick={handleRecoverOrder}
+            disabled={isRecovering}
+            className="btn-primary"
+            style={{ padding: '8px 18px', fontSize: '0.85rem', background: 'linear-gradient(135deg, #00e5ff, #0088ff)', color: '#000', fontWeight: 'bold' }}
+          >
+            {isRecovering ? 'Restoring...' : 'Restore Download'}
+          </button>
+        </div>
+      </div>
+
       {userOrders.length === 0 ? (
         <div className="glass-panel" style={{ padding: '40px', textAlign: 'center' }}>
           <h3 style={{ color: 'var(--text-muted)' }}>You have no orders yet.</h3>
@@ -101,41 +162,65 @@ const MyOrders = () => {
                       <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>Your downloads are ready:</p>
                       
                       {order.deliveryLink && (
-                        <div style={{ marginBottom: '10px' }}>
-                          <a href={order.deliveryLink} target="_blank" rel="noopener noreferrer" className="btn-primary" style={{ display: 'inline-block', padding: '10px 16px', fontSize: '0.9rem', textAlign: 'center', textDecoration: 'none', background: 'linear-gradient(45deg, #27c93f, #149c28)' }}>
-                            Download Custom Files
+                        <div style={{ marginBottom: '10px', display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                          <a href={getDriveDirectLink(order.deliveryLink)} target="_blank" rel="noopener noreferrer" className="btn-primary" style={{ display: 'inline-block', padding: '10px 16px', fontSize: '0.9rem', textAlign: 'center', textDecoration: 'none', background: 'linear-gradient(45deg, #27c93f, #149c28)', color: '#fff', fontWeight: 'bold' }}>
+                            📥 Direct Download
+                          </a>
+                          <a href={order.deliveryLink} target="_blank" rel="noopener noreferrer" className="btn-secondary" style={{ display: 'inline-block', padding: '10px 14px', fontSize: '0.85rem', textAlign: 'center', textDecoration: 'none' }}>
+                            📂 Open Drive
                           </a>
                         </div>
                       )}
                       
                       {(order.items || []).map((item, i) => {
                         const hasReviewed = reviews.some(r => r.productId === item.id && r.userEmail === currentUser?.email);
-                        const downloadUrl = item.driveLink || products?.find(p => p.id === item.id || p.title === item.title)?.driveLink || 'https://drive.google.com';
+                        const rawDrive = item.driveLink || products?.find(p => p.id === item.id || p.title === item.title)?.driveLink || 'https://drive.google.com';
+                        const directUrl = getDriveDirectLink(rawDrive);
 
                         return (
-                          <div key={i} style={{ display: 'flex', gap: '8px', flexDirection: 'column', alignItems: 'flex-end', marginBottom: '8px' }}>
-                            <a 
-                              href={downloadUrl} 
-                              target="_blank" 
-                              rel="noopener noreferrer" 
-                              className="btn-primary" 
-                              style={{ 
-                                display: 'inline-flex', 
-                                alignItems: 'center', 
-                                gap: '8px', 
-                                padding: '10px 18px', 
-                                fontSize: '0.9rem', 
-                                textAlign: 'center', 
-                                textDecoration: 'none',
-                                background: 'linear-gradient(135deg, #00e5ff, #0088ff)',
-                                color: '#000',
-                                fontWeight: '700',
-                                borderRadius: '8px',
-                                boxShadow: '0 4px 12px rgba(0, 229, 255, 0.3)'
-                              }}
-                            >
-                              <span>📥 Download {item.title}</span>
-                            </a>
+                          <div key={i} style={{ display: 'flex', gap: '8px', flexDirection: 'column', alignItems: 'flex-end', marginBottom: '12px' }}>
+                            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                              <a 
+                                href={directUrl} 
+                                target="_blank" 
+                                rel="noopener noreferrer" 
+                                className="btn-primary" 
+                                style={{ 
+                                  display: 'inline-flex', 
+                                  alignItems: 'center', 
+                                  gap: '8px', 
+                                  padding: '10px 18px', 
+                                  fontSize: '0.9rem', 
+                                  textAlign: 'center', 
+                                  textDecoration: 'none',
+                                  background: 'linear-gradient(135deg, #00e5ff, #0088ff)',
+                                  color: '#000',
+                                  fontWeight: '700',
+                                  borderRadius: '8px',
+                                  boxShadow: '0 4px 12px rgba(0, 229, 255, 0.3)'
+                                }}
+                              >
+                                <span>📥 Direct Download</span>
+                              </a>
+                              <a 
+                                href={rawDrive} 
+                                target="_blank" 
+                                rel="noopener noreferrer" 
+                                className="btn-secondary" 
+                                style={{ 
+                                  display: 'inline-flex', 
+                                  alignItems: 'center', 
+                                  gap: '6px', 
+                                  padding: '10px 14px', 
+                                  fontSize: '0.85rem', 
+                                  textAlign: 'center', 
+                                  textDecoration: 'none',
+                                  borderRadius: '8px'
+                                }}
+                              >
+                                <span>📂 Open Google Drive</span>
+                              </a>
+                            </div>
                             
                             {!hasReviewed ? (
                               <button 

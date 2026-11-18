@@ -1,14 +1,16 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import { AppContext } from '../context/AppContext';
 
 const AdminDashboard = () => {
-  const { products, addProduct, updateProduct, deleteProduct, siteSettings, setSiteSettings, orders, updateOrder, reviews, deleteReview, users, addToast, fetchOrders } = useContext(AppContext);
+  const { products, addProduct, updateProduct, deleteProduct, siteSettings, setSiteSettings, orders, updateOrder, reviews, deleteReview, users, addToast, fetchOrders, API_URL } = useContext(AppContext);
   const navigate = useNavigate();
 
   const [activeTab, setActiveTab] = useState('overview');
   const [newLogoUrl, setNewLogoUrl] = useState(siteSettings.logoUrl);
   const [isRefreshingOrders, setIsRefreshingOrders] = useState(false);
+  const [isSyncingRazorpay, setIsSyncingRazorpay] = useState(false);
   
   const [newProduct, setNewProduct] = useState({
     title: '', description: '', price: '', image: '', color: '#007bff', features: '', driveLink: '', previewUrl: '', previewVideoUrl: ''
@@ -232,6 +234,26 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleSyncRazorpay = async () => {
+    setIsSyncingRazorpay(true);
+    try {
+      const res = await axios.post(`${API_URL}/payment/sync-all`);
+      if (res.data?.success) {
+        if (res.data.recoveredCount > 0) {
+          addToast(`Success! Recovered ${res.data.recoveredCount} missing order(s) from Razorpay!`, 'success');
+        } else {
+          addToast("All captured Razorpay payments are in sync!", "info");
+        }
+        if (fetchOrders) await fetchOrders();
+      }
+    } catch (err) {
+      console.error("Razorpay sync error:", err);
+      addToast("Failed to sync Razorpay payments: " + (err.response?.data?.error || err.message), "error");
+    } finally {
+      setIsSyncingRazorpay(false);
+    }
+  };
+
   return (
     <section style={{ padding: '100px 20px', maxWidth: '1000px', margin: '0 auto', minHeight: '80vh' }}>
       <div className="section-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
@@ -425,20 +447,42 @@ const AdminDashboard = () => {
               Total Orders: <strong style={{ color: 'var(--primary)' }}>{uniqueOrders.length}</strong> • Auto-refreshes every 20s
             </p>
           </div>
-          <button
-            onClick={async () => {
-              setIsRefreshingOrders(true);
-              if (fetchOrders) await fetchOrders();
-              setIsRefreshingOrders(false);
-              addToast("Orders refreshed from server!", "success");
-            }}
-            className="btn-secondary"
-            style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '8px 18px', fontSize: '0.85rem' }}
-            disabled={isRefreshingOrders}
-          >
-            <span style={{ display: 'inline-block', transform: isRefreshingOrders ? 'rotate(360deg)' : 'none', transition: 'transform 0.8s ease' }}>🔄</span>
-            <span>{isRefreshingOrders ? 'Checking Server...' : 'Refresh Orders'}</span>
-          </button>
+          <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+            <button
+              onClick={handleSyncRazorpay}
+              className="btn-primary"
+              disabled={isSyncingRazorpay}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '8px 16px',
+                fontSize: '0.85rem',
+                background: 'linear-gradient(135deg, #00e5ff, #0088ff)',
+                color: '#000',
+                fontWeight: '700',
+                borderRadius: '8px',
+                border: 'none',
+                cursor: isSyncingRazorpay ? 'not-allowed' : 'pointer'
+              }}
+            >
+              <span>{isSyncingRazorpay ? '⏳ Syncing Razorpay...' : '⚡ Sync Razorpay Payments'}</span>
+            </button>
+            <button
+              onClick={async () => {
+                setIsRefreshingOrders(true);
+                if (fetchOrders) await fetchOrders();
+                setIsRefreshingOrders(false);
+                addToast("Orders refreshed from server!", "success");
+              }}
+              className="btn-secondary"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '8px 18px', fontSize: '0.85rem' }}
+              disabled={isRefreshingOrders}
+            >
+              <span style={{ display: 'inline-block', transform: isRefreshingOrders ? 'rotate(360deg)' : 'none', transition: 'transform 0.8s ease' }}>🔄</span>
+              <span>{isRefreshingOrders ? 'Checking Server...' : 'Refresh Orders'}</span>
+            </button>
+          </div>
         </div>
 
         <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '15px' }}>
