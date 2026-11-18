@@ -62,17 +62,17 @@ const About = () => {
       </div>
 
       {/* ====================================================================
-          OUR WORK SECTION (EXACT MOCKUP)
+          OUR WORK SECTION (EXACT MOCKUP FROM page 01.svg)
           ==================================================================== */}
       <section className="our-work-section">
-        <h2 className="our-work-title">OUR WORK</h2>
+        <h2 className="our-work-title">OUR <span>WORK</span></h2>
 
         <div className="our-work-capsule">
           {/* Left Column: MUSIC */}
           <div className="work-capsule-col">
             <h3 className="work-col-heading">MUSIC</h3>
             <p className="work-col-subcategories">
-              BGM , MUSIC , CINEMATIC , SFX ,
+              BGM, MUSIC , CINEMATIC , SFX ,
             </p>
 
             <div className="work-col-links-group">

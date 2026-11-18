@@ -65,7 +65,7 @@
 }
 
 /* ==========================================================================
-   OUR WORK SECTION (EXACT MOCKUP REPLICATION)
+   OUR WORK SECTION (EXACT MOCKUP REPLICATION FROM page 01.svg)
    ========================================================================== */
 .our-work-section {
   margin-top: 60px;
@@ -73,43 +73,46 @@
 }
 
 .our-work-title {
-  font-family: var(--font-heading);
-  font-size: 1.7rem;
+  font-family: 'Bebas Neue', 'Anton', Impact, sans-serif;
+  font-size: clamp(2.2rem, 5vw, 3.2rem);
   font-weight: 800;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--secondary);
+  color: #ffffff;
   margin-bottom: 24px;
   display: inline-block;
-  text-shadow: 0 0 20px rgba(0, 210, 255, 0.4);
 }
 
-/* The Grand Capsule Box */
+.our-work-title span {
+  color: #0077e4;
+  text-shadow: 0 0 20px rgba(0, 119, 228, 0.4);
+}
+
+/* The Grand Capsule Box (cls-1: border: 1px solid #0077e4; fill: #0d0d0d; rx: 52px) */
 .our-work-capsule {
   display: grid;
   grid-template-columns: 1fr 1px 1fr;
-  border: 1.8px solid rgba(0, 123, 255, 0.45);
-  border-radius: 36px;
-  background: rgba(8, 8, 12, 0.85);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  box-shadow: 0 15px 45px rgba(0, 0, 0, 0.7), inset 0 0 30px rgba(0, 123, 255, 0.08);
-  padding: 45px 35px 50px;
-  min-height: 380px;
+  border: 1.5px solid #0077e4;
+  border-radius: 52px;
+  background: #0d0d0d;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9), 0 0 30px rgba(0, 119, 228, 0.15);
+  padding: 50px 40px 55px;
+  min-height: 400px;
   position: relative;
   transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .our-work-capsule:hover {
-  border-color: rgba(0, 210, 255, 0.65);
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 30px rgba(0, 210, 255, 0.2);
+  border-color: #00aaff;
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.95), 0 0 40px rgba(0, 170, 255, 0.25);
 }
 
-/* Middle Vertical Divider */
+/* Middle Vertical Divider (cls-3: stroke: #fff, 1px) */
 .work-capsule-divider {
   width: 1px;
-  background: rgba(255, 255, 255, 0.22);
+  background: #ffffff;
   align-self: stretch;
+  opacity: 0.85;
 }
 
 /* Work Column */
@@ -120,48 +123,52 @@
   text-align: left;
 }
 
+/* Headings: MUSIC & VIDEOS (cls-2 font-size: 100px; fill: #fff;) */
 .work-col-heading {
-  font-family: var(--font-heading);
-  font-size: clamp(2.4rem, 4vw, 3.4rem);
+  font-family: 'Bebas Neue', 'Anton', Impact, sans-serif;
+  font-size: clamp(3.2rem, 6vw, 5.2rem);
   font-weight: 900;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
   color: #ffffff;
   text-align: center;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
+  line-height: 1;
 }
 
+/* Subcategories (cls-4 font-size: 37.5px; fill: #fff;) */
 .work-col-subcategories {
-  font-size: 0.95rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  font-family: 'Bebas Neue', 'Oswald', sans-serif;
+  font-size: clamp(1.1rem, 2.2vw, 1.45rem);
+  font-weight: 600;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   color: #ffffff;
   text-align: center;
   margin-bottom: 45px;
-  line-height: 1.6;
+  line-height: 1.5;
 }
 
-/* Action Links in Red */
+/* Action Links in Red (cls-6 font-size: 37.5px; fill: #fa0000;) */
 .work-col-links-group {
   display: flex;
   flex-direction: column;
   gap: 16px;
   margin-top: auto;
-  padding-left: 10px;
+  padding-left: 15px;
 }
 
 .work-red-link-item {
-  font-family: var(--font-heading);
-  font-size: 1.15rem;
+  font-family: 'Bebas Neue', 'Anton', Impact, sans-serif;
+  font-size: 1.45rem;
   font-weight: 800;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: #ff3344;
+  color: #fa0000;
   text-decoration: none;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   cursor: pointer;
   background: transparent;
   border: none;
@@ -171,9 +178,9 @@
 }
 
 .work-red-link-item:hover {
-  color: #ff6677;
+  color: #ff3344;
   transform: translateX(6px);
-  text-shadow: 0 0 16px rgba(255, 51, 68, 0.7);
+  text-shadow: 0 0 16px rgba(250, 0, 0, 0.7);
 }
 
 .work-red-link-item svg {
@@ -181,7 +188,7 @@
 }
 
 .work-red-link-item:hover svg {
-  transform: translateX(3px);
+  transform: scale(1.15);
 }
 
 /* ==========================================================================

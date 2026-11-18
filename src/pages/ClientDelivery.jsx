@@ -321,7 +321,7 @@ const ClientDelivery = () => {
           <h1 className="delivery-title">FINAL OUTPUT</h1>
           <p className="delivery-subtitle">THANK YOU FOR CHOOSING DS3 STUDIO!</p>
 
-          {/* Center Google Drive Logo */}
+          {/* Center Google Drive Logo (Exact 3D asset from SVG) */}
           <div
             className={`gdrive-logo-wrap ${isDeliveredOrApproved ? 'interactive' : ''}`}
             onClick={() => {
@@ -332,15 +332,23 @@ const ClientDelivery = () => {
             style={{ cursor: isDeliveredOrApproved ? 'pointer' : 'default' }}
             title={isDeliveredOrApproved ? 'Click to open Google Drive Final Files' : 'Google Drive Storage'}
           >
-            <GoogleDriveLogo size={120} />
+            <img
+              src="/delivery/gdrive_3d_logo.png"
+              alt="Google Drive Final Output"
+              className="delivery-gdrive-3d-img"
+            />
           </div>
 
           {/* ORDER ID Label */}
           <div className="order-id-label">ORDER ID</div>
 
-          {/* Capsule Input Row with ID Badge Icon */}
+          {/* Capsule Input Row with ID Badge Icon (Exact asset from SVG) */}
           <div className="order-input-capsule-row">
-            <IdBadgeIcon />
+            <img
+              src="/delivery/id_badge_verified.png"
+              alt="Verified Client ID"
+              className="delivery-id-badge-img"
+            />
             <input
               type="text"
               className="order-id-capsule-input"
@@ -349,7 +357,7 @@ const ClientDelivery = () => {
               onKeyDown={(e) => {
                 if (e.key === 'Enter') handleAction();
               }}
-              placeholder="ENTER YOUR ORDER ID (e.g. 17112026-001)"
+              placeholder="ENTER YOUR ORDER ID (e.g. 16112026-001)"
               aria-label="Order ID Input"
             />
           </div>
